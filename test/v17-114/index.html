@@ -1,0 +1,1852 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Field Survey Pro V17.114 — Plans & Cameras</title><!-- Field Survey Pro V17.35: position dimension before distance entry --><!-- Field Survey Pro V17.32: independent dimension hit targets and validation --><style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;font-family:system-ui,Arial;background:#0b192a;color:#eef5ff}button,input,select,textarea{font:inherit}button{background:#204d79;color:white;border:1px solid #6186a8;border-radius:10px;padding:10px;min-height:43px;font-weight:600}button:disabled{opacity:.4}.primary{background:#2676c5;border-color:#66aaf1}.danger{background:#683344}.muted{color:#b2c8df;font-size:13px}.screen{height:100dvh;display:flex;flex-direction:column}.hidden{display:none!important}header{display:flex;align-items:center;gap:8px;padding:8px;background:#153754;min-height:52px}header strong{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}header button{min-height:35px;padding:6px 10px}#save{font-size:11px;color:#a4e7c3;white-space:nowrap}.content{overflow:auto;flex:1;padding:16px}.stack{display:grid;gap:12px;max-width:600px;margin:auto}.card{background:#17334e;border:1px solid #385d7b;border-radius:13px;padding:15px}.row{display:flex;align-items:center;gap:8px}.row>*{min-width:0}.row .grow{flex:1}input,select,textarea{width:100%;border:1px solid #a5b9cb;border-radius:9px;padding:10px;min-height:44px;background:#fff;color:#17293b}textarea{min-height:65px}.full{width:100%}.menu{display:grid;gap:8px}.menu button{text-align:left}#planArea,#surveyArea{flex:1;min-height:0;position:relative;background:#e8eef4;margin:5px;border-radius:9px;overflow:hidden}svg{display:block;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none}#planCanvas,#surveyCanvas{background:#fff}svg .wall{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}svg .pin{touch-action:none}svg .pin circle{stroke:white;stroke-width:2.5;vector-effect:non-scaling-stroke}svg .pin text{fill:white;font-size:17px;font-weight:800;text-anchor:middle;dominant-baseline:central;pointer-events:none}svg .cone{pointer-events:none;fill:#f59b3b35;stroke:#e48b29;stroke-width:2}svg .handle{fill:#ffe171;stroke:#183b60;stroke-width:2}#planCanvas image,#surveyCanvas image{pointer-events:none;user-select:none;-webkit-user-select:none}#planTools{padding:7px;display:flex;gap:7px;background:#173754;overflow-x:auto}#planTools button{white-space:nowrap;flex:1;font-size:13px}#floatTools{position:absolute;right:10px;top:60px;display:flex;flex-direction:column;gap:6px;padding:7px;background:#12395dec;border:1px solid #6c92b5;border-radius:13px;z-index:3;touch-action:none;box-shadow:0 5px 14px #0004}#floatTools button{font-size:12px;min-height:40px;padding:7px}#dragTools{font-size:13px;text-align:center;color:#c3dbf4;cursor:grab;touch-action:none;padding:3px}#restoreTools{position:absolute;right:8px;top:64px;z-index:3}#detail{position:absolute;bottom:10px;left:10px;width:min(340px,calc(100% - 20px));max-height:75%;overflow:auto;z-index:5;background:#173957;border:1px solid #90afc8;border-radius:13px;padding:12px;box-shadow:0 6px 22px #0006}#detailDrag{touch-action:none;user-select:none;cursor:grab}#detail label{font-size:12px;display:block;margin:9px 0 4px}.modalBack{position:fixed;inset:0;background:#0008;z-index:20;display:grid;place-items:center;padding:15px}.modal{background:#183c5e;border:1px solid #7da5c6;border-radius:15px;padding:18px;width:min(380px,100%);display:grid;gap:12px}.modal h3{margin:0}.hint{position:absolute;left:12px;top:12px;color:#35526b;font-size:12px;background:#ffffffe0;padding:6px;border-radius:7px;pointer-events:none;max-width:65%}.topbar{display:flex;align-items:center;gap:7px;padding:7px;background:#183854}.topbar select{flex:1;min-width:0}.small{font-size:12px}.divider{height:1px;background:#476582;margin:8px 0}@media(orientation:landscape){header{min-height:42px;padding:4px 8px}#floatTools{top:12px}#restoreTools{top:12px}.content{padding:10px}}
+#planTools{flex:0 0 auto;overflow:visible;display:flex;flex-wrap:wrap;gap:5px;padding:6px}#planTools.hidden{display:none!important}#planTools button{flex:1 1 auto;font-size:12px;padding:7px 8px;min-height:37px}#drawingDoneBar{background:#143754;padding:7px 10px 10px;flex-shrink:0}#drawingDoneBar button{width:100%;min-height:48px;font-size:17px}#drawingDoneBar.hidden{display:none!important}#planBottom{padding:8px;display:grid;gap:7px;background:#143754}#planBottom button.hidden{display:none!important}#planArea.empty{flex:0 0 auto;min-height:170px;height:170px;display:flex;align-items:center;justify-content:center}#planArea.empty svg{display:none}#planArea.empty .hint{position:static;text-align:center;max-width:100%;font-size:16px;padding:15px}#planArea.empty + #planTools{display:none!important}#planSelect.empty,#planMore.hidden{display:none!important}.topbar:has(#planSelect.empty){display:none}#planTools button.activeTool{background:#2676c5;border-color:#66aaf1}@media (orientation:landscape){
+#planTools{flex-wrap:nowrap;overflow-x:auto;padding:3px 5px;gap:4px}
+#planTools button{flex:0 0 auto;min-height:32px;padding:4px 10px;font-size:12px}
+#drawingDoneBar{padding:3px 6px 5px}
+#drawingDoneBar button{min-height:35px;font-size:14px}
+.topbar{padding:3px 6px}
+.topbar select{min-height:33px;padding:4px}
+#planArea{margin:2px 5px}
+#planArea .hint{padding:3px 5px;font-size:11px}
+}
+
+#zoomTools{position:absolute;right:8px;bottom:8px;z-index:4;display:flex;gap:4px}#zoomTools button{min-height:34px;padding:4px 12px;background:#204d79dc}
+#planBottom{display:flex;gap:7px;padding:7px}#planBottom button{flex:1;min-width:0}
+#drawingDoneBar{padding:6px}#drawingDoneBar button{width:100%}
+@media(orientation:landscape){#planBottom{padding:3px}#planBottom button{min-height:33px;padding:4px;font-size:12px}#planArea{flex:1;min-height:120px;margin:2px 5px}#planTools{padding:3px;gap:4px}#planTools button{min-height:32px;padding:3px 8px;font-size:12px}#drawingDoneBar{padding:3px}#drawingDoneBar button{min-height:33px}header{min-height:35px}header button{min-height:30px}.topbar{padding:3px}.topbar select{min-height:33px}}
+#cropBack .modal{width:min(95vw,760px);max-height:94dvh;overflow:auto;gap:8px;padding:12px}
+#cropCanvas{width:100%;height:min(48dvh,430px);background:#e4e9ed;touch-action:none;object-fit:contain;border-radius:8px}
+#cropActions{display:flex;gap:8px}#cropActions button{flex:1}
+@media (pointer:coarse){#zoomTools{display:none!important}}
+#planCanvas,#cropCanvas{ -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; user-select:none; -webkit-user-select:none; }
+#planArea.empty{background:transparent;flex:0 0 0;min-height:0;margin:0;overflow:hidden}
+#planArea.empty svg,#planArea.empty .hint{display:none}
+#planArea.empty #zoomTools{display:none!important}
+#planBottom.only-add{display:block}#planBottom.only-add #addPlan{width:100%}#cropCanvas{touch-action:none;user-select:none;-webkit-user-select:none}#cropConfirmActions{display:flex;gap:8px;margin-top:8px}#cropConfirmActions button{flex:1}#cropCanvas{touch-action:none}
+/* V17.24: maximize plan in both orientations */
+#plans{position:relative;overflow:hidden}
+#plans #planArea{flex:1 1 0;min-height:0;margin:3px 5px 5px}
+#plans #planTools:not(.hidden){position:absolute;z-index:8;left:10px;top:115px;width:auto;max-width:calc(100% - 20px);padding:5px;display:flex;flex-wrap:wrap;justify-content:flex-start;gap:4px;background:#153754ee;border:1px solid #6587a7;border-radius:11px;box-shadow:0 3px 12px #0005}
+#plans #planTools button{flex:0 0 auto;font-size:12px;min-height:34px;padding:5px 8px}
+#plans #drawingDoneBar:not(.hidden){z-index:9;flex:0 0 auto;padding:5px 9px 8px}
+#plans #drawingDoneBar button{min-height:43px}
+#plans #planBottom:not(.hidden){flex:0 0 auto}
+#plans #planTools .hidden{display:none!important}
+@media(orientation:landscape){
+ #plans header{min-height:36px}#plans .topbar{padding:3px 6px}
+ #plans #planTools:not(.hidden){top:82px;left:8px;max-width:min(440px,75%)}
+ #plans #planTools button{min-height:29px;font-size:11px;padding:3px 7px}
+ #plans #drawingDoneBar:not(.hidden){position:absolute;right:10px;bottom:10px;width:112px;background:transparent;padding:0}
+ #plans #drawingDoneBar button{min-height:40px}
+ #plans #planArea{min-height:0}
+}
+
+/* V17.24: layout-only, edge-to-edge editor */
+#plans.fsp-fullscreen{position:relative;isolation:isolate;height:100dvh;height:100svh;overflow:hidden;background:#fff}
+#plans.fsp-fullscreen #planArea{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;min-height:0!important;margin:0!important;border-radius:0!important;background:white;z-index:0;flex:none!important}
+#plans.fsp-fullscreen #planCanvas{width:100%;height:100%;display:block}
+#plans.fsp-fullscreen>header{position:absolute;z-index:12;top:8px;left:8px;width:auto;max-width:calc(100% - 95px);height:auto;min-height:0;padding:0;background:transparent;pointer-events:none;gap:5px}
+#plans.fsp-fullscreen>header button{pointer-events:auto;min-height:36px;padding:5px 10px;background:#153754ee;box-shadow:0 2px 8px #0003}
+#plans.fsp-fullscreen>header strong{display:none}
+#plans.fsp-fullscreen>header #save{display:none}
+#plans.fsp-fullscreen>.topbar{display:none!important}
+#plans.fsp-fullscreen #planBottom{display:none!important}
+#plans.fsp-fullscreen #planTools:not(.hidden){position:absolute!important;z-index:12!important;top:8px!important;right:8px!important;left:auto!important;width:auto!important;max-width:calc(100% - 105px)!important;display:flex!important;flex-wrap:nowrap!important;align-items:center;gap:5px!important;padding:5px!important;border-radius:13px!important;background:#153754e8!important;box-shadow:0 3px 12px #0004!important;overflow:visible!important;touch-action:pan-x}
+#plans.fsp-fullscreen #planTools button{flex:0 0 auto!important;min-height:35px!important;padding:5px 8px!important;font-size:12px!important;white-space:nowrap}
+#plans.fsp-fullscreen #planTools button.fsp-secondary{display:none!important}
+#plans.fsp-fullscreen #planTools.fsp-expanded{flex-wrap:wrap!important;max-width:min(350px,calc(100% - 16px))!important;top:52px!important}
+#plans.fsp-fullscreen #planTools.fsp-expanded button.fsp-secondary:not(.hidden){display:block!important}
+#plans.fsp-fullscreen #planTools #backDraw{display:none!important}
+#plans.fsp-fullscreen #planTools #fspToggleTools{background:#204d79;min-width:38px}
+#plans.fsp-fullscreen #drawingDoneBar:not(.hidden){position:absolute!important;z-index:11!important;right:10px!important;bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;left:auto!important;width:auto!important;background:transparent!important;padding:0!important}
+#plans.fsp-fullscreen #drawingDoneBar button{min-height:44px!important;min-width:104px!important;padding:8px 15px!important;font-size:15px!important;box-shadow:0 2px 9px #0005}
+#plans.fsp-fullscreen #planHint{display:none!important}
+@media(max-width:440px){#plans.fsp-fullscreen #planTools:not(.hidden){max-width:calc(100% - 96px)!important}#plans.fsp-fullscreen #planTools button{font-size:11px!important;padding:5px 6px!important}}
+@media(orientation:landscape){#plans.fsp-fullscreen>header{top:6px;left:6px}#plans.fsp-fullscreen #planTools:not(.hidden){top:6px!important;right:6px!important}#plans.fsp-fullscreen #planTools.fsp-expanded{top:46px!important}#plans.fsp-fullscreen #drawingDoneBar:not(.hidden){bottom:8px!important;right:8px!important}}
+
+
+/* V17.24: landscape-first floor plan layout repair */
+@media(orientation:landscape){
+ #plans:not(.fsp-fullscreen) header{min-height:34px!important;padding:3px 7px!important}
+ #plans:not(.fsp-fullscreen) .topbar{padding:2px 5px!important}
+ #plans:not(.fsp-fullscreen) .topbar select{min-height:32px!important;padding:3px 8px!important}
+ #plans:not(.fsp-fullscreen) #planBottom{display:flex!important;gap:5px!important;padding:3px 6px!important}
+ #plans:not(.fsp-fullscreen) #planBottom.hidden{display:none!important}
+ #plans:not(.fsp-fullscreen) #planBottom button{min-height:32px!important;padding:3px 7px!important;flex:1}
+ #plans:not(.fsp-fullscreen) #planArea{flex:1 1 0!important;min-height:0!important;margin:2px 5px!important}
+}
+
+/* V17.24: compact scrollable modal and movable toolbar */
+#modalBack .modal{max-height:calc(100dvh - 22px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;width:min(440px,calc(100vw - 24px))!important;padding:12px!important}
+#modalBack .modal .menu{max-height:calc(100dvh - 130px);overflow-y:auto}
+#plans.fsp-fullscreen #planTools:not(.hidden){top:56px!important;right:10px!important;max-width:min(330px,calc(100vw - 20px))!important;flex-wrap:wrap!important;touch-action:none!important}
+#plans.fsp-fullscreen #planTools.fsp-collapsed:not(.hidden){width:auto!important;max-width:55px!important;padding:4px!important;top:56px!important}
+#plans.fsp-fullscreen #planTools.fsp-collapsed button:not(#fspToggleTools){display:none!important}
+#plans.fsp-fullscreen #planTools #fspToggleTools{order:-2!important}
+#plans.fsp-fullscreen #planTools #fspDragTools{order:-1!important;cursor:grab;background:#355e7c;min-width:30px}
+#plans.fsp-fullscreen #planTools.fsp-collapsed #fspDragTools{display:none!important}
+@media(orientation:landscape){#plans.fsp-fullscreen #planTools:not(.hidden){top:8px!important}}
+
+/* V17.24: floating drawing tools at bottom in both orientations */
+#plans.fsp-fullscreen #planTools:not(.hidden){
+ top:auto!important;bottom:calc(65px + env(safe-area-inset-bottom,0px))!important;
+ left:8px!important;right:auto!important;
+ max-width:calc(100vw - 16px)!important;
+ width:max-content!important;
+ flex-wrap:wrap!important;
+}
+#plans.fsp-fullscreen #planTools.fsp-expanded:not(.hidden){top:auto!important;bottom:calc(65px + env(safe-area-inset-bottom,0px))!important}
+#plans.fsp-fullscreen #planTools.fsp-collapsed:not(.hidden){top:auto!important;bottom:calc(65px + env(safe-area-inset-bottom,0px))!important}
+#plans.fsp-fullscreen #planTools button{min-height:34px!important}
+@media(orientation:landscape){#plans.fsp-fullscreen #planTools:not(.hidden){top:auto!important;bottom:9px!important;left:8px!important;max-width:calc(100vw - 145px)!important}}
+
+/* V17.24 gesture isolation: canvas owns all touch drawing, no page scrolling. */
+#plans.fsp-fullscreen #planCanvas{touch-action:none!important;overscroll-behavior:contain!important}
+#plans.fsp-fullscreen #zoomTools{display:none!important}
+#plans.fsp-fullscreen #planTools:not(.hidden){touch-action:none!important}
+#plans.fsp-fullscreen #planTools #line.primary,#plans.fsp-fullscreen #planTools #free.primary{outline:2px solid #fff;outline-offset:-2px}
+
+#measureHelp{pointer-events:none;position:absolute;left:12px;top:12px;z-index:35;max-width:min(320px,calc(100% - 24px));background:#fff;color:#18344a;border:2px solid #3684ca;border-radius:12px;box-shadow:0 4px 20px #0004;padding:13px;font-size:14px;line-height:1.35}
+#measureHelp p{margin:8px 0 10px}#measureHelp button{pointer-events:auto;background:#2466a0;color:white;border:0;border-radius:8px;padding:8px 12px;float:right}
+#plans.fsp-fullscreen #planTools #measureWall.primary{outline:2px solid #fff;outline-offset:-2px}
+
+/* V17.24: a directly reachable rotate action on both floor-plan screens. */
+#planArea,#surveyArea{position:relative}
+.fsp-rotate{position:absolute;top:9px;right:9px;z-index:48;min-height:37px;padding:5px 12px;border-radius:22px;background:#174d80;color:#fff;border:1px solid #b4d3ef;box-shadow:0 2px 7px #0004;font-size:14px}
+#plans.fsp-fullscreen .fsp-rotate{top:9px;right:9px}
+@media(orientation:landscape){.fsp-rotate{top:7px;right:8px}}
+
+/* V17.25: camera placement is an edge-to-edge workspace */
+#survey{position:relative;isolation:isolate;height:100dvh;overflow:hidden;background:#fff}
+#survey>header,#survey>.topbar{display:none!important}
+#survey #surveyArea{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;margin:0!important;border-radius:0!important;min-height:0!important;z-index:0}
+#survey #surveyCanvas{width:100%;height:100%}
+#survey #floatTools{top:auto;bottom:12px;right:10px;max-height:calc(100% - 70px);overflow-y:auto;z-index:10}
+#survey #floatTools button{min-height:34px;padding:5px 9px}
+#survey #dragTools{padding:0;line-height:20px}
+#survey #restoreTools{top:auto;bottom:12px;right:10px;z-index:10}
+#survey #surveyDone{position:absolute;bottom:12px;left:10px;z-index:12;min-height:38px;padding:6px 17px;border-radius:22px;box-shadow:0 3px 9px #0004}
+#survey #rotateSurveyView{top:9px;right:9px;z-index:12}
+#survey #surveyHint{top:8px;left:8px;max-width:calc(100% - 115px);font-size:11px;padding:4px 6px;opacity:.8}
+#surveyCanvas .pin text{font-size:12px}
+@media (orientation:landscape){#survey #floatTools{bottom:7px;right:8px;padding:4px;gap:4px}#survey #floatTools button{min-height:30px;padding:4px 7px;font-size:11px}#survey #surveyDone{bottom:8px;left:8px}#survey #surveyHint{top:6px;left:8px}}
+
+/* V17.27: streamlined camera controls, consistent proposed-camera color. */
+#survey #addCamera.primary{background:#e88320!important;border-color:#f7b05f!important;color:#fff!important;font-weight:700}
+#survey #addCamera:not(.primary){background:#244f78!important;border-color:#6187aa!important;color:#fff!important}
+#survey #floatTools{gap:5px!important}
+#survey #floatTools #takePhoto{display:none!important}
+#survey #floatTools #dragTools{font-size:0!important;min-height:20px!important;line-height:20px!important}
+#survey #floatTools #dragTools::after{content:'⠿';font-size:16px}
+#survey #surveyHint{pointer-events:none}
+/* Menus should be compact, without two identical dismissal actions. */
+#modalBack .modal:has(.menu) #modalCancel{display:none!important}
+#modalBack .modal:has(.menu) .menu button{min-height:42px!important;padding:10px 12px!important}
+#addCamera.primary{background:#e88320!important;border-color:#e88320!important;color:#fff!important}
+#addCamera.placing-existing{background:#2676c8!important;border-color:#2676c8!important;color:#fff!important}
+
+/* V17.29: compact draggable camera toolbar, never stretched between top and bottom. */
+#survey #floatTools{height:max-content!important;min-height:0!important;align-self:flex-start!important;max-height:calc(100dvh - 24px)!important;overflow-y:auto!important;}
+#survey #floatTools button{flex:0 0 auto!important;}
+#plans:not(.fsp-fullscreen) #planCanvas .pin{cursor:pointer;pointer-events:visiblePainted;}
+
+/* V17.30 compact camera details, one visible Done control */
+#surveyArea.fsp-detail-open #floatTools,
+#surveyArea.fsp-detail-open #restoreTools,
+#surveyArea.fsp-detail-open #surveyDone{display:none!important}
+#surveyArea #detail{position:absolute!important;left:10px!important;right:auto!important;top:auto!important;bottom:10px!important;width:min(310px,calc(100% - 20px))!important;max-height:min(390px,calc(100% - 20px))!important;padding:11px!important;overflow:auto!important;z-index:60!important}
+#surveyArea #detail label{margin:6px 0 3px!important}
+#surveyArea #detail input,#surveyArea #detail select{min-height:36px!important;padding:6px 9px!important}
+#surveyArea #detail textarea{min-height:48px!important;height:54px!important;padding:6px 9px!important}
+#surveyArea #detail button{min-height:36px!important;padding:6px 8px!important}
+@media(orientation:landscape){#surveyArea #detail{max-height:calc(100% - 14px)!important;bottom:7px!important;left:7px!important;width:min(340px,calc(100% - 14px))!important}}
+/* Preserve a readable number while retaining the enlarged invisible touch target */
+#surveyCanvas .pin text{font-size:16px!important;font-weight:800!important;paint-order:stroke;stroke:#0003;stroke-width:.4px}
+
+/* V17.33: movable dimension entry card, placed clear of the line. */
+#modalBack.fsp-distance-dialog{display:block!important;pointer-events:none;background:rgba(0,0,0,.16)!important;padding:0!important}
+#modalBack.fsp-distance-dialog .modal{position:fixed!important;top:var(--distance-top,12px)!important;left:var(--distance-left,12px)!important;right:auto!important;bottom:auto!important;width:min(330px,calc(100vw - 24px))!important;max-height:calc(100dvh - 24px)!important;overflow:auto!important;pointer-events:auto!important;padding:12px!important;gap:8px!important;box-shadow:0 7px 24px #0007!important}
+#modalBack.fsp-distance-dialog #modalTitle{font-size:17px;cursor:grab;touch-action:none;user-select:none;display:flex;align-items:center;gap:8px;padding:5px 2px 9px}
+#modalBack.fsp-distance-dialog .modal{touch-action:pan-y}
+#modalBack.fsp-distance-dialog #modalTitle::before{content:'⠿';font-size:20px;color:#b7d7f1}
+#modalBack.fsp-distance-dialog #modalBody input[type=number]{min-height:38px!important;padding:6px 9px!important}
+#modalBack.fsp-distance-dialog #modalBody label{display:block;margin:5px 0 3px}
+#modalBack.fsp-distance-dialog .row button{min-height:38px!important}
+#planCanvas .fsp-active-distance{stroke:#ffb000!important;stroke-width:4!important;stroke-dasharray:none!important;filter:drop-shadow(0 0 2px #fff)}
+#planCanvas .fsp-active-endpoint{fill:#ffb000!important;stroke:#fff;stroke-width:2!important;vector-effect:non-scaling-stroke}
+
+/* V17.35: dedicated, unobstructed endpoint-adjustment step */
+#dimensionPositionBar{position:absolute;z-index:52;left:50%;bottom:94px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:#183d5c;color:white;border-radius:13px;padding:9px;box-shadow:0 5px 18px #0005;max-width:calc(100% - 20px);white-space:nowrap}
+#dimensionPositionBar.hidden{display:none!important}
+#dimensionPositionBar button{min-height:40px;padding:7px 13px;font-weight:700}
+#dimensionPositionBar .tip{font-size:13px;line-height:1.2;white-space:normal;max-width:145px}
+#planCanvas .dimension-adjust-handle{fill:#f59e0b;stroke:white;stroke-width:3;vector-effect:non-scaling-stroke;touch-action:none;cursor:grab}
+#planCanvas .dimension-adjust-hit{fill:transparent;stroke:transparent;pointer-events:all;touch-action:none}
+@media(max-width:440px){#dimensionPositionBar{bottom:88px}#dimensionPositionBar .tip{font-size:12px;max-width:100px}}
+/* V17.40 area labels */
+#planCanvas .area-label{cursor:grab;touch-action:none}
+#planCanvas .area-label text,#surveyCanvas .area-label text{paint-order:stroke;stroke:white;stroke-width:5;stroke-linejoin:round;font-weight:800;font-size:22px;fill:#166534}
+#planCanvas .area-label rect,#surveyCanvas .area-label rect{fill:#f0fdf4;stroke:#16a34a;stroke-width:1.5;opacity:.94}
+
+/* V17.81: keep the floating distance entry fully usable above the landscape keyboard. */
+@media (orientation:landscape) {
+ html.keyboard-visible #modalBack.fsp-distance-dialog .modal {
+  position:fixed!important;
+  top:calc(var(--fsp-visible-top,0px) + 3px)!important;
+  left:8px!important;right:auto!important;bottom:auto!important;
+  width:min(330px,calc(100vw - 16px))!important;
+  max-height:calc(var(--fsp-visible-height,100dvh) - 6px)!important;
+  overflow-y:auto!important;
+  padding:7px 10px!important;gap:3px!important;
+ }
+ html.keyboard-visible #modalBack.fsp-distance-dialog #modalTitle {
+  font-size:14px!important;padding:0 0 3px!important;min-height:0!important;
+ }
+ html.keyboard-visible #modalBack.fsp-distance-dialog #modalBody label {margin:2px 0!important;font-size:12px!important}
+ html.keyboard-visible #modalBack.fsp-distance-dialog #modalBody input {min-height:30px!important;padding:3px 7px!important}
+ html.keyboard-visible #modalBack.fsp-distance-dialog .row button {min-height:30px!important;padding:3px 8px!important}
+}
+/* V17.80: keep landscape text-entry dialog inside visible keyboard viewport. */
+@media (orientation:landscape) {
+ html.keyboard-visible #modalBack:not(.fsp-distance-dialog) {
+  position:fixed!important;top:var(--fsp-visible-top,0px)!important;left:0!important;
+  right:0!important;bottom:auto!important;height:var(--fsp-visible-height,100dvh)!important;
+  display:flex!important;align-items:flex-start!important;justify-content:center!important;
+  padding:4px 10px!important;overflow-y:auto!important;
+ }
+ html.keyboard-visible #modalBack:not(.fsp-distance-dialog) .modal {
+  flex:0 1 min(440px,100%)!important;
+  max-height:calc(var(--fsp-visible-height,100dvh) - 8px)!important;
+  overflow-y:auto!important;overscroll-behavior:contain!important;
+ }
+ html.keyboard-visible #modalBack:not(.fsp-distance-dialog) #modalBody {min-height:0!important}
+ html.keyboard-visible #modalBack:not(.fsp-distance-dialog) input:focus,
+ html.keyboard-visible #modalBack:not(.fsp-distance-dialog) textarea:focus {scroll-margin-bottom:54px}
+}
+/* V17.79 landscape keyboard accommodation */
+@media (orientation: landscape) {
+  html.keyboard-visible, html.keyboard-visible body { height: var(--fsp-visible-height, 100dvh); }
+  html.keyboard-visible .screen { height: var(--fsp-visible-height, 100dvh); }
+  html.keyboard-visible .modalBack { height: var(--fsp-visible-height, 100dvh); bottom: auto; align-items: start; overflow-y: auto; }
+  html.keyboard-visible .modal { max-height: calc(var(--fsp-visible-height, 100dvh) - 20px); overflow-y: auto; }
+  html.keyboard-visible #detail { max-height: calc(var(--fsp-visible-height, 100dvh) - 20px); overflow-y: auto; }
+}
+</style></head><body>
+<section id="home" class="screen"><header><strong>Field Survey Pro <span class="small">V17.111 TEST</span></strong></header><div class="content"><div class="stack"><button id="continue" class="primary hidden">Continue Survey</button><button id="newSurvey" class="primary">+ New Survey</button><button id="allSurveys">All Surveys</button><div class="card muted">V17 test: Plans and camera placement. This version uses separate test storage; your older V16 surveys are not changed. Export a backup before relying on phone storage.</div></div></div></section>
+<section id="list" class="screen hidden"><header><button data-go="home">← Home</button><strong>All Surveys</strong></header><div class="content"><div class="stack"><input id="search" placeholder="Search surveys"><div id="surveyRows" class="menu"></div><button id="importBackup">Import V17 Backup</button><button id="exportBackup">Export V17 Backup</button></div></div></section>
+<section id="plans" class="screen hidden"><header><button data-go="home">← Back</button><strong id="plansTitle">Plans</strong><span id="save">Saved ✓</span></header><div class="topbar"><select id="planSelect" aria-label="Plan"></select><button id="planMore">⋯</button><button id="fitPlan" class="hidden" title="Reset view">Fit</button></div><div id="planArea"><button id="rotatePlanView" class="fsp-rotate" type="button" title="Rotate floor plan 90 degrees">↻ 90°</button><div id="zoomTools"><button id="zoomOut">−</button><button id="zoomIn">+</button></div><svg id="planCanvas" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><g id="planScene"></g><g id="strokePreview" pointer-events="none"></g></svg><div class="hint" id="planHint">Add a plan to begin</div></div><div id="dimensionPositionBar" class="hidden"><span class="tip">Drag either endpoint to adjust</span><button id="dimensionCancel">Cancel</button><button id="dimensionPositionDone" class="primary">Done ✓</button></div><div id="planTools" class="hidden"><button id="backDraw">← Back</button><button id="panTool">Select / Pan</button><button id="line" class="primary">Line</button><button id="free">Freehand</button><button id="drawColor" type="button" title="Drawing color">🔵 Color</button><button id="autoWall">Auto Wall</button><button id="measureWall">Measure</button><button id="measureHelpButton" type="button" title="Measurement instructions">? Help</button><button id="areaTool" type="button" class="hidden" aria-hidden="true" tabindex="-1">Calculate Area</button><button id="moreDrawing" class="hidden">More ▾</button><button id="showDims">Hide Dimensions</button><button id="undo">Undo Wall</button><button id="clear">Clear Drawing</button></div><div id="drawingDoneBar" class="hidden"><button id="finishEdit" class="primary">Done ✓</button></div><div id="planBottom"><button id="addPlan">+ Add Floor Plan</button><button id="editPlan">Edit Plan</button><button id="toSurvey" class="primary">+ Add Camera</button></div></section>
+<section id="survey" class="screen hidden"><header><button id="backPlans">← Plans</button><strong id="surveyTitle">Add Camera</strong><span id="surveySave" class="small" style="color:#a4e7c3">Saved ✓</span></header><div class="topbar"><select id="surveyPlanSelect" aria-label="Plan"></select><span id="camCount" class="small">0 cameras</span></div><div id="surveyArea"><button id="surveyDone" type="button" class="primary">Done ✓</button><button id="rotateSurveyView" class="fsp-rotate" type="button" title="Rotate floor plan 90 degrees">↻ 90°</button><svg id="surveyCanvas" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><g id="surveyScene"></g></svg><div class="hint" id="surveyHint">+ Camera to place a camera</div><div id="floatTools"><div id="dragTools">⠿ Move</div><button id="addCamera">+ Camera</button><button id="takePhoto" class="hidden" aria-hidden="true" tabindex="-1">Take Photo</button><button id="surveyMore">More</button><button id="minTools">‹</button></div><button id="restoreTools" class="hidden">› Tools</button><div id="detail" class="hidden"><div class="row" id="detailDrag" title="Hold and drag to move camera details"><span aria-hidden="true" style="font-size:18px;color:#b9d4eb;touch-action:none;cursor:grab;padding:5px 8px">⠿</span><strong id="detailTitle" class="grow">Camera</strong><button id="closeDetail">✕</button></div><label>Camera number</label><input id="detailNumber" type="text" inputmode="numeric" pattern="[0-9]+" autocomplete="off"><label>New / Existing</label><div id="detailType" class="row" role="group" aria-label="New or Existing camera"><button type="button" data-camera-type="New" class="grow">New</button><button type="button" data-camera-type="Existing" class="grow">Existing</button></div><label>Description / Location (optional)</label><textarea id="detailNotes" placeholder="Mounting location, notes…"></textarea><div class="row" style="margin-top:10px"><button id="deleteCamera" class="danger grow">Delete Camera</button><button id="doneDetail" class="primary grow">Done</button></div></div></div></section>
+<div id="modalBack" class="modalBack hidden"><div class="modal"><h3 id="modalTitle">Action</h3><div id="modalText" class="muted"></div><div id="modalBody"></div><div class="row"><button id="modalCancel" class="grow">Cancel</button><button id="modalOk" class="primary grow">Continue</button></div></div></div>
+<div id="cropBack" class="modalBack hidden"><div class="modal"><h3 id="cropTitle">Crop Floor Plan</h3><p id="cropInstructions" class="muted" style="margin:0">Drag a box around the area to keep, or confirm the whole plan.</p><canvas id="cropCanvas"></canvas><div id="cropActions"><button id="cropRotate">Rotate ↻</button><button id="cropReset">Reset Crop</button></div><div id="cropConfirmActions"><button id="cropCancel">Cancel</button><button id="cropApply" class="primary">Confirm Floor Plan ✓</button></div></div></div><input id="planFile" type="file" accept="image/*,.pdf,application/pdf" class="hidden"><input id="planPhoto" type="file" accept="image/*" capture="environment" class="hidden"><input id="backupFile" type="file" accept="application/json,.json" class="hidden"><input id="sitePhoto" type="file" accept="image/*" capture="environment" class="hidden">
+<script>
+(()=>{'use strict';const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?.()||Math.random().toString(36).slice(2),KEY='fsp-test-isolated-v1-plans-cameras';let data={surveys:[],active:null},survey=null,plan=null,screen='home',editing=false,tool='line',placing=false,selected=null,detailId=null,gesture=null,modalAction=null,lastType='New',revision=0,savedRevision=0,saveQueue=Promise.resolve(),db=null;const NS='http://www.w3.org/2000/svg';function el(tag,attrs={},parent){const n=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,v);parent?.append(n);return n}function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function active(){return data.surveys.find(s=>s.id===data.active)}function show(name){screen=name;document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('hidden',x.id!==name));if(name==='home'){const a=active();$('continue').classList.toggle('hidden',!a);$('continue').textContent=a?'Continue Survey — '+a.name:'Continue Survey'}if(name==='list')renderList();if(name==='plans'){editing=false;zoomed=false;updatePlans();if(plan&&!plan.image)scheduleStablePlanFit();else requestAnimationFrame(()=>restorePlanView())}if(name==='survey'){$('surveyArea').classList.remove('fsp-detail-open');placing=false;$('addCamera').classList.remove('primary','placing-existing');selected=null;closeDetail();updateSurvey();requestAnimationFrame(()=>restorePlanView())}}function setStatus(t){$('save').textContent=t;$('surveySave').textContent=t}async function initDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open('fsp-test-isolated-v1',1);req.onupgradeneeded=()=>req.result.createObjectStore('state');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}// Durable storage: write full survey snapshots to both IndexedDB and localStorage.
+// On reload, reconcile wall geometry so an older/incomplete snapshot cannot erase a sketch.
+const MIRROR_KEY=KEY+'-full-mirror-v1748';
+function parseStored(raw){try{const x=typeof raw==='string'?JSON.parse(raw):raw;return x&&Array.isArray(x.surveys)?x:null}catch{return null}}
+function mergeSaved(base,other){
+ if(!other)return base;if(!base)return other;
+ const out=structuredClone(base);
+ for(const s of other.surveys){let dest=out.surveys.find(x=>x.id===s.id);
+  if(!dest){out.surveys.push(structuredClone(s));continue}
+  for(const p of s.plans||[]){let target=dest.plans.find(x=>x.id===p.id);
+   if(!target){dest.plans.push(structuredClone(p));continue}
+   // Preserve drawn geometry even if another storage backend has a newer, incomplete copy.
+   if((p.walls?.length||0)>(target.walls?.length||0))target.walls=structuredClone(p.walls);
+   // Merge saved per-wall colors even when both snapshots have the same number of walls.
+   for(const w of target.walls||[]){const matching=(p.walls||[]).find(x=>x.id===w.id);if(matching?.color&&!w.color)w.color=matching.color;}
+   if((p.dimensions?.length||0)>(target.dimensions?.length||0))target.dimensions=structuredClone(p.dimensions);
+   if((p.cameras?.length||0)>(target.cameras?.length||0))target.cameras=structuredClone(p.cameras);
+  }
+ }
+ return out;
+}
+async function read(){let idbState=null,mirror=null,legacy=null;
+ try{db=await initDB();idbState=await new Promise((res,rej)=>{const t=db.transaction('state','readonly').objectStore('state').get(KEY);t.onsuccess=()=>res(parseStored(t.result));t.onerror=()=>rej(t.error)})}catch(e){console.warn('IndexedDB unavailable',e)}
+ try{mirror=parseStored(localStorage.getItem(MIRROR_KEY));legacy=parseStored(localStorage.getItem(KEY))}catch(e){console.warn('Storage read failed',e)}
+ // Reconcile all available snapshots before displaying the home screen.
+ diagnosticStartup={indexedDB:idbState?.surveys?.map(s=>({name:s.name,plans:s.plans?.map(p=>({name:p.name,walls:p.walls?.length||0}))})),mirror:mirror?.surveys?.map(s=>({name:s.name,plans:s.plans?.map(p=>({name:p.name,walls:p.walls?.length||0}))})),legacy:legacy?.surveys?.map(s=>({name:s.name,plans:s.plans?.map(p=>({name:p.name,walls:p.walls?.length||0}))}))};
+ data=mergeSaved(mergeSaved(idbState,mirror),legacy)||{surveys:[],active:null};
+ recoverMissingWalls();
+ // V17.52: restore independent V17.51 wall copies for EVERY plan at startup,
+ // not only the currently selected plan. This also repairs old empty snapshots.
+ let recoveredWalls=0;
+ for(const sv of data.surveys||[])for(const pl of sv.plans||[]){
+  try{
+   const key='fsp-test-isolated-blue-walls-v1751-'+sv.id+'-'+pl.id;
+   const backup=JSON.parse(localStorage.getItem(key)||'null');
+   if(backup&&Array.isArray(backup.walls)){
+    for(const w of pl.walls||[]){const backed=backup.walls.find(x=>x.id===w.id);if(backed?.color&&!w.color)w.color=backed.color;}
+   }
+   if(backup&&Array.isArray(backup.walls)&&backup.walls.length>(pl.walls?.length||0)){
+    pl.walls=structuredClone(backup.walls);
+    recoveredWalls++;
+   }
+   // A saved zoom/pan state must never make a restored drawing appear blank.
+   if(pl.walls?.length&&pl.viewState)delete pl.viewState;
+  }catch(e){console.warn('Wall restore failed for plan',pl.id,e)}
+ }
+ if(recoveredWalls)console.info('Recovered blue walls in',recoveredWalls,'plans');
+ show('home');
+ // file:// downloads can be assigned separate storage origins by the browser.
+ // A different HTML file location can therefore appear to lose existing surveys.
+ if(location.protocol==='file:'&&!data.surveys.length){
+   setStatus('Local file storage');
+   console.warn('File-based browser storage may not be shared between downloads or app launches. Use the same file path/origin and export JSON backups.');
+ }
+ // Persist recovered data immediately; never display Saved until storage commits.
+ if(data.surveys.length)await save();
+}
+const WALL_RECOVERY_KEY=KEY+'-wall-recovery-v1747';
+function wallRecoverySnapshot(){
+ try{const old=JSON.parse(localStorage.getItem(WALL_RECOVERY_KEY)||'{}');
+  for(const s of data.surveys||[])for(const p of s.plans||[]){
+   const k=s.id+'|'+p.id;
+   if(Array.isArray(p.walls))old[k]={walls:structuredClone(p.walls),time:Date.now()};
+  }localStorage.setItem(WALL_RECOVERY_KEY,JSON.stringify(old));
+ }catch(e){console.warn('Wall recovery backup unavailable',e)}
+}
+// V17.51: independent blue-wall recovery, keyed by survey and plan.
+function savePlanWalls(){
+ if(!survey||!plan||!Array.isArray(plan.walls))return;
+ try{
+  const key='fsp-test-isolated-blue-walls-v1751-'+survey.id+'-'+plan.id;
+  const snapshot=JSON.stringify({walls:plan.walls,updated:Date.now()});
+  localStorage.setItem(key,snapshot);
+  if(localStorage.getItem(key)!==snapshot)throw Error('Wall recovery read-back failed');
+ }catch(e){console.error('Blue wall recovery failed',e);setStatus('Wall backup failed !')}
+}
+function restorePlanWalls(){
+ if(!survey||!plan)return;
+ try{
+  const key='fsp-test-isolated-blue-walls-v1751-'+survey.id+'-'+plan.id;
+  const saved=JSON.parse(localStorage.getItem(key)||'null');
+  if(saved&&Array.isArray(saved.walls)){
+   for(const w of plan.walls||[]){const backed=saved.walls.find(x=>x.id===w.id);if(backed?.color&&!w.color)w.color=backed.color;}
+  }
+  if(saved&&Array.isArray(saved.walls)&&saved.walls.length>(plan.walls?.length||0)&&!plan.wallUndoCommitted){
+   plan.walls=structuredClone(saved.walls);
+   delete plan.viewState;
+   zoomed=false;
+   save();
+  }
+ }catch(e){console.warn('Blue wall recovery unavailable',e)}
+}
+function recoverMissingWalls(){try{const backup=JSON.parse(localStorage.getItem(WALL_RECOVERY_KEY)||'{}');let restored=0;
+ for(const s of data.surveys||[])for(const p of s.plans||[]){const b=backup[s.id+'|'+p.id];
+  if(b?.walls?.length>(p.walls?.length||0)&&!p.wallUndoCommitted){p.walls=structuredClone(b.walls);restored++}
+ }if(restored)setTimeout(()=>alert('Recovered '+restored+' floor plan(s) from a local backup. Please check the drawings and export a backup.'),250);
+ }catch(e){console.warn('Wall recovery failed',e)}}
+function save(){wallRecoverySnapshot();const n=++revision;setStatus('Saving…');const snapshot=JSON.stringify(data);
+ saveQueue=saveQueue.catch(()=>{}).then(async()=>{
+  // Do not report Saved unless at least one permanent backend has committed.
+  let success=0,errors=[];
+  try{localStorage.setItem(MIRROR_KEY,snapshot);success++}catch(e){errors.push(e)}
+  if(db)try{await new Promise((res,rej)=>{const t=db.transaction('state','readwrite');t.objectStore('state').put(JSON.parse(snapshot),KEY);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||Error('Transaction aborted'))});success++}catch(e){errors.push(e)}
+  if(!success)throw errors[0]||Error('No persistent storage available');
+  // Verify the exact survey snapshot, including every drawn wall, can be read back.
+  let verified=0;
+  try{const stored=localStorage.getItem(MIRROR_KEY);if(stored===snapshot)verified++}catch(e){errors.push(e)}
+  if(db)try{const stored=await new Promise((res,rej)=>{const r=db.transaction('state','readonly').objectStore('state').get(KEY);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});if(JSON.stringify(stored)===snapshot)verified++}catch(e){errors.push(e)}
+  if(!verified)throw Error('Saved data failed storage read-back verification');
+  savedRevision=n;if(revision===n)setStatus(verified===2?'Saved ✓':'Saved (1 copy) ✓');
+ }).catch(e=>{console.error(e);setStatus('Save failed !');alert('Autosave failed. Export a backup from All Surveys. '+e.message)});return saveQueue}
+function touch(){if(survey)survey.updated=Date.now();save()}function current(){survey=active();plan=survey?.plans.find(p=>p.id===survey.activePlan)||survey?.plans[0]||null;if(plan&&survey){survey.activePlan=plan.id;if(plan.confirmed===undefined)plan.confirmed=true;restorePlanWalls()}}// V17.55: calculate the actual persisted geometry, not assumed 1000x700 plan bounds.
+function savedWallBounds(p=plan){
+ const pts=(p?.walls||[]).flatMap(w=>Array.isArray(w.points)?w.points:[]).filter(q=>Number.isFinite(Number(q?.x))&&Number.isFinite(Number(q?.y)));
+ if(!pts.length)return null;
+ const xs=pts.map(q=>Number(q.x)),ys=pts.map(q=>Number(q.y));
+ return {x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys),points:pts.length};
+}
+function fitSavedWallsView(){
+ if(!plan||plan.image||!(plan.walls||[]).length)return false;
+ const b=savedWallBounds();if(!b)return false;
+ applyPlanOrientation();
+ const cx=b.x+b.w/2,cy=b.y+b.h/2;
+ const baseW=Math.max(120,b.w*1.25),baseH=Math.max(120,b.h*1.25);
+ const cw=orientationIsLandscape?baseH:baseW,ch=orientationIsLandscape?baseW:baseH;
+ let fitted=false;
+ for(const id of ['planCanvas','surveyCanvas']){
+  const svg=$(id),r=svg.getBoundingClientRect();if(r.width<10||r.height<10)continue;
+  const aspect=r.width/r.height;let w=cw,h=ch;
+  if(w/h<aspect)w=h*aspect;else h=w/aspect;
+  svg.setAttribute('viewBox',[cx-w/2,cy-h/2,w,h].join(' '));fitted=true;
+ }
+ if(fitted)zoomed=true;
+ return fitted;
+}
+function open(id){data.active=id;current();save();show('plans');scheduleStablePlanFit()}function nextName(){let n=survey.nextPlanNumber||1;const used=new Set(survey.plans.map(p=>p.name));while(used.has('Plan '+n))n++;survey.nextPlanNumber=n+1;return 'Plan '+n}function makePlan(image=null){const p={id:uid(),name:nextName(),image,walls:[],cameras:[],showDimensions:true,confirmed:false,notes:'',created:Date.now()};survey.plans.push(p);survey.activePlan=p.id;plan=p;touch();show('plans');return p}function promptModal(title,html,action,ok='Continue'){modalAction=action;$('modalTitle').textContent=title;$('modalText').textContent='';$('modalBody').innerHTML=html;$('modalOk').textContent=ok;$('modalBack').classList.remove('hidden')}function closeModal(){clearDistanceDialog();$('modalBack').classList.add('hidden');modalAction=null;$('modalCancel').onclick=closeModal}$('modalCancel').onclick=closeModal;$('modalOk').onclick=()=>{const fn=modalAction;if(!fn){closeModal();return}fn();if(modalAction===fn)closeModal()};function confirmModal(title,msg,action){promptModal(title,'<p class="muted">'+esc(msg)+'</p>',action,'Confirm')}function selectModal(title,items){promptModal(title,'<div class="menu">'+items.map((x,i)=>'<button data-choice="'+i+'">'+esc(x.label)+'</button>').join('')+'</div>',()=>{},'Close');$('modalBody').querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{const fn=items[+b.dataset.choice].action;closeModal();fn()})}function nameSurvey(){promptModal('New Survey','<label class="muted">Survey name (optional)</label><input id="newName" placeholder="Untitled Survey">',()=>{const name=$('newName').value.trim()||'Untitled Survey';const s={id:uid(),name,plans:[],activePlan:null,nextPlanNumber:1,updated:Date.now(),sitePhotos:[],notes:''};data.surveys.push(s);data.active=s.id;current();touch();show('plans')},'Create Survey')}$('newSurvey').onclick=nameSurvey;$('continue').onclick=()=>open(data.active);$('allSurveys').onclick=()=>show('list');document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));$('search').oninput=renderList;function renderList(){const q=$('search').value.toLowerCase();$('surveyRows').innerHTML=data.surveys.filter(s=>s.name.toLowerCase().includes(q)).sort((a,b)=>b.updated-a.updated).map(s=>'<div class="card row"><button class="grow" data-open="'+s.id+'">'+esc(s.name)+' <span class="muted">('+s.plans.length+' plans)</span></button><button data-options="'+s.id+'">⋯</button></div>').join('')||'<p class="muted">No surveys yet.</p>';$('surveyRows').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>open(b.dataset.open));$('surveyRows').querySelectorAll('[data-options]').forEach(b=>b.onclick=()=>{const s=data.surveys.find(x=>x.id===b.dataset.options);selectModal(s.name,[{label:'Rename Survey',action:()=>promptModal('Rename Survey','<input id="renameSurvey" value="'+esc(s.name)+'">',()=>{const v=$('renameSurvey').value.trim();if(v){s.name=v;touch();renderList()}},'Rename')},{label:'Delete Survey',action:()=>confirmModal('Delete Survey','Delete '+s.name+' and all plans and cameras? This cannot be undone.',()=>{data.surveys=data.surveys.filter(x=>x.id!==s.id);if(data.active===s.id)data.active=data.surveys[0]?.id||null;current();save();renderList()})}])})}function selectors(){for(const id of ['planSelect','surveyPlanSelect']){const s=$(id);s.innerHTML=survey.plans.length?survey.plans.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join(''):'<option>No plans added</option>';s.disabled=!survey.plans.length;if(plan)s.value=plan.id}}function switchPlan(id){$('surveyArea').classList.remove('fsp-detail-open');survey.activePlan=id;current();selected=null;closeDetail();touch();if(screen==='plans')updatePlans();else updateSurvey()}$('planSelect').onchange=e=>switchPlan(e.target.value);$('surveyPlanSelect').onchange=e=>switchPlan(e.target.value);function updatePlans(){current();$('plansTitle').textContent=survey?.name||'Plans';selectors();$('editPlan').disabled=!plan;$('toSurvey').disabled=!plan||!plan.confirmed;$('planMore').disabled=!plan;$('planTools').classList.toggle('hidden',!editing);$('fitPlan').classList.add('hidden');$('zoomTools').classList.toggle('hidden',!plan);$('drawingDoneBar').classList.toggle('hidden',!editing);$('planBottom').classList.toggle('hidden',editing);$('planArea').classList.toggle('empty',!plan);$('planArea').classList.toggle('hidden',!plan);$('planSelect').classList.toggle('empty',!plan);$('planSelect').parentElement.classList.toggle('hidden',!plan);$('planMore').classList.toggle('hidden',!plan);$('editPlan').classList.toggle('hidden',!plan);$('toSurvey').classList.toggle('hidden',!plan||!plan.confirmed);$('planBottom').classList.toggle('only-add',!plan);$('showDims').textContent=plan?.showDimensions===false?'Show Dimensions':'Hide Dimensions';$('editPlan').classList.toggle('hidden',editing||!plan);$('planHint').textContent=!plan?'No floor plans yet. Tap + Add Floor Plan below.':editing?(plan?.walls.some(w=>w.measure)?'Long-press a wall to add or edit measurements.':(plan?.image?'Select Measure and drag along a wall.':'Tip: Long-press any wall to add measurements.')):(plan?.confirmed?'Floor plan confirmed. Edit anytime.':'Draft drawing — tap Edit Plan, then Done to confirm.');renderScene('planScene',false);if(editing){setTool(tool);updateEditingToolbar()}requestAnimationFrame(()=>fitPlanView())}function updateEditingToolbar(){ $('undo').classList.remove('primary','activeTool');$('undo').style.background='#244f78';$('undo').style.color='white';const uploaded=!!plan?.image;for(const id of ['autoWall','clear','showDims'])$(id).classList.toggle('hidden',uploaded&&!advancedDrawing);for(const id of ['line','free'])$(id).classList.remove('hidden');$('moreDrawing').classList.toggle('hidden',!uploaded);$('moreDrawing').textContent=advancedDrawing?'Less ▴':'More ▾';$('panTool').classList.toggle('hidden',!uploaded);$('undo').textContent='Undo'}let advancedDrawing=false;$('moreDrawing').onclick=()=>{advancedDrawing=!advancedDrawing;updateEditingToolbar()};function updateSurvey(){current();$('surveyTitle').textContent='Add Camera';selectors();$('camCount').textContent=(plan?.cameras.length||0)+' cameras';renderScene('surveyScene',true)}
+// V17.29: Camera markers remain interactive in the normal Plans view after Done/reopening.
+$('planCanvas').addEventListener('pointerdown',e=>{
+ if(editing||!plan)return;
+ const pin=e.target.closest('[data-cam]');
+ if(!pin)return;
+ const id=pin.dataset.cam;
+ if(!plan.cameras.some(c=>c.id===id))return;
+ e.stopImmediatePropagation();e.preventDefault();
+ openSharedView('survey');
+ selected=id;renderScene('surveyScene',true);
+});let drawNewPlanId=null;function addPlanFlow(replace=false){selectModal(replace?'Replace Plan':'Add Plan',[{label:'Upload Plan (image or PDF)',action:()=>{uploadMode=replace?'replace':'add';$('planFile').click()}},{label:'Take Photo of Plan',action:()=>{uploadMode=replace?'replace':'add';$('planPhoto').click()}},{label:'Draw Plan',action:()=>{if(replace)replacePlan(null);else {makePlan();drawNewPlanId=plan.id}editing=true;advancedDrawing=false;tool='line';advancedDrawing=!!plan?.image;zoomed=false;updatePlans()}}])}let uploadMode='add';$('addPlan').onclick=()=>addPlanFlow();$('planMore').onclick=()=>{if(!plan)return;selectModal(plan.name,[{label:'Rename Plan',action:()=>promptModal('Rename Plan','<input id="renamePlan" value="'+esc(plan.name)+'">',()=>{const v=$('renamePlan').value.trim();if(v){plan.name=v;touch();updatePlans()}},'Done')},{label:'Replace Plan',action:()=>addPlanFlow(true)},{label:'Delete Plan',action:()=>confirmModal('Delete '+plan.name,'Delete this plan and all its cameras and drawing? Other plans keep their names.',()=>{survey.plans=survey.plans.filter(p=>p.id!==plan.id);survey.activePlan=survey.plans[0]?.id||null;current();touch();updatePlans()})}])};function replacePlan(image){const p=plan;if(p.cameras.length||p.walls.length){selectModal('Replace '+p.name,[{label:'Keep cameras and drawing',action:()=>{p.image=image;p.confirmed=true;touch();updatePlans()}},{label:'Keep cameras, clear drawing',action:()=>{p.image=image;p.walls=[];p.confirmed=false;touch();updatePlans()}},{label:'Remove cameras and drawing',action:()=>confirmModal('Remove existing work?','All cameras and drawn walls on this plan will be deleted.',()=>{p.image=image;p.walls=[];p.cameras=[];p.confirmed=false;touch();updatePlans()})}])}else{p.image=image;p.confirmed=true;touch();updatePlans()}}$('editPlan').onclick=()=>{drawNewPlanId=null;editing=true;advancedDrawing=false;tool='line';advancedDrawing=!!plan?.image;zoomed=false;updatePlans();if(plan&&!plan.image)scheduleStablePlanFit();else requestAnimationFrame(()=>restorePlanView())};
+function leaveDrawing(back=false){const p=plan;if(!p)return;const finish=()=>{touch();editing=false;drawNewPlanId=null;zoomed=false;updatePlans();if(plan&&!plan.image)scheduleStablePlanFit();if(back&&newId===p.id)addPlanFlow()};const newId=drawNewPlanId;
+if(back&&newId===p.id){if(p.walls.length===0){survey.plans=survey.plans.filter(x=>x.id!==p.id);survey.activePlan=survey.plans.at(-1)?.id||null;current();touch();finish()}else selectModal('Leave Drawing',[{label:'Keep sketch as a draft',action:finish},{label:'Discard sketch and choose another plan',action:()=>{survey.plans=survey.plans.filter(x=>x.id!==p.id);survey.activePlan=survey.plans.at(-1)?.id||null;current();touch();finish()}}]);}
+else finish()}
+$('backDraw').onclick=()=>leaveDrawing(true);
+async function completePlanEdit(){
+ hideMeasureHelp();if(!plan)return;plan.confirmed=true;wallRecoverySnapshot();setStatus('Saving…');await save();if(revision!==savedRevision)return;editing=false;drawNewPlanId=null;zoomed=false;updatePlans();if(plan&&!plan.image)scheduleStablePlanFit();
+}
+$('finishEdit').onclick=()=>{if(!plan)return;
+ // V17.80: Done finishes the edit without requiring measurements.
+ // Preserve automatic area calculation when enough measurements already exist.
+ if(!plan.image)refreshAutoArea();
+ completePlanEdit();
+};let areaNudgeShown=false;
+function showAreaNudge(){
+ if(!plan||!editing||areaNudgeShown||(plan.areas||[]).length||areaMeasurements().length<2)return;
+ const key='fsp-test-isolated-area-nudge-dismissed';
+ try{if(localStorage.getItem(key)==='yes')return}catch(e){}
+ areaNudgeShown=true;
+ document.getElementById('fsp-area-nudge')?.remove();
+ const n=document.createElement('div');n.id='fsp-area-nudge';
+ n.style.cssText='position:absolute;bottom:80px;left:12px;right:12px;max-width:380px;margin:auto;z-index:90;background:#153754;border:1px solid #76a6d0;border-radius:12px;padding:12px;color:white;box-shadow:0 5px 20px #0006;font-size:14px';
+ n.innerHTML='<strong>Ready to calculate square footage?</strong><p style="margin:6px 0 10px">Two measurements are saved. You can calculate an area now or keep working.</p><div style="display:flex;gap:8px"><button type="button" id="fsp-area-nudge-go" style="flex:1;background:#2676c5">Calculate Area</button><button type="button" id="fsp-area-nudge-dismiss">Not now</button></div>';
+ $('planArea').append(n);
+ n.querySelector('#fsp-area-nudge-go').onclick=()=>{n.remove();$('areaTool').click()};
+ n.querySelector('#fsp-area-nudge-dismiss').onclick=()=>{n.remove();try{localStorage.setItem(key,'yes')}catch(e){}};
+}
+const drawingColors={blue:'#17569d',red:'#dc2626',green:'#16a34a',yellow:'#eab308'};
+let drawingColor='blue';
+function chooseDrawingColor(){selectModal('Drawing Color',Object.keys(drawingColors).map(name=>({label:name.charAt(0).toUpperCase()+name.slice(1),action:()=>{drawingColor=name;$('drawColor').textContent='● '+name.charAt(0).toUpperCase()+name.slice(1);$('drawColor').style.color='';$('drawColor').style.borderLeft='7px solid '+drawingColors[name];}})))}
+$('drawColor').onclick=chooseDrawingColor;
+function setTool(t){const exitingMeasure=tool==='measure'&&t!=='measure';if(t!=='measure')hideMeasureHelp();tool=t;for(const [id,v] of [['panTool','pan'],['line','line'],['free','free'],['measureWall','measure']])$(id).classList.toggle('primary',t===v);$('areaTool').classList.toggle('primary',t==='area-trace');$('measureWall').style.background=t==='measure'?'#d97706':'';$('measureWall').style.color=t==='measure'?'white':'';$('planCanvas').dataset.activeTool=t;document.getElementById('fsp-area-nudge')?.remove();$('planHint').textContent=t==='pan'?'Drag to move the plan. Pinch to zoom.':t==='measure'?'Drag between two points to measure.':t==='line'?'Drag to draw a straight wall.':'Draw freehand with your finger.'}
+$('panTool').onclick=()=>setTool('pan');$('line').onclick=()=>setTool('line');$('free').onclick=()=>setTool('free');$('undo').onclick=()=>{
+ if(!plan)return;
+ if(tool==='measure'){
+  // Measurement-only undo: never change blue walls in this mode.
+  const history=plan.actionHistory||[];
+  let index=-1;
+  for(let i=history.length-1;i>=0;i--){
+   const action=history[i];
+   if(action.kind==='dimension'&&(plan.dimensions||[]).some(d=>d.id===action.id)){index=i;break;}
+   if(action.kind==='wall-measure'&&(plan.walls||[]).some(w=>w.id===action.id)){index=i;break;}
+  }
+  if(index>=0){
+   const action=history.splice(index,1)[0];
+   if(action.kind==='dimension')plan.dimensions=(plan.dimensions||[]).filter(d=>d.id!==action.id);
+   else {const wall=(plan.walls||[]).find(w=>w.id===action.id);if(wall){if(action.before)wall.measure=action.before;else delete wall.measure;}}
+  }else if(plan.dimensions?.length){
+   const removed=plan.dimensions.pop();
+   plan.actionHistory=history.filter(a=>!(a.kind==='dimension'&&a.id===removed.id));
+  }else{
+   $('planHint').textContent='No measurements to undo. Walls are protected in Measure mode.';
+   return;
+  }
+  refreshAutoArea();touch();updatePlans();
+  $('planHint').textContent='Last measurement undone. Walls unchanged.';
+  return;
+ }
+ // Drawing modes: undo the newest wall as before.
+ if(plan.walls?.length){
+  const removed=plan.walls.pop();
+  plan.wallUndoCommitted=true;
+  plan.actionHistory=(plan.actionHistory||[]).filter(a=>!(a.kind==='wall'&&a.id===removed.id));
+  delete plan.undoSnapshot;
+  // An edited outline must be eligible for irregular-shape detection again.
+  plan.irregularSketchChoice=null;
+  refreshAutoArea();savePlanWalls();touch();updatePlans();
+  $('planHint').textContent='Last wall removed. Undo saved.';
+  return;
+ }
+ const a=plan.actionHistory?.pop();
+ if(a?.kind==='dimension')plan.dimensions=(plan.dimensions||[]).filter(d=>d.id!==a.id);
+ else if(a?.kind==='wall-measure'){const w=plan.walls.find(w=>w.id===a.id);if(w){if(a.before)w.measure=a.before;else delete w.measure}}
+ else if(a?.kind==='auto-wall')plan.walls=a.before;
+ else if(plan.dimensions?.length)plan.dimensions.pop();
+ else{$('planHint').textContent='Nothing to undo.';return}
+ refreshAutoArea();savePlanWalls();touch();updatePlans();
+};$('clear').onclick=()=>{if(plan?.walls.length)confirmModal('Clear Drawing','Remove all drawn walls from this plan? Cameras and uploaded plan remain.',()=>{plan.walls=[];plan.irregularSketchChoice=null;refreshAutoArea();touch();updatePlans()})};
+function distancePointSegment(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy)}
+function simplify(points,epsilon){if(points.length<3)return points.slice();let max=0,idx=0;for(let i=1;i<points.length-1;i++){const d=distancePointSegment(points[i],points[0],points.at(-1));if(d>max){max=d;idx=i}}if(max<=epsilon)return [points[0],points.at(-1)];return [...simplify(points.slice(0,idx+1),epsilon).slice(0,-1),...simplify(points.slice(idx),epsilon)]}
+function autoStraighten(points){
+ if(points.length<3)return points.map(p=>({...p}));
+ const pts=points.map(p=>({x:p.x,y:p.y}));
+ const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y),span=Math.hypot(Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys));
+ if(span<12)return pts;
+ const close=Math.hypot(pts[0].x-pts.at(-1).x,pts[0].y-pts.at(-1).y)<Math.max(28,span*.12);
+ // For a closed sketch, split at the farthest point before simplifying, so
+ // RDP does not collapse the whole loop to a single line.
+ let simplified;
+ if(close){
+  pts[pts.length-1]={...pts[0]};
+  let k=1,max=0;for(let i=1;i<pts.length-1;i++){const d=Math.hypot(pts[i].x-pts[0].x,pts[i].y-pts[0].y);if(d>max){max=d;k=i}}
+  const epsilon=Math.max(8,Math.min(18,span*.022));
+  simplified=[...simplify(pts.slice(0,k+1),epsilon).slice(0,-1),...simplify(pts.slice(k),epsilon)];
+ }else simplified=simplify(pts,Math.max(8,Math.min(18,span*.022)));
+ if(simplified.length<2)return pts;
+ const out=[{...simplified[0]}];
+ for(let i=1;i<simplified.length;i++){
+  const p={...simplified[i]},prev=out.at(-1),dx=p.x-prev.x,dy=p.y-prev.y;
+  if(Math.abs(dx)>Math.abs(dy)*1.7)p.y=prev.y;
+  else if(Math.abs(dy)>Math.abs(dx)*1.7)p.x=prev.x;
+  if(Math.hypot(p.x-prev.x,p.y-prev.y)>3)out.push(p);
+ }
+ if(close&&out.length>=4)out[out.length-1]={...out[0]};
+ return out.length>=2?out:pts;
+}
+$('autoWall').onclick=()=>{
+ if(!plan?.walls.length){alert('Draw a wall first.');return}
+ const before=JSON.stringify(plan.walls);
+ try{
+  const candidate=JSON.parse(before);
+  let changed=false;
+  for(const w of candidate){
+   if(!Array.isArray(w.points)||w.points.length<2)throw Error('Invalid wall points');
+   if(w.points.length<3)continue;
+   const next=autoStraighten(w.points);
+   if(!Array.isArray(next)||next.length<2||next.some(p=>!Number.isFinite(p.x)||!Number.isFinite(p.y)))throw Error('Invalid straightening result');
+   if(JSON.stringify(next)!==JSON.stringify(w.points)){w.points=next;changed=true}
+  }
+  if(!changed){$('planHint').textContent='Walls already straight or no freehand strokes to convert.';return}
+  if(candidate.length!==plan.walls.length||candidate.some(w=>w.points.length<2))throw Error('Wall count mismatch');
+  plan.undoSnapshot=before;plan.walls=candidate;touch();updatePlans();
+ }catch(err){console.error('Auto Wall failed safely',err);$('planHint').textContent='Auto Wall could not convert this sketch. Original preserved.';}
+};
+$('showDims').onclick=()=>{if(!plan)return;plan.showDimensions=plan.showDimensions===false;touch();updatePlans()};
+// Area calculations are linked to their source measurements, not to every new line.
+function areaMeasurements(){
+ const list=[];
+ (plan?.dimensions||[]).forEach((d,i)=>{if(d.measure)list.push({id:'d:'+d.id,label:'Measurement '+(i+1)+' — '+formatFeet(d.measure),measure:d.measure,mid:{x:(d.a.x+d.b.x)/2,y:(d.a.y+d.b.y)/2}})});
+ (plan?.walls||[]).forEach((w,i)=>{if(w.measure)list.push({id:'w:'+w.id,label:'Wall '+(i+1)+' — '+formatFeet(w.measure),measure:w.measure,mid:{x:(w.points[0].x+w.points.at(-1).x)/2,y:(w.points[0].y+w.points.at(-1).y)/2}})});
+ return list;
+}
+function formatFeet(m){const ft=feetOf(m);return m.displayUnit==='m'?`${(ft*0.3048).toFixed(2)} m`:`${Number(ft.toFixed(2))}'`}
+function feetOf(m){return Number(m?.feet||0)+Number(m?.inches||0)/12}
+
+// V17.62: unit selection is a display/input preference; saved distances remain feet for area math.
+const MEASURE_UNIT_PREF_KEY='fsp-test-isolated-preferred-distance-unit';
+function preferredMeasureUnit(){
+ try{return localStorage.getItem(MEASURE_UNIT_PREF_KEY)==='m'?'m':'ft'}catch(e){return 'ft'}
+}
+function rememberMeasureUnit(unit){
+ try{localStorage.setItem(MEASURE_UNIT_PREF_KEY,unit==='m'?'m':'ft')}catch(e){}
+}
+function measureUnitMarkup(prefix,m){
+ const unit=m.displayUnit==='m'?'m':m.displayUnit==='ft'?'ft':m.feet!=null||m.inches!=null? 'ft':preferredMeasureUnit(),value=unit==='m'?feetOf(m)*0.3048:feetOf(m);
+ return '<label class="muted">Distance</label><input id="'+prefix+'Distance" type="number" min="0" step="any" value="'+(value>0?Number(value.toFixed(3)):'')+'"><label class="muted">Units</label><select id="'+prefix+'Unit"><option value="ft" '+(unit==='ft'?'selected':'')+'>Feet (ft)</option><option value="m" '+(unit==='m'?'selected':'')+'>Meters (m)</option></select><label style="display:flex;align-items:center;gap:9px"><input id="'+prefix+'Estimated" type="checkbox" style="width:22px;min-height:22px" '+(m.estimated||m.method==='Estimated'?'checked':'')+'> Estimated (not field-verified)</label>';
+}
+function enableUnitConversion(prefix){
+ const field=$(prefix+'Distance'),select=$(prefix+'Unit');
+ if(field){field.setAttribute('placeholder','Enter distance');}
+ if(!field||!select)return;
+ let previous=select.value;
+ const convert=()=>{
+  const next=select.value;
+  if(next===previous)return;
+  const raw=field.value.trim(),value=Number(raw);
+  if(raw!==''&&Number.isFinite(value)){
+   const converted=previous==='ft'?value*0.3048:value/0.3048;
+   field.value=String(Number(converted.toFixed(6)));
+  }
+  previous=next;
+ };
+ select.onchange=convert;
+ select.oninput=convert;
+ select.addEventListener('blur',convert);
+ // Prevent saving a mismatched unit/value if the browser delays change.
+ field.dataset.unit=previous;
+ select.dataset.previousUnit=previous;
+ const sync=()=>{convert();field.dataset.unit=previous;select.dataset.previousUnit=previous};
+ select.onchange=sync;select.oninput=sync;select.addEventListener('blur',sync);
+}
+function readMeasureInput(prefix){
+ const value=Number($(prefix+'Distance').value),unit=$(prefix+'Unit').value;
+ if(!Number.isFinite(value)||value<=0)return null;
+ const feet=unit==='m'?value/0.3048:value;
+ return {feet:Math.floor(feet),inches:Math.round((feet%1)*12000)/1000,displayUnit:unit,estimated:$(prefix+'Estimated').checked};
+}
+function measureText(m){const val=feetOf(m);return (m.estimated||m.method==='Estimated'?'~':'')+(m.displayUnit==='m'?(val*0.3048).toFixed(2)+' m':Number(val.toFixed(2))+"'");}
+// Auto area recognition uses the topology of snapped straight walls, never sketch scale.
+function recognizeDrawnArea(){
+ const walls=plan?.walls||[];if(walls.length<4)return null;
+ let segments=walls.map((w,i)=>({w,i,a:w.points?.[0],b:w.points?.at(-1)})).filter(s=>s.a&&s.b&&Math.hypot(s.a.x-s.b.x,s.a.y-s.b.y)>5);
+ if(segments.length!==walls.length)return {status:'unsupported',reason:'Some walls have no usable endpoints'};
+ let verts=[],tol=12;
+ function vertex(p){let i=verts.findIndex(v=>Math.hypot(v.x-p.x,v.y-p.y)<=tol);if(i<0){i=verts.length;verts.push({x:p.x,y:p.y,edges:[]})}return i}
+ for(const e of segments){e.v1=vertex(e.a);e.v2=vertex(e.b);if(e.v1===e.v2)return {status:'unsupported',reason:'A wall is too short'};verts[e.v1].edges.push(e);verts[e.v2].edges.push(e)}
+ if(verts.length!==segments.length||verts.some(v=>v.edges.length!==2))return {status:'unsupported',reason:'Close the outline and connect every wall endpoint'};
+ let ordered=[],seen=new Set(),at=0,previous=null;
+ for(let j=0;j<segments.length;j++){const e=verts[at].edges.find(x=>x!==previous);if(!e||seen.has(e))return {status:'unsupported',reason:'The wall outline branches or overlaps'};seen.add(e);const next=e.v1===at?e.v2:e.v1;ordered.push({e,from:at,to:next});previous=e;at=next}
+ if(at!==0)return {status:'unsupported',reason:'The wall outline is not closed'};
+ // Normalize collinear consecutive wall pieces for area recognition only.
+ // Keep the original walls untouched so editing and saved survey data are unchanged.
+ let areaEdges=ordered.map(({e,from,to})=>({a:verts[from],b:verts[to],sources:[e]}));
+ function straightJoin(a,b){
+  const x=a.b.x-a.a.x,y=a.b.y-a.a.y,X=b.b.x-b.a.x,Y=b.b.y-b.a.y;
+  const l=Math.hypot(x,y),L=Math.hypot(X,Y);
+  if(l<1||L<1)return false;
+  const chordX=b.b.x-a.a.x,chordY=b.b.y-a.a.y,chord=Math.hypot(chordX,chordY);
+  if(chord<5)return false;
+  // A wall may be drawn left-to-right or right-to-left, and its extra
+  // extension may be slightly angled or retrace part of the existing wall.
+  // Preserve real corners: only collapse vertices close to the combined chord.
+  const deviation=Math.abs((a.b.x-a.a.x)*chordY-(a.b.y-a.a.y)*chordX)/chord;
+  const allowance=Math.max(9,Math.min(20,chord*0.025));
+  if(deviation>allowance)return false;
+  const axis=Math.abs(chordX)>=Math.abs(chordY)?'x':'y';
+  const axisA=Math.abs(x)>=Math.abs(y)?'x':'y',axisB=Math.abs(X)>=Math.abs(Y)?'x':'y';
+  if(axis!==axisA||axis!==axisB)return false;
+  // Do not turn an L corner into a diagonal even if a very short wall
+  // makes the vertex appear close to the chord.
+  const cos=Math.abs((x*X+y*Y)/(l*L));
+  if(cos<0.94)return false;
+  // Prevent collapsing an out-and-back spike that would erase real geometry.
+  if(chord<Math.max(l,L)*0.45)return false;
+  return true;
+ }
+ let changed=true;
+ while(changed&&areaEdges.length>4){
+  changed=false;
+  for(let j=0;j<areaEdges.length;j++){
+   const k=(j+1)%areaEdges.length;
+   if(!straightJoin(areaEdges[j],areaEdges[k]))continue;
+   const combined={a:areaEdges[j].a,b:areaEdges[k].b,sources:[...areaEdges[j].sources,...areaEdges[k].sources]};
+   if(k===0){areaEdges[0]=combined;areaEdges.splice(j,1)}
+   else{areaEdges.splice(j,2,combined)}
+   changed=true;break;
+  }
+ }
+ if(areaEdges.length!==ordered.length){
+  verts=areaEdges.map(x=>({x:x.a.x,y:x.a.y}));
+  segments=areaEdges.map((x,i)=>({a:x.a,b:x.b,i:x.sources[0].i,w:{measure:x.sources.length===1?x.sources[0].w.measure:null}}));
+  ordered=segments.map((e,i)=>({e,from:i,to:(i+1)%segments.length}));
+ }
+ const n=ordered.length;
+ if(n!==4&&n!==6)return {status:'unsupported',reason:'Detected '+n+' distinct wall directions after combining straight sections (expected 4 or 6). Check for an extra corner'};
+
+ // Determine horizontal and vertical orientation from the sketch; actual dimensions always come from field measurements.
+ // Match separately drawn orange dimensions to their corresponding blue wall.
+ // Only use dimensions that run parallel, cover most of the wall, and sit close to it.
+ // Never use the sketch's pixel scale to infer a real-world length.
+ const dimensionByWall=new Map();
+ const bounds=segments.reduce((o,e)=>({minX:Math.min(o.minX,e.a.x,e.b.x),maxX:Math.max(o.maxX,e.a.x,e.b.x),minY:Math.min(o.minY,e.a.y,e.b.y),maxY:Math.max(o.maxY,e.a.y,e.b.y)}),{minX:Infinity,maxX:-Infinity,minY:Infinity,maxY:-Infinity});
+ const span=Math.max(bounds.maxX-bounds.minX,bounds.maxY-bounds.minY,1);
+ // The orange dimension is a separate annotation, commonly offset from the wall.
+ // Match by direction, endpoint coverage and relative location; do not convert pixels to feet.
+ const candidates=[];
+ for(const [di,d] of (plan.dimensions||[]).entries()){
+  const ft=feetOf(d.measure);if(!(ft>0)||!d.a||!d.b)continue;
+  const dx=d.b.x-d.a.x,dy=d.b.y-d.a.y,dlen=Math.hypot(dx,dy);if(dlen<5)continue;
+  const axis=Math.abs(dx)>=Math.abs(dy)?'x':'y';
+  for(const e of segments){
+   const wx=e.b.x-e.a.x,wy=e.b.y-e.a.y,wlen=Math.hypot(wx,wy);
+   if((Math.abs(wx)>=Math.abs(wy)?'x':'y')!==axis)continue;
+   const parallel=Math.abs((wx*dx+wy*dy)/(wlen*dlen));if(parallel<0.96)continue;
+   const ux=wx/wlen,uy=wy/wlen;
+   const t1=(d.a.x-e.a.x)*ux+(d.a.y-e.a.y)*uy;
+   const t2=(d.b.x-e.a.x)*ux+(d.b.y-e.a.y)*uy;
+   const overlap=Math.max(0,Math.min(wlen,Math.max(t1,t2))-Math.max(0,Math.min(t1,t2)));
+   const coverage=overlap/Math.max(1,Math.min(wlen,dlen));
+   if(coverage<0.72)continue;
+   const mid={x:(d.a.x+d.b.x)/2,y:(d.a.y+d.b.y)/2};
+   const cross=Math.abs((mid.x-e.a.x)*uy-(mid.y-e.a.y)*ux);
+   const along=Math.abs((mid.x-e.a.x)*ux+(mid.y-e.a.y)*uy-wlen/2);
+   if(cross>Math.max(30,span*0.16))continue;
+   const score=cross+along*0.2+(1-coverage)*span;
+   candidates.push({di,e,ft,score});
+  }
+ }
+ // Assign each dimension to at most one wall and vice versa, preferring best alignment.
+ candidates.sort((a,b)=>a.score-b.score);
+ const usedDimensions=new Set();
+ for(const c of candidates){
+  if(usedDimensions.has(c.di)||dimensionByWall.has(c.e))continue;
+  usedDimensions.add(c.di);dimensionByWall.set(c.e,{feet:c.ft,score:c.score});
+ }
+ const parts=ordered.map(({e,from,to})=>{const a=verts[from],b=verts[to],dx=b.x-a.x,dy=b.y-a.y;const axis=Math.abs(dx)>=Math.abs(dy)?'x':'y';const direct=feetOf(e.w.measure),matched=dimensionByWall.get(e)?.feet||0;const length=direct>0?direct:matched;return {e,axis,sign:Math.sign(axis==='x'?dx:dy),length,known:length>0}});
+ if(parts.some((p,i)=>p.axis===parts[(i+1)%n].axis))return {status:'unsupported',reason:'Draw straight alternating horizontal and vertical walls'};
+ const h=parts.filter(p=>p.axis==='x'),v=parts.filter(p=>p.axis==='y');
+ function solve(items){let unknown=items.filter(p=>!p.known);if(unknown.length===0){const residual=items.reduce((a,p)=>a+p.sign*p.length,0);return Math.abs(residual)<Math.max(2,items.reduce((a,p)=>a+p.length,0)*.05)?true:'conflict'}
+ if(unknown.length===1){const p=unknown[0];p.length=-items.filter(x=>x!==p).reduce((a,x)=>a+x.sign*x.length,0)/p.sign;return p.length>0?true:'conflict'}return false}
+ const hx=solve(h),vy=solve(v);
+ if(hx==='conflict'||vy==='conflict')return {status:'unsupported',reason:'Measured wall lengths do not close the building; check dimensions'};
+ if(!hx||!vy){const missing=(!hx?h:v).filter(p=>!p.known);return {status:'missing',shape:n===4?'Rectangle':'L-shaped building',missing:(!hx?'horizontal':'vertical')+' wall '+(missing[0].e.i+1)}}
+ let x=0,y=0,pts=[{x:0,y:0}];for(const p of parts){if(p.axis==='x')x+=p.sign*p.length;else y+=p.sign*p.length;pts.push({x,y})}
+ let twice=0;for(let i=0;i<n;i++)twice+=pts[i].x*pts[i+1].y-pts[i+1].x*pts[i].y;
+ const sq=Math.abs(twice)/2;if(!(sq>0))return {status:'unsupported',reason:'The measurements do not describe a valid area'};
+ const center={x:verts.reduce((a,p)=>a+p.x,0)/n,y:verts.reduce((a,p)=>a+p.y,0)/n};
+ return {status:'ready',area:{id:uid(),kind:'auto-drawn',name:n===4?'Building Area':'L-shaped Area',sqft:sq,pos:center,group:''}};
+}
+function areaSquare(a){if(a.kind==='auto-drawn'||a.kind==='auto-uploaded-rectangle')return a.sqft;if(a.kind==='manual-rectangle')return a.width*a.height;if(a.kind==='manual-l')return a.width*a.height-a.cutWidth*a.cutHeight;if(a.kind==='rectangle'){const m=areaMeasurements(),x=m.find(z=>z.id===a.lengthId),y=m.find(z=>z.id===a.widthId);return x&&y?feetOf(x.measure)*feetOf(y.measure):null}
+ if(a.kind==='trace')return polygonMeasuredArea(a.points||[]);
+ return null}
+function areaAxisScales(){
+ const values={x:[],y:[]};
+ for(const d of (plan?.dimensions||[])){
+  const ft=feetOf(d.measure);if(!(ft>0)||!d.a||!d.b)continue;
+  const dx=Math.abs(d.b.x-d.a.x),dy=Math.abs(d.b.y-d.a.y);
+  if(dx>dy*3&&dx>5)values.x.push(ft/dx);
+  else if(dy>dx*3&&dy>5)values.y.push(ft/dy);
+ }
+ for(const w of (plan?.walls||[])){
+  const ft=feetOf(w.measure),a=w.points?.[0],b=w.points?.at(-1);if(!(ft>0)||!a||!b)continue;
+  const dx=Math.abs(b.x-a.x),dy=Math.abs(b.y-a.y);
+  if(dx>dy*3&&dx>5)values.x.push(ft/dx);
+  else if(dy>dx*3&&dy>5)values.y.push(ft/dy);
+ }
+ for(const axis of ['x','y'])values[axis].sort((a,b)=>a-b);
+ return {x:values.x.length?values.x[Math.floor(values.x.length/2)]:null,y:values.y.length?values.y[Math.floor(values.y.length/2)]:null};
+}
+function areaScale(){const a=areaAxisScales();return a.x&&a.y?Math.sqrt(a.x*a.y):a.x||a.y}
+function polygonMeasuredArea(points){
+ if(points.length<3)return null;
+ const scale=areaAxisScales();
+ // Photos and customer plans may be stretched. Require both actual axes.
+ if(!(scale.x>0&&scale.y>0))return null;
+ let twice=0;for(let i=0;i<points.length;i++){const p=points[i],q=points[(i+1)%points.length];twice+=p.x*q.y-q.x*p.y}
+ return Math.abs(twice)*scale.x*scale.y/2;
+}
+function updateUploadedRectangleArea(){
+ if(!plan?.image)return;
+ const old=(plan.areas||[]).find(a=>a.kind==='auto-uploaded-rectangle');
+ const ds=(plan.dimensions||[]).filter(d=>feetOf(d.measure)>0&&d.a&&d.b);
+ const horizontal=ds.find(d=>Math.abs(d.b.x-d.a.x)>Math.abs(d.b.y-d.a.y)*3);
+ const vertical=ds.find(d=>Math.abs(d.b.y-d.a.y)>Math.abs(d.b.x-d.a.x)*3);
+ if(!horizontal||!vertical){if(old){plan.areas=plan.areas.filter(a=>a!==old);touch()}return}
+ // An existing irregular or manually defined area takes priority over auto rectangle.
+ if((plan.areas||[]).some(a=>a!==old))return;
+ const sqft=feetOf(horizontal.measure)*feetOf(vertical.measure);
+ if(old)old.sqft=sqft;
+ else{plan.areas??=[];plan.areas.push({id:uid(),kind:'auto-uploaded-rectangle',name:'Building Area',sqft,pos:{x:500,y:350},group:''})}
+ touch();
+}
+function areaTotal(group){return (plan.areas||[]).filter(a=>a.group===group).reduce((s,a)=>s+(areaSquare(a)||0),0)}
+function areaOptions(items,chosen){return items.map(m=>`<option value="${esc(m.id)}" ${m.id===chosen?'selected':''}>${esc(m.label)}</option>`).join('')}
+function areaEditor(existing=null){const items=areaMeasurements();if(items.length<2&&!existing){alert('Measure two walls first, then choose Area.');return}
+ const a=existing||{id:uid(),kind:'rectangle',name:'Room '+((plan.areas||[]).length+1),group:'',lengthId:items[0].id,widthId:items[1].id,pos:{x:500,y:350}};
+ const missing=existing&&(!items.some(m=>m.id===a.lengthId)||!items.some(m=>m.id===a.widthId));
+ promptModal(existing?'Edit Area':'Calculate Area',`<label>Room / section name</label><input id="areaName" value="${esc(a.name)}" placeholder="Room or section"><label>Length</label><select id="areaLength">${areaOptions(items,a.lengthId)}</select><label>Width</label><select id="areaWidth">${areaOptions(items,a.widthId)}</select><label>Building total (optional group name)</label><input id="areaGroup" value="${esc(a.group||'')}" placeholder="e.g. Main Building">${missing?'<p class="muted">One or more original measurements were deleted. Choose replacement measurements, or use Delete Area below.</p>':''}<p class="muted">Select the two sides of a rectangle. Other wall measurements won't affect this area. Sections with the same group name are added together; avoid overlapping sections.</p>`,()=>{
+ const l=$('areaLength').value,w=$('areaWidth').value;if(!l||!w||l===w){alert('Choose two different measurements.');return}
+ a.name=$('areaName').value.trim()||'Area';a.lengthId=l;a.widthId=w;a.group=$('areaGroup').value.trim();
+ if(!existing){const one=items.find(m=>m.id===l),two=items.find(m=>m.id===w);const first=plan.dimensions?.find(d=>'d:'+d.id===l)||plan.walls?.find(w=>'w:'+w.id===l);const second=plan.dimensions?.find(d=>'d:'+d.id===w)||plan.walls?.find(w=>'w:'+w.id===w);const ends=z=>z?.a?[z.a,z.b]:[z?.points?.[0],z?.points?.at(-1)];const [a1,a2]=ends(first),[b1,b2]=ends(second);if(a1&&a2&&b1&&b2){const h=Math.abs(a2.x-a1.x)>=Math.abs(a2.y-a1.y)?[a1,a2]:[b1,b2],v=h[0]===a1?[b1,b2]:[a1,a2];a.pos={x:(h[0].x+h[1].x)/2,y:(v[0].y+v[1].y)/2}}else a.pos={x:(one.mid.x+two.mid.x)/2,y:(one.mid.y+two.mid.y)/2};plan.areas??=[];plan.areas.push(a)}
+ touch();updatePlans();},'Save Area');
+ if(existing){const del=document.createElement('button');del.className='danger';del.textContent='Delete Area';del.style.width='100%';del.onclick=()=>{plan.areas=plan.areas.filter(z=>z.id!==existing.id);closeModal();touch();updatePlans()};$('modalBody').append(del)}
+}
+let traceArea=null;
+$('planCanvas').addEventListener('pointerdown',e=>{if(tool!=='area-trace'||!traceArea)return;e.preventDefault();e.stopImmediatePropagation();const p=pt(e,$('planCanvas'));if(p){traceArea.points.push({x:p.x,y:p.y});const root=$('planScene');root.querySelectorAll('[data-trace-preview]').forEach(x=>x.remove());if(traceArea.points.length>1)el('polyline',{points:traceArea.points.map(q=>q.x+','+q.y).join(' '),stroke:'#16a34a','stroke-width':4,fill:'none','data-trace-preview':'yes'},root);for(const q of traceArea.points)el('circle',{cx:q.x,cy:q.y,r:7,fill:'#16a34a','data-trace-preview':'yes'},root)}},true);
+function startAreaTrace(){const scales=areaAxisScales();if(!(scales.x&&scales.y)){alert('Add one horizontal and one vertical orange measurement before tracing the building.');return}traceArea={points:[]};setTool('area-trace');$('planHint').textContent='Tap each corner. Tap Area again to finish.';}
+function finishAreaTrace(){if(!traceArea)return;const pts=traceArea.points;traceArea=null;setTool(plan?.image?'pan':'line');if(pts.length<3){renderScene('planScene',false);return}
+ const a={id:uid(),kind:'trace',name:'Traced Area',group:'',points:pts,pos:{x:pts.reduce((s,p)=>s+p.x,0)/pts.length,y:pts.reduce((s,p)=>s+p.y,0)/pts.length}};
+ promptModal('Save Traced Area',`<label>Name</label><input id="traceName" value="Traced Area"><label>Building total (optional group)</label><input id="traceGroup" placeholder="e.g. Main Building"><p class="muted">Area uses your horizontal and vertical orange measurements. Check that each line spans the actual distance entered.</p>`,()=>{a.name=$('traceName').value.trim()||'Traced Area';a.group=$('traceGroup').value.trim();plan.areas??=[];plan.areas=plan.areas.filter(z=>z.kind!=='auto-uploaded-rectangle');plan.areas.push(a);touch();updatePlans()},'Save Area');}
+function manualAreaEditor(kind,existing=null){
+ const isL=kind==='manual-l',a=existing||{id:uid(),kind,name:'Area '+((plan.areas||[]).length+1),width:0,height:0,cutWidth:0,cutHeight:0,group:'',pos:{x:500,y:350}};
+ const field=(id,label,value)=>'<label>'+label+' (feet)</label><input id="'+id+'" type="number" min="0" step="any" value="'+(value||'')+'" placeholder="Enter actual feet">';
+ promptModal(isL?'L-shaped Building':'Rectangular Building','<p class="muted">Use actual measured dimensions. Your sketch does not need to be to scale.</p><label>Area name</label><input id="manualName" value="'+esc(a.name)+'">'+field('manualWidth','Overall width',a.width)+field('manualHeight','Overall height',a.height)+(isL?field('manualCutWidth','Missing corner width',a.cutWidth)+field('manualCutHeight','Missing corner height',a.cutHeight):'')+'<p class="muted">'+(isL?'Square footage = overall width × height − missing corner width × height.':'Square footage = width × height.')+'</p>',()=>{
+  const w=Number($('manualWidth').value),h=Number($('manualHeight').value),cw=isL?Number($('manualCutWidth').value):0,ch=isL?Number($('manualCutHeight').value):0;
+  if(![w,h].every(v=>Number.isFinite(v)&&v>0)||(isL&&(![cw,ch].every(v=>Number.isFinite(v)&&v>0)||cw>=w||ch>=h))){alert('Enter positive actual dimensions. The missing corner must be smaller than the building.');return}
+  Object.assign(a,{name:$('manualName').value.trim()||'Area',width:w,height:h,cutWidth:cw,cutHeight:ch});
+  if(!existing){plan.areas??=[];plan.areas=plan.areas.filter(z=>z.kind!=='auto-uploaded-rectangle');plan.areas.push(a)}
+  touch();updatePlans();
+ },'Save Area');
+}
+function guideDrawnAreaMeasurement(){
+ const result=recognizePlanArea();
+ if(result?.status==='ready'){refreshAutoArea();updatePlans();alert('Square footage calculated from the orange measurements.');return}
+ const detail=result?.status==='missing'?'Next, measure '+result.missing+'.':result?.status==='unsupported'?result.reason:'';
+ selectModal('Measure the Building',[
+ {label:'Measure Building',action:()=>{plan.irregularSketchChoice='calculate';touch();setTool('measure');showMeasureHelp(true)}},
+ {label:'Back to Sketch',action:()=>{plan.irregularSketchChoice='sketch';touch();setTool('line')}}
+ ]);
+ setStatus('Draw orange measurement lines along the building walls. '+detail);
+}
+$('areaTool').onclick=()=>{
+ if(tool==='area-trace'){finishAreaTrace();return}
+ if(plan?.image){
+  selectModal('Calculate Area — Uploaded Plan',[
+   {label:'Trace irregular outline using orange measurements',action:()=>startAreaTrace()},
+   {label:'Use orange measurements for rectangle',action:()=>{setTool('measure');showMeasureHelp(true)}}
+  ]);
+ }else{
+  guideDrawnAreaMeasurement();
+ }
+};
+// Handle dragging area labels independently from floor plan gestures.
+let areaLabelDrag=null;
+$('planCanvas').addEventListener('pointerdown',e=>{const hit=e.target.closest('[data-area-label]');if(!hit||!plan)return;const a=(plan.areas||[]).find(z=>z.id===hit.dataset.areaLabel);if(!a)return;e.preventDefault();e.stopImmediatePropagation();const p=pt(e,$('planCanvas'));areaLabelDrag={id:e.pointerId,area:a,start:p,moved:false};$('planCanvas').setPointerCapture(e.pointerId)},true);
+$('planCanvas').addEventListener('pointermove',e=>{const d=areaLabelDrag;if(!d||d.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();const p=pt(e,$('planCanvas'));if(p&&d.start){if(Math.hypot(p.x-d.start.x,p.y-d.start.y)>4)d.moved=true;if(d.moved){d.area.pos={x:p.x,y:p.y};renderScene('planScene',false)}}},true);
+$('planCanvas').addEventListener('pointerup',e=>{const d=areaLabelDrag;if(!d||d.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();areaLabelDrag=null;if(d.moved){touch();renderScene('planScene',false)}else if(d.area.kind==='rectangle')selectModal(d.area.name,[{label:'Edit Area / Replace Measurements',action:()=>areaEditor(d.area)},{label:'Delete Area',action:()=>confirmModal('Delete '+d.area.name,'Remove only this green area label? Walls and measurements will stay.',()=>{plan.areas=plan.areas.filter(z=>z.id!==d.area.id);touch();updatePlans()})}]);else if(d.area.kind==='auto-drawn')selectModal(d.area.name,[{label:'Recalculate after measuring',action:()=>{const c=recognizeDrawnArea();if(c?.status==='ready'){Object.assign(d.area,c.area,{id:d.area.id});touch();updatePlans()}else alert('More valid measurements are needed.')}},{label:'Delete Area',action:()=>confirmModal('Delete Area','Remove this area result?',()=>{plan.areas=plan.areas.filter(z=>z.id!==d.area.id);touch();updatePlans()})}]);else if(d.area.kind==='manual-l'||d.area.kind==='manual-rectangle')manualAreaEditor(d.area.kind,d.area);else{selectModal(d.area.name,[{label:'Rename / group',action:()=>promptModal('Edit Traced Area',`<label>Name</label><input id="tn" value="${esc(d.area.name)}"><label>Building total group</label><input id="tg" value="${esc(d.area.group||'')}">`,()=>{d.area.name=$('tn').value.trim()||'Area';d.area.group=$('tg').value.trim();touch();updatePlans()},'Done')},{label:'Delete Area',action:()=>confirmModal('Delete Area','Remove this area calculation?',()=>{plan.areas=plan.areas.filter(z=>z.id!==d.area.id);touch();updatePlans()})}])}},true);
+function renderAreas(root){if(!plan?.areas?.length)return;for(const a of plan.areas){const n=areaSquare(a);if(a.kind==='trace'&&a.points?.length>2)el('polygon',{points:a.points.map(p=>p.x+','+p.y).join(' '),fill:'#16a34a', 'fill-opacity':'.10',stroke:'#16a34a','stroke-width':2,'pointer-events':'none'},root);
+ const p=a.pos||{x:500,y:350},g=el('g',{class:'area-label','data-area-label':a.id,transform:`rotate(${-planRotationDegrees()} ${p.x} ${p.y})`},root),label=n===null?'Needs measurements':(Math.round(n*10)/10).toLocaleString()+' sq ft';
+ el('rect',{x:p.x-82,y:p.y-22,width:164,height:44,rx:8,'data-area-label':a.id},g);
+ const title=el('text',{x:p.x,y:p.y-4,'text-anchor':'middle','font-size':14,'data-area-label':a.id},g);title.textContent=a.name;
+ const total=el('text',{x:p.x,y:p.y+15,'text-anchor':'middle','data-area-label':a.id},g);total.textContent=label;
+ }}
+
+
+$('measureWall').onclick=()=>{if(!plan)return;if(tool==='measure'){setTool('pan');hideMeasureHelp();return}setTool('measure');showMeasureHelp();};
+function hideMeasureHelp(){document.getElementById('measureHelp')?.remove()}
+$('measureHelpButton').onclick=()=>showMeasureHelp(true);
+function showMeasureHelp(force=false){hideMeasureHelp();if(!force&&localStorage.getItem('fsp-test-isolated-measure-tip-v1719')==='yes')return;
+ const n=document.createElement('div');n.id='measureHelp';n.setAttribute('role','status');n.innerHTML='<strong>Measure walls</strong><p>Drag a measurement line, adjust the endpoints, then tap Done to enter its length. Measure stays on until you tap Measure again or choose another tool. Square footage appears automatically when enough measurements are saved.</p><button type="button" id="dismissMeasureHelp">Got it ×</button>';
+ $('planArea').append(n);n.querySelector('button').onclick=()=>{localStorage.setItem('fsp-test-isolated-measure-tip-v1719','yes');hideMeasureHelp()};}
+
+function promptForIrregularSketch(){
+ if(!plan||plan.image||!editing||plan.irregularSketchChoice)return;
+ const walls=plan.walls||[];if(walls.length<5)return;
+ const vertices=[],edges=[],tol=12;
+ function index(p){let n=vertices.findIndex(q=>Math.hypot(q.x-p.x,q.y-p.y)<tol);if(n<0){n=vertices.length;vertices.push({x:p.x,y:p.y,count:0})}return n}
+ for(const wall of walls){const a=wall.points?.[0],b=wall.points?.at(-1);if(!a||!b)return;const u=index(a),v=index(b);if(u===v)return;vertices[u].count++;vertices[v].count++;edges.push([u,v])}
+ if(vertices.length!==edges.length||vertices.some(v=>v.count!==2))return;
+ const seen=new Set([0]),queue=[0];while(queue.length){const x=queue.pop();for(const [a,b] of edges){const y=a===x?b:b===x?a:-1;if(y>=0&&!seen.has(y)){seen.add(y);queue.push(y)}}}
+ if(seen.size!==vertices.length)return;
+ plan.irregularSketchChoice='asked';touch();
+ selectModal('Irregular Building Shape Detected',[
+ {label:'Sketch Only — Continue',action:()=>{plan.irregularSketchChoice='sketch';touch();setTool('line');updatePlans()}},
+ {label:'Calculate Square Footage',action:()=>{plan.irregularSketchChoice='calculate';touch();guideDrawnAreaMeasurement()}}
+ ]);
+}
+// V17.93: Recognize a closed, roughly rectangular freehand outline without changing its strokes.
+// Require independent horizontal and vertical field measurements; never infer feet from pixels.
+function recognizeFreehandRectangle(){
+ const walls=plan?.walls||[];
+ if(!walls.length||!walls.some(w=>(w.points||[]).length>2))return null;
+ let strokes=walls.map(w=>w.points||[]).filter(p=>p.length>=2);
+ if(strokes.length!==walls.length)return null;
+ const pts=[...strokes[0]];
+ const joinTol=24;
+ for(let i=1;i<strokes.length;i++){
+  let next=strokes[i],last=pts.at(-1);
+  if(Math.hypot(last.x-next[0].x,last.y-next[0].y)>joinTol){
+   if(Math.hypot(last.x-next.at(-1).x,last.y-next.at(-1).y)>joinTol)return null;
+   next=[...next].reverse();
+  }
+  pts.push(...next);
+ }
+ if(pts.length<5)return null;
+ const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+ const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+ const width=maxX-minX,height=maxY-minY;
+ if(width<35||height<35||Math.hypot(pts[0].x-pts.at(-1).x,pts[0].y-pts.at(-1).y)>Math.max(joinTol,Math.min(width,height)*0.12))return null;
+ // All four sides must be represented and most points must lie near the rectangle perimeter.
+ const tol=Math.max(14,Math.min(width,height)*0.11);
+ const near=pts.filter(p=>Math.min(Math.abs(p.x-minX),Math.abs(p.x-maxX),Math.abs(p.y-minY),Math.abs(p.y-maxY))<=tol);
+ if(near.length/pts.length<0.85)return null;
+ const dims=(plan.dimensions||[]).filter(d=>feetOf(d.measure)>0&&d.a&&d.b);
+ const horizontal=dims.filter(d=>Math.abs(d.b.x-d.a.x)>Math.abs(d.b.y-d.a.y)*3);
+ const vertical=dims.filter(d=>Math.abs(d.b.y-d.a.y)>Math.abs(d.b.x-d.a.x)*3);
+ if(!horizontal.length||!vertical.length)return {status:'missing'};
+ const h=horizontal.find(d=>Math.abs(d.b.x-d.a.x)>width*.5);
+ const v=vertical.find(d=>Math.abs(d.b.y-d.a.y)>height*.5);
+ if(!h||!v)return {status:'missing'};
+ return {status:'ready',area:{id:uid(),kind:'auto-drawn',name:'Building Area',sqft:feetOf(h.measure)*feetOf(v.measure),pos:{x:(minX+maxX)/2,y:(minY+maxY)/2},group:''}};
+}
+function recognizePlanArea(){
+ const drawn=recognizeDrawnArea();
+ return drawn?.status==='ready'?drawn:(recognizeFreehandRectangle()||drawn);
+}
+function refreshAutoArea(){
+ if(!plan)return;
+ if(plan.image){updateUploadedRectangleArea();return}
+ const check=recognizePlanArea();
+ const old=(plan.areas||[]).find(a=>a.kind==='auto-drawn');
+ if(check?.status!=='ready'){
+  if(old){plan.areas=plan.areas.filter(a=>a!==old);touch()}
+  return;
+ }
+ if(old){const pos=old.pos;Object.assign(old,check.area);if(pos)old.pos=pos;}
+ else{plan.areas??=[];plan.areas.push(check.area)}
+ touch();
+}
+function editWallMeasure(index){const w=plan.walls[index];if(!w)return;const m=w.measure||{};
+ promptModal('Wall Measurement',measureUnitMarkup('m',m),()=>{
+ const next=readMeasureInput('m');if(!next){alert('Enter a valid distance');return}
+ plan.actionHistory??=[];plan.actionHistory.push({kind:'wall-measure',id:w.id,before:w.measure?{...w.measure}:null});
+ w.measure=next;rememberMeasureUnit(next.displayUnit);refreshAutoArea();touch();updatePlans();},'Done');enableUnitConversion('m');
+}
+$('toSurvey').onclick=()=>{if(plan?.confirmed)openSharedView('survey')};$('backPlans').onclick=()=>openSharedView('plans');$('surveyDone').onclick=()=>{placing=false;$('addCamera').classList.remove('primary','placing-existing');openSharedView('plans')};
+let activeDistanceId=null;
+let dimensionStage=null, dimensionDrag=null;
+function redrawDimensionStage(){
+ if(!dimensionStage)return;
+ const d=plan?.dimensions?.find(x=>x.id===dimensionStage.id);if(!d)return;
+ const root=$('planScene');
+ root.querySelectorAll('[data-dimension-stage]').forEach(x=>x.remove());
+ el('line',{x1:d.a.x,y1:d.a.y,x2:d.b.x,y2:d.b.y,stroke:'#ffae00','stroke-width':4,'vector-effect':'non-scaling-stroke','pointer-events':'none','data-dimension-stage':'line'},root);
+ for(const key of ['a','b']){
+  const q=d[key];
+  el('circle',{cx:q.x,cy:q.y,r:12,class:'dimension-adjust-handle','pointer-events':'none','data-dimension-stage':key,style:'touch-action:none;cursor:grab'},root);
+  el('circle',{cx:q.x,cy:q.y,r:32,class:'dimension-adjust-hit','data-dimension-endpoint':key,'data-dimension-stage':key,style:'touch-action:none;cursor:grab'},root);
+ }
+}
+function beginDimensionStage(index,isNew=false){
+ const d=plan?.dimensions?.[index];if(!d)return;
+ dimensionStage={id:d.id,isNew,original:{a:{...d.a},b:{...d.b}}};dimensionDrag=null;
+ $('dimensionPositionBar').classList.remove('hidden');
+ $('planTools').style.visibility='hidden';$('drawingDoneBar').style.visibility='hidden';
+ renderScene('planScene',false);redrawDimensionStage();
+}
+function finishDimensionStage(accept){
+ const s=dimensionStage;if(!s)return;
+ const d=plan?.dimensions?.find(x=>x.id===s.id);
+ dimensionStage=null;dimensionDrag=null;
+ $('dimensionPositionBar').classList.add('hidden');
+ $('planTools').style.removeProperty('visibility');$('drawingDoneBar').style.removeProperty('visibility');
+ if(!accept&&d){if(s.isNew)plan.dimensions=plan.dimensions.filter(x=>x.id!==s.id);else{d.a=s.original.a;d.b=s.original.b}}
+ renderScene('planScene',false);
+ if(accept&&d){if(!s.isNew)touch();editOverlayMeasure(plan.dimensions.indexOf(d),s.isNew)}
+}
+$('dimensionCancel').onclick=()=>finishDimensionStage(false);
+$('dimensionPositionDone').onclick=()=>finishDimensionStage(true);
+
+function clearDistanceDialog(){
+ $('modalBack').classList.remove('fsp-distance-dialog');
+ $('modalBack').style.removeProperty('--distance-top');$('modalBack').style.removeProperty('--distance-left');
+ activeDistanceId=null;
+ $('modalTitle').onpointerdown=null;$('modalTitle').onpointermove=null;$('modalTitle').onpointerup=null;$('modalTitle').onpointercancel=null;
+ document.querySelectorAll('.fsp-active-distance').forEach(n=>n.classList.remove('fsp-active-distance'));document.querySelectorAll('[data-distance-preview]').forEach(n=>n.remove());
+}
+function highlightDistance(d){
+ const svg=$('planCanvas'),root=$('planScene');
+ const nodes=[...root.querySelectorAll('[data-overlay-line]')].filter(n=>n.dataset.overlayLine===d.id);
+ nodes.forEach(n=>n.classList.add('fsp-active-distance'));
+ for(const q of [d.a,d.b]){
+  const circle=el('circle',{cx:q.x,cy:q.y,r:8,class:'fsp-active-endpoint','pointer-events':'none'},root);
+  circle.setAttribute('data-distance-preview',d.id);
+ }
+}
+function positionDistanceDialog(d){
+ const back=$('modalBack'),modal=back.querySelector('.modal'),svg=$('planCanvas');
+ back.classList.add('fsp-distance-dialog');activeDistanceId=d.id;
+ const screen=svg.getBoundingClientRect();
+ const a=svg.createSVGPoint();a.x=(d.a.x+d.b.x)/2;a.y=(d.a.y+d.b.y)/2;
+ const matrix=$('planScene').getScreenCTM();const middle=matrix?a.matrixTransform(matrix):{x:innerWidth/2,y:innerHeight/2};
+ const width=Math.min(330,innerWidth-24),height=modal.getBoundingClientRect().height||270;
+ const left=Math.max(12,Math.min(innerWidth-width-12,middle.x>innerWidth/2?12:innerWidth-width-12));
+ const above=middle.y-height-24,beneath=middle.y+28;
+ const top=above>=12?above:(beneath+height<=innerHeight-12?beneath:Math.max(12,Math.min(innerHeight-height-12,middle.y>innerHeight/2?12:innerHeight-height-12)));
+ back.style.setProperty('--distance-left',left+'px');back.style.setProperty('--distance-top',top+'px');
+ highlightDistance(d);
+ let drag=null;const title=$('modalTitle');
+ title.onpointerdown=e=>{if(e.button!==0)return;const r=modal.getBoundingClientRect();drag={id:e.pointerId,x:e.clientX,y:e.clientY,left:r.left,top:r.top};title.setPointerCapture(e.pointerId);e.preventDefault()};
+ title.onpointermove=e=>{if(!drag||e.pointerId!==drag.id)return;const l=Math.max(8,Math.min(innerWidth-modal.offsetWidth-8,drag.left+e.clientX-drag.x));const t=Math.max(8,Math.min(innerHeight-modal.offsetHeight-8,drag.top+e.clientY-drag.y));back.style.setProperty('--distance-left',l+'px');back.style.setProperty('--distance-top',t+'px')};
+ title.onpointerup=title.onpointercancel=e=>{if(drag&&title.hasPointerCapture?.(drag.id))title.releasePointerCapture(drag.id);drag=null};
+ // Dragging the dialog must never be interpreted as a floor-plan gesture.
+ // Capture all pointer events on the dialog before they can reach the canvas.
+ const isolate=e=>e.stopPropagation();
+ for(const eventName of ['pointerdown','pointermove','pointerup','pointercancel','touchstart','touchmove','touchend']){
+  modal.addEventListener(eventName,isolate,{passive:true});
+ }
+}
+
+function editOverlayMeasure(index,isNew=false){const d=plan.dimensions?.[index];if(!d)return;const m=d.measure||{};
+ promptModal('Distance on Plan',measureUnitMarkup('o',m),()=>{
+ const next=readMeasureInput('o');if(!next){alert('Enter a valid distance');return}
+ if(isNew){plan.actionHistory??=[];plan.actionHistory.push({kind:'dimension',id:d.id})}
+ d.measure=next;rememberMeasureUnit(next.displayUnit);refreshAutoArea();touch();updatePlans();if(isNew){setTool('measure');hideMeasureHelp();}
+ },'Done');
+ enableUnitConversion('o');
+ positionDistanceDialog(d);
+ if(isNew){$('modalCancel').onclick=()=>{plan.dimensions=plan.dimensions.filter(x=>x!==d);closeModal();renderScene('planScene',false);$('modalCancel').onclick=closeModal};}
+ else {const del=document.createElement('button');del.textContent='Delete Measurement';del.className='danger';del.style.width='100%';del.onclick=()=>{plan.dimensions=plan.dimensions.filter(x=>x!==d);closeModal();touch();updatePlans()};$('modalBody').append(del)}
+}
+function pt(e,svg){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;/* Persist plain JSON-compatible coordinates, not SVGPoint/DOMPoint objects. */const scene=svg.id==='planCanvas'?$('planScene'):svg.id==='surveyCanvas'?$('surveyScene'):svg;const m=scene.getScreenCTM();if(!m)return null;const q=p.matrixTransform(m.inverse());return Number.isFinite(q.x)&&Number.isFinite(q.y)?{x:q.x,y:q.y}:null}
+// Capture the drawing transform once per stroke; preview and committed wall use identical plan coordinates.
+function strokePoint(e,g){if(!g?.inverseMatrix)return pt(e,$('planCanvas'));const p=$('planCanvas').createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(g.inverseMatrix);return Number.isFinite(q.x)&&Number.isFinite(q.y)?{x:q.x,y:q.y}:null}
+function linePath(points){return points.map((p,i)=>(i?'L':'M')+p.x+' '+p.y).join(' ')}let zoomed=false;function getViewBox(svg){return svg.getAttribute('viewBox').split(/[,\s]+/).map(Number)}
+function setViewBox(svg,b){svg.setAttribute('viewBox',b.join(' '));zoomed=true}
+function zoomPlan(factor){const svg=visibleCanvas(),b=getViewBox(svg),cx=b[0]+b[2]/2,cy=b[1]+b[3]/2;setViewBox(svg,[cx-b[2]*factor/2,cy-b[3]*factor/2,b[2]*factor,b[3]*factor])}
+$('zoomIn').onclick=()=>{zoomPlan(.75);rememberPlanView()};$('zoomOut').onclick=()=>{zoomPlan(1.33);rememberPlanView()};$('fitPlan').onclick=()=>{zoomed=false;fitPlanView()};
+$('planCanvas').addEventListener('wheel',e=>{if(!plan)return;e.preventDefault();zoomPlan(e.deltaY>0?1.15:.87);rememberPlanView()},{passive:false});
+// V17.24: single navigation controller, screen-to-SVG coordinates account for
+// SVG preserveAspectRatio letterboxing and 90-degree scene rotation.
+const pointers=new Map();let pinch=null,navPan=null,suppressTouchUntil=0;
+const navSvg=$('planCanvas');
+function screenToSvg(clientX,clientY){
+ const m=navSvg.getScreenCTM();if(!m)return null;
+ const p=navSvg.createSVGPoint();p.x=clientX;p.y=clientY;
+ return p.matrixTransform(m.inverse());
+}
+function pointerPair(){const a=[...pointers.values()];return {mid:{x:(a[0].x+a[1].x)/2,y:(a[0].y+a[1].y)/2},dist:Math.max(1,Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y))}}
+function beginPinch(){const q=pointerPair();pinch={...q,box:getViewBox(navSvg),anchor:screenToSvg(q.mid.x,q.mid.y)};navPan=null;gesture=null;$('strokePreview').replaceChildren();suppressTouchUntil=Date.now()+300}
+navSvg.addEventListener('pointerdown',e=>{
+ if(!plan)return;
+ if(dimensionStage){return}
+ if(e.target.closest('[data-overlay-dimension]'))return;
+ e.preventDefault();pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ try{navSvg.setPointerCapture(e.pointerId)}catch{}
+ if(pointers.size===2){beginPinch();return}
+ if(pointers.size>2)return;
+ if(!editing||tool==='pan'){
+  navPan={id:e.pointerId,start:{x:e.clientX,y:e.clientY},box:getViewBox(navSvg),anchor:screenToSvg(e.clientX,e.clientY)};
+  gesture=null;
+ }
+},{capture:true});
+navSvg.addEventListener('pointermove',e=>{
+ if(!pointers.has(e.pointerId))return;
+ pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pointers.size===2){
+  if(!pinch)beginPinch();
+  const q=pointerPair(),b=pinch.box,scale=Math.max(.15,Math.min(8,pinch.dist/q.dist));
+  const w=b[2]*scale,h=b[3]*scale;
+  // Compute the anchor's fractional position in the *visible SVG* viewport,
+  // including letterboxing. The SVG CTM is stable until viewBox changes.
+  const r=navSvg.getBoundingClientRect(),ratio=Math.min(r.width/b[2],r.height/b[3]);
+  const usedW=b[2]*ratio,usedH=b[3]*ratio;
+  const x0=(r.width-usedW)/2,y0=(r.height-usedH)/2;
+  const fX=(pinch.mid.x-r.left-x0)/usedW;
+  const fY=(pinch.mid.y-r.top-y0)/usedH;
+  // Pan from the midpoint's displacement using the new viewBox scale.
+  const newRatio=Math.min(r.width/w,r.height/h);
+  const newUsedW=w*newRatio,newUsedH=h*newRatio;
+  const nx=(r.width-newUsedW)/2,ny=(r.height-newUsedH)/2;
+  const midFX=(q.mid.x-r.left-nx)/newUsedW,midFY=(q.mid.y-r.top-ny)/newUsedH;
+  setViewBox(navSvg,[b[0]+fX*b[2]-midFX*w,b[1]+fY*b[3]-midFY*h,w,h]);
+  return;
+ }
+ if(navPan&&navPan.id===e.pointerId){
+  // Work in actual SVG screen coordinates, not raw client / element ratios.
+  const b=navPan.box,r=navSvg.getBoundingClientRect();
+  const scale=Math.min(r.width/b[2],r.height/b[3]);
+  const dx=(e.clientX-navPan.start.x)/scale,dy=(e.clientY-navPan.start.y)/scale;
+  setViewBox(navSvg,[b[0]-dx,b[1]-dy,b[2],b[3]]);
+ }
+},{capture:true});
+for(const eventName of ['pointerup','pointercancel'])navSvg.addEventListener(eventName,e=>{
+ pointers.delete(e.pointerId);
+ if(navPan?.id===e.pointerId)navPan=null;
+ if(pinch&&pointers.size<2){pinch=null;suppressTouchUntil=Date.now()+350;gesture=null;$('strokePreview').replaceChildren()}
+ if(pointers.size===0&&plan&&(navPan===null||!pinch))rememberPlanView(navSvg)
+},{capture:true});
+// Rotate the *rendered view*, never the saved geometry.
+function planBounds(){
+ if(!plan)return {x:0,y:0,w:1000,h:700};
+ if(plan.image){
+  const iw=Number(plan.imageWidth)||1000,ih=Number(plan.imageHeight)||700;
+  const ratio=iw/ih,base=1000/700;
+  if(ratio>base){const h=1000/ratio;return {x:0,y:(700-h)/2,w:1000,h}}
+  const w=700*ratio;return {x:(1000-w)/2,y:0,w,h:700};
+ }
+ // Keep plan-space bounds fixed while walls are committed so the view does not jump.
+ return {x:0,y:0,w:1000,h:700};
+}
+// V17.24: one orientation controller for every floor-plan layer.
+// All coordinates remain in original plan space; only the view is rotated.
+let orientationIsLandscape=false;
+// Manual view-only rotation override: null = follow device, 0/90 = chosen view.
+let planRotationOverride=null;
+function detectedLandscape(){
+ const r=$('planArea').getBoundingClientRect();
+ return window.matchMedia('(orientation: landscape)').matches ||
+        window.innerWidth>window.innerHeight ||
+        (r.width>r.height*1.3 && window.innerWidth>600);
+}
+function planRotationDegrees(){const override=plan?.viewRotationOverride??planRotationOverride;return override===null?(detectedLandscape()?90:0):override;}
+
+function rotateVisiblePlan90(){
+ if(!plan)return;
+ const next=(planRotationDegrees()+90)%360;
+ plan.viewRotationOverride=next;
+ planRotationOverride=next;
+ // Do not restore a view box that was fitted for a different rotation.
+ delete plan.viewState;
+ zoomed=false;
+ applyPlanOrientation();
+ fitPlanView(true);
+ rememberPlanView(visibleCanvas());
+}
+function enableAutomaticPlanRotation(){
+ if(!plan)return;
+ plan.viewRotationOverride=null;
+ planRotationOverride=null;
+ delete plan.viewState;
+ zoomed=false;
+ applyPlanOrientation();
+ fitPlanView(true);
+ rememberPlanView(visibleCanvas());
+}
+$('rotatePlanView').onclick=rotateVisiblePlan90;
+$('rotateSurveyView').onclick=rotateVisiblePlan90;
+function planLandscape(){return detectedLandscape();}
+function applyPlanOrientation(){
+ if(!plan)return;
+ const b=planBounds(),cx=b.x+b.w/2,cy=b.y+b.h/2;
+ const degrees=planRotationDegrees();
+ orientationIsLandscape=(degrees%180)!==0;
+ const transform=degrees?`rotate(${degrees} ${cx} ${cy})`:'';
+ for(const id of ['planScene','strokePreview','surveyScene'])$(id).setAttribute('transform',transform);
+}
+// V17.24: shared per-plan camera/plan viewport. Persist only when a gesture finishes.
+function visibleCanvas(){return screen==='survey'?$('surveyCanvas'):$('planCanvas')}
+function rememberPlanView(svg=visibleCanvas(),persist=true){
+ if(!plan||!svg||svg.getBoundingClientRect().width<10)return;
+ const b=getViewBox(svg),r=svg.getBoundingClientRect();
+ if(!b.every(Number.isFinite)||b[2]<=0||b[3]<=0)return;
+ const next={cx:b[0]+b[2]/2,cy:b[1]+b[3]/2,unitsPerPixel:Math.max(b[2]/r.width,b[3]/r.height),rotation:planRotationDegrees()};
+ plan.viewState=next;
+ if(persist)touch();
+}
+function restorePlanView(){
+ if(!plan)return;
+ applyPlanOrientation();
+ const v=plan.viewState;
+ if(!v||v.rotation!==planRotationDegrees()){zoomed=false;fitPlanView(true);return}
+ const svg=visibleCanvas(),r=svg.getBoundingClientRect();
+ if(r.width<10||r.height<10)return;
+ const scale=Math.max(.0001,Number(v.unitsPerPixel)||1);
+ const w=r.width*scale,h=r.height*scale;
+ svg.setAttribute('viewBox',[v.cx-w/2,v.cy-h/2,w,h].join(' '));
+ zoomed=true;
+}
+function openSharedView(name){
+ if(screen==='plans'||screen==='survey')rememberPlanView(visibleCanvas(),false);
+ show(name);
+ requestAnimationFrame(()=>restorePlanView());
+}
+// V17.59: refit only after the plan screen finishes changing between viewing and editing.
+let planFitFrame=0;
+function scheduleStablePlanFit(){
+ cancelAnimationFrame(planFitFrame);
+ planFitFrame=requestAnimationFrame(()=>{planFitFrame=requestAnimationFrame(()=>{
+  if(screen!=='plans'||!plan||gesture||pinch||navPan)return;
+  zoomed=false;fitPlanView(true);
+ })});
+}
+function fitPlanView(force=false){
+ if(!plan)return;
+ if(!force&&gesture&&['pending-draw','draw','overlay-measure'].includes(gesture.kind))return;
+ applyPlanOrientation();
+ if(zoomed&&!force)return;
+ const b=planBounds(),cx=b.x+b.w/2,cy=b.y+b.h/2;
+ const cw=orientationIsLandscape?b.h:b.w,ch=orientationIsLandscape?b.w:b.h;
+ for(const id of ['planCanvas','surveyCanvas']){
+  const svg=$(id),r=svg.getBoundingClientRect();
+  if(r.width<10||r.height<10)continue;
+  const aspect=r.width/r.height;
+  let w=cw*1.06,h=ch*1.06;
+  if(w/h<aspect)w=h*aspect;else h=w/aspect;
+  svg.setAttribute('viewBox',[cx-w/2,cy-h/2,w,h].join(' '));
+ }
+}
+let orientationFrame=0;
+let lastDetectedLandscape=detectedLandscape();
+function refreshPlanOrientation(){
+ // Browser chrome may resize the SVG while the finger is down; never reset the drawing viewport mid-stroke.
+ if(editing&&gesture&&['pending-draw','draw'].includes(gesture.kind))return;
+ // Revert to device-following when the device actually changes orientation.
+ const now=detectedLandscape();
+ // A manual rotation stays selected until Automatic Rotation is chosen.
+ lastDetectedLandscape=now;
+ // Do not discard saved geometry or alter the active editing tool.
+ gesture=null;navPan=null;pinch=null;pointers.clear();
+ $('strokePreview').replaceChildren();
+ zoomed=!!plan?.viewState;
+ cancelAnimationFrame(orientationFrame);
+ orientationFrame=requestAnimationFrame(()=>{if(plan?.viewState && plan.viewState.rotation===planRotationDegrees())restorePlanView();else{zoomed=false;fitPlanView(true);if(plan)rememberPlanView(visibleCanvas())}});
+}
+window.addEventListener('resize',refreshPlanOrientation);
+window.addEventListener('orientationchange',()=>{
+ refreshPlanOrientation();
+ setTimeout(refreshPlanOrientation,120);
+ setTimeout(refreshPlanOrientation,350);
+});
+window.matchMedia('(orientation: landscape)').addEventListener?.('change',refreshPlanOrientation);
+function drawReadableMeasureLabel(root,a,b,m,attrs={}){
+ const midX=(a.x+b.x)/2,midY=(a.y+b.y)/2,angle=planRotationDegrees(),text=measureText(m);
+ const estimatedWidth=Math.max(46,text.length*12+18);
+ const length=Math.hypot(b.x-a.x,b.y-a.y);
+ const short=length<estimatedWidth+30;
+ const centerY=short?-31:0;
+ const g=el('g',{transform:`rotate(${-angle} ${midX} ${midY})`},root);
+ const r=el('rect',{x:midX-estimatedWidth/2,y:midY+centerY-15,width:estimatedWidth,height:30,rx:6,fill:'#fff8eb',stroke:'#d97706','stroke-width':1.5,'pointer-events':'none'},g);
+ const t=el('text',{x:midX,y:midY+centerY+7,fill:'#92400e','font-size':20,'font-weight':'bold','text-anchor':'middle',style:'cursor:pointer',...attrs},g);
+ t.textContent=text;
+}
+function renderScene(target,isSurvey){const root=$(target);root.replaceChildren();if(!plan)return;fitPlanView();if(plan.image)el('image',{href:plan.image,x:0,y:0,width:1000,height:700,preserveAspectRatio:'xMidYMid meet'},root);for(let wi=0;wi<plan.walls.length;wi++){const w=plan.walls[wi];el('path',{d:linePath(w.points),class:'wall',stroke:drawingColors[w.color]||drawingColors.blue,'data-wall':wi},root);if(!isSurvey)el('path',{d:linePath(w.points),fill:'none',stroke:'transparent','stroke-width':30,'stroke-linecap':'round','stroke-linejoin':'round','data-wall-hit':wi},root);if(!isSurvey&&editing&&w.measure&&plan.showDimensions!==false){const a=w.points[0],b=w.points.at(-1);drawReadableMeasureLabel(root,a,b,w.measure,{'data-dimension':wi})}}if(!isSurvey&&editing)for(let di=0;di<(plan.dimensions||[]).length;di++){
+ const d=plan.dimensions[di],a=d.a,b=d.b;
+ el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'#d97706','stroke-width':2.5,'stroke-dasharray':'7 4','vector-effect':'non-scaling-stroke','data-overlay-line':d.id},root);
+ if(!isSurvey)el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'transparent','stroke-width':26,'stroke-linecap':'round','pointer-events':'stroke','data-overlay-dimension':di,style:'cursor:pointer'},root);
+ for(const q of [a,b])el('circle',{cx:q.x,cy:q.y,r:5,fill:'#d97706','pointer-events':'none'},root);
+ if(d.measure&&plan.showDimensions!==false){
+  drawReadableMeasureLabel(root,a,b,d.measure,{'data-overlay-dimension':di});
+ }
+}
+renderAreas(root);if(!isSurvey && editing){if(dimensionStage)redrawDimensionStage();return;}for(const c of plan.cameras){const g=el('g',{class:'pin','data-cam':c.id,},root),color=c.type==='Existing'?'#2676c8':'#e88320',angle=(c.angle||0)*Math.PI/180;const x2=c.x+100*Math.cos(angle),y2=c.y+100*Math.sin(angle);if(selected===c.id){const a1=angle-.43,a2=angle+.43;el('path',{class:'cone',d:`M${c.x} ${c.y} L${c.x+155*Math.cos(a1)} ${c.y+155*Math.sin(a1)} A155 155 0 0 1 ${c.x+155*Math.cos(a2)} ${c.y+155*Math.sin(a2)} Z`},g);el('line',{x1:c.x,y1:c.y,x2,y2,stroke:color,'stroke-width':3},g)}el('circle',{cx:c.x,cy:c.y,r:23,fill:'transparent',stroke:'none'},g);el('circle',{cx:c.x,cy:c.y,r:13,fill:color},g);const t=el('text',{x:c.x,y:c.y+1,'font-size':12},g);t.textContent=c.num;if(selected===c.id){el('circle',{cx:x2,cy:y2,r:36,fill:'transparent','pointer-events':'all','data-handle':c.id},g);el('circle',{cx:x2,cy:y2,r:12,class:'handle','pointer-events':'none'},g)}}}
+function bindDrawing(){
+ const svg=$('planCanvas');let wallPress=null,ignoreClick=false;
+ function snapCorner(p){
+  if(!p||!plan?.walls?.length||tool!=='line')return null;
+  const matrix=$('planScene').getScreenCTM();if(!matrix)return null;
+  const screen=q=>{const t=svg.createSVGPoint();t.x=q.x;t.y=q.y;return t.matrixTransform(matrix)};
+  const target=screen(p);let nearest=null,best=30;
+  for(const w of plan.walls)for(const q of [w.points?.[0],w.points?.at(-1)]){
+   if(!q||!Number.isFinite(q.x)||!Number.isFinite(q.y))continue;
+   const pos=screen(q),dist=Math.hypot(pos.x-target.x,pos.y-target.y);
+   if(dist<best){best=dist;nearest={x:q.x,y:q.y}}
+  }
+  return nearest;
+ }
+ function previewSnap(p){if(!p)return;const preview=$('strokePreview');el('circle',{cx:p.x,cy:p.y,r:12,fill:'#22c55e','fill-opacity':'.25',stroke:'#16a34a','stroke-width':2,'pointer-events':'none'},preview);el('circle',{cx:p.x,cy:p.y,r:5,fill:'#16a34a',stroke:'#fff','stroke-width':2,'pointer-events':'none'},preview)}
+
+ function closestWall(p){let best=-1;const rect=svg.getBoundingClientRect(),v=getViewBox(svg);let dmin=Math.max(30,Math.min(70,32*v[2]/Math.max(rect.width,1)));plan?.walls.forEach((w,i)=>{for(let j=1;j<w.points.length;j++){const d=distancePointSegment(p,w.points[j-1],w.points[j]);if(d<dmin){dmin=d;best=i}}});return best}
+ function showWallColorMenu(index){if(!plan?.walls?.[index])return;selectModal('Wall Color',Object.keys(drawingColors).map(name=>({label:name.charAt(0).toUpperCase()+name.slice(1),action:()=>{const wall=plan?.walls?.[index];if(!wall)return;wall.color=name;savePlanWalls();touch();renderScene('planScene',false)}})))}
+ function clearPress(){if(wallPress?.timer)clearTimeout(wallPress.timer);wallPress=null}
+ function openWall(index){if(!plan||index<0)return;ignoreClick=true;gesture=null;clearPress();renderScene('planScene',false);const w=plan.walls[index];if(w){el('path',{d:linePath(w.points),fill:'none',stroke:'#f59e0b','stroke-width':7,'stroke-linecap':'round','pointer-events':'none'},$('planScene'));editWallMeasure(index)}}
+ svg.addEventListener('click',e=>{if(dimensionStage)return;if(ignoreClick){ignoreClick=false;e.preventDefault();return}if(!editing||!plan)return;const overlay=e.target.closest('[data-overlay-dimension]');if(overlay){e.preventDefault();e.stopPropagation();beginDimensionStage(Number(overlay.dataset.overlayDimension));return}const dim=e.target.closest('[data-dimension]');if(tool==='pan'&&!overlay){const hit=e.target.closest('[data-wall-hit],[data-wall]');const index=hit?Number(hit.dataset.wallHit??hit.dataset.wall):closestWall(pt(e,svg));if(index>=0){e.preventDefault();e.stopPropagation();showWallColorMenu(index)}return}if(dim&&tool!=='measure'){e.preventDefault();e.stopPropagation();openWall(Number(dim.dataset.dimension))}});
+ svg.addEventListener('pointerdown',e=>{
+  if(!editing||!plan||navPan||pointers.size>1||Date.now()<suppressTouchUntil)return;
+  if(dimensionStage){
+   const key=e.target.closest('[data-dimension-endpoint]')?.dataset.dimensionEndpoint;
+   if(key){e.preventDefault();e.stopPropagation();dimensionDrag={id:e.pointerId,key};try{svg.setPointerCapture(e.pointerId)}catch{}}
+   return;
+  }
+  const p=pt(e,svg);if(!p)return;
+  const overlay=e.target.closest('[data-overlay-dimension]');if(overlay){e.preventDefault();e.stopPropagation();beginDimensionStage(Number(overlay.dataset.overlayDimension));return}
+  const dim=e.target.closest('[data-dimension]');if(dim)return;
+  const wall=closestWall(p);
+  if(tool==='pan')return;
+  if(tool==='measure'){
+   e.preventDefault();zoomed=true;
+   gesture={kind:'overlay-measure',id:e.pointerId,start:p,end:p};svg.setPointerCapture(e.pointerId);$('planHint').textContent='Drag between two points, then adjust endpoints and tap Done.';return
+  }
+  // Freeze the SVG viewBox and drawing-to-screen transform before starting.
+  e.preventDefault();zoomed=true;
+  // Defer drawing until a clear drag; holding still must never create a wall.
+  const initialSnap=snapCorner(p);gesture={kind:'pending-draw',id:e.pointerId,points:[initialSnap||p],start:initialSnap||p,initialSnap,clientStart:{x:e.clientX,y:e.clientY},inverseMatrix:$('planScene').getScreenCTM()?.inverse(),startBox:getViewBox(svg)};
+  svg.setPointerCapture(e.pointerId);
+  if(initialSnap){$('strokePreview').replaceChildren();previewSnap(initialSnap)}
+  if(false&&wall>=0){wallPress={id:e.pointerId,start:p,index:wall,fired:false,timer:setTimeout(()=>{if(wallPress?.id===e.pointerId){wallPress.fired=true;openWall(wall)}},550)};
+  }
+ });
+ svg.addEventListener('pointermove',e=>{
+  if(dimensionDrag?.id===e.pointerId){
+   const d=plan?.dimensions?.find(x=>x.id===dimensionStage?.id),p=pt(e,svg);
+   if(d&&p){d[dimensionDrag.key]={x:p.x,y:p.y};renderScene('planScene',false)}
+   return;
+  }
+  if(pointers.size>1||pinch)return;
+  if(gesture?.id!==e.pointerId)return;
+  const p=(gesture.kind==='draw'||gesture.kind==='pending-draw')?strokePoint(e,gesture):pt(e,svg);if(!p)return;
+  if(gesture.kind==='pan'){const g=gesture,rect=svg.getBoundingClientRect(),v=g.startBox;setViewBox(svg,[v[0]-(e.clientX-g.startClient.x)*v[2]/rect.width,v[1]-(e.clientY-g.startClient.y)*v[3]/rect.height,v[2],v[3]]);return}
+  if(gesture.kind==='overlay-measure'){
+   gesture.end=p;const preview=$('strokePreview');preview.replaceChildren();
+   el('line',{x1:gesture.start.x,y1:gesture.start.y,x2:p.x,y2:p.y,stroke:'#d97706','stroke-width':3,'stroke-dasharray':'7 4'},preview);
+   return;
+  }
+  if(gesture.kind==='pending-draw'){
+   const movement=Math.hypot(e.clientX-gesture.clientStart.x,e.clientY-gesture.clientStart.y);
+   if(movement<19)return;
+   clearPress();gesture.kind='draw';
+  }
+  if(gesture.kind!=='draw')return;
+  const snapped=tool==='line'?snapCorner(p):null;if(tool==='line')gesture.points=[gesture.start,snapped||p];else if(Math.hypot(p.x-gesture.points.at(-1).x,p.y-gesture.points.at(-1).y)>3)gesture.points.push(p);
+  const preview=$('strokePreview');preview.replaceChildren();el('path',{d:linePath(gesture.points),class:'wall',stroke:drawingColors[drawingColor]||drawingColors.blue,'stroke-dasharray':'6 5'},preview);if(tool==='line'){previewSnap(gesture.initialSnap);previewSnap(snapped)}
+ });
+ function end(e){
+  if(dimensionDrag?.id===e.pointerId){dimensionDrag=null;try{if(svg.hasPointerCapture(e.pointerId))svg.releasePointerCapture(e.pointerId)}catch{};return}
+  $('strokePreview').replaceChildren();
+  if(gesture?.kind==='pan'&&gesture.id===e.pointerId){gesture=null;return}
+  if(gesture?.kind==='overlay-measure'&&gesture.id===e.pointerId){
+   const g=gesture;gesture=null;
+   if(e.type==='pointercancel'){renderScene('planScene',false);return}
+   const end=pt(e,svg)||g.end;
+   if(Math.hypot(end.x-g.start.x,end.y-g.start.y)>18){
+    plan.dimensions??=[];const d={id:uid(),a:g.start,b:end};plan.dimensions.push(d);
+    const i=plan.dimensions.length-1;renderScene('planScene',false);beginDimensionStage(i,true);
+   }else $('planHint').textContent='Drag from one end of the wall to the other.';
+   return;
+  }
+  if(wallPress?.id===e.pointerId)clearPress();
+  if(gesture?.kind==='pending-draw'&&gesture.id===e.pointerId){gesture=null;return}
+  if(gesture?.kind!=='draw'||gesture.id!==e.pointerId)return;
+  const g=gesture;gesture=null;
+  zoomed=true;
+  // Re-evaluate snapping at release: the final pointer event may arrive
+  // without a preceding pointermove (especially on touch devices).
+  if(e.type!=='pointercancel'&&tool==='line'&&g.points.length>1){
+   const released=strokePoint(e,g);
+   if(released){const endSnap=snapCorner(released);g.points[g.points.length-1]=endSnap||released}
+  }
+  if(e.type!=='pointercancel'&&g.points.length>1&&Math.hypot(g.points.at(-1).x-g.start.x,g.points.at(-1).y-g.start.y)>5){zoomed=true;const coords=g.points.map(p=>({x:Number(p.x),y:Number(p.y)}));if(coords.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y))){const w={id:uid(),points:coords,color:drawingColor};plan.walls.push(w);refreshAutoArea();savePlanWalls();plan.actionHistory??=[];plan.actionHistory.push({kind:'wall',id:w.id});delete plan.undoSnapshot;touch();promptForIrregularSketch()}else{setStatus('Invalid wall coordinates');alert('Wall was not saved because its coordinates were invalid. Please draw it again.')}}
+  renderScene('planScene',false);
+  if(e.type!=='pointercancel'&&plan)rememberPlanView(svg,false);
+ }
+ svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
+}bindDrawing();
+function nextCamNum(){const nums=new Set(survey.plans.flatMap(p=>p.cameras.map(c=>String(c.num))));let i=1;while(nums.has(String(i)))i++;return i}function activateCamera(type='New'){
+ lastType=type;placing=true;selected=null;
+ $('addCamera').classList.toggle('primary',type==='New');
+ $('addCamera').classList.toggle('placing-existing',type==='Existing');
+ closeDetail();
+ $('surveyHint').textContent='Tap the plan to place '+(type==='Existing'?'an existing':'a new')+' camera';
+}
+$('addCamera').onclick=()=>{if(placing&&lastType==='New'){
+ placing=false;$('addCamera').classList.remove('primary','placing-existing');
+ $('surveyHint').textContent='Tap + Camera to place a camera';
+}else activateCamera('New')};
+let longTimer=null;// Camera-mode area label drag: keep green label movable without entering Edit Plan.
+(function bindSurveyAreaLabelDrag(){
+ const svg=$('surveyCanvas');let drag=null;
+ svg.addEventListener('pointerdown',e=>{
+  const hit=e.target.closest('[data-area-label]');if(!hit||!plan||placing)return;
+  const area=(plan.areas||[]).find(a=>a.id===hit.dataset.areaLabel);if(!area)return;
+  const p=pt(e,svg);if(!p)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  drag={id:e.pointerId,area,dx:(area.pos?.x??500)-p.x,dy:(area.pos?.y??350)-p.y,moved:false};
+  svg.setPointerCapture(e.pointerId);
+ },true);
+ svg.addEventListener('pointermove',e=>{
+  if(!drag||drag.id!==e.pointerId)return;
+  e.preventDefault();e.stopImmediatePropagation();const p=pt(e,svg);if(!p)return;
+  drag.area.pos={x:p.x+drag.dx,y:p.y+drag.dy};drag.moved=true;
+  renderScene('surveyScene',true);
+ },true);
+ function finish(e){if(!drag||drag.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();const moved=drag.moved;drag=null;if(moved)touch()}
+ svg.addEventListener('pointerup',finish,true);svg.addEventListener('pointercancel',finish,true);
+})();
+function bindSurvey(){const svg=$('surveyCanvas');svg.addEventListener('pointerdown',e=>{if(!plan)return;const p=pt(e,svg),handle=e.target.closest('[data-handle]'),pin=e.target.closest('[data-cam]');if(placing){if(pin||handle)return;const num=String(nextCamNum());
+ plan.cameras.push({id:uid(),num,type:lastType,x:p.x,y:p.y,angle:0,notes:''});placing=false;$('addCamera').classList.remove('primary','placing-existing');selected=null;$('surveyHint').textContent='Camera '+num+' placed. Tap to select, long-press for details.';touch();updateSurvey();return}if(e.target.closest('[data-area-label]'))return;if(pin){const c=plan.cameras.find(c=>c.id===pin.dataset.cam);if(!c)return;selected=c.id;gesture={kind:handle?'rotate':'move',id:e.pointerId,c,from:p,orig:{x:c.x,y:c.y,angle:c.angle},moved:false,long:false,transform:$('surveyScene').getScreenCTM()?.inverse()};svg.setPointerCapture(e.pointerId);if(!handle)longTimer=setTimeout(()=>{if(gesture&&!gesture.moved){gesture.long=true;openDetail(c.id)}},550);renderScene('surveyScene',true)}else{selected=null;closeDetail();renderScene('surveyScene',true)}});svg.addEventListener('pointermove',e=>{const g=gesture;if(!g||g.id!==e.pointerId)return;const p=g.transform?(()=>{const q=svg.createSVGPoint();q.x=e.clientX;q.y=e.clientY;const v=q.matrixTransform(g.transform);return {x:v.x,y:v.y}})():pt(e,svg);if(!p)return;if(Math.hypot(p.x-g.from.x,p.y-g.from.y)>10){g.moved=true;clearTimeout(longTimer)}if(g.long)return;if(g.kind==='rotate'){const desired=Math.atan2(p.y-g.c.y,p.x-g.c.x)*180/Math.PI;const delta=((desired-g.c.angle+540)%360)-180;g.c.angle+=Math.max(-5,Math.min(5,delta*.22));}else if(g.moved){g.c.x=g.orig.x+p.x-g.from.x;g.c.y=g.orig.y+p.y-g.from.y}renderScene('surveyScene',true)});function end(e){if(!gesture||gesture.id!==e.pointerId)return;clearTimeout(longTimer);const g=gesture;gesture=null;if(e.type==='pointercancel'){Object.assign(g.c,g.orig)}else if(g.moved&&!g.long)touch();renderScene('surveyScene',true)}svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end)}bindSurvey();
+// Shared pan/pinch on Camera Survey. Camera placement and marker drags retain priority.
+(function bindSurveyNavigation(){
+ const svg=$('surveyCanvas'),touches=new Map();let pan=null,pinchState=null,changed=false;
+ function scenePoint(x,y){const p=svg.createSVGPoint();p.x=x;p.y=y;return p.matrixTransform(svg.getScreenCTM().inverse())}
+ svg.addEventListener('pointerdown',e=>{
+  if(!plan||placing||gesture?.kind==='rotate'||gesture?.kind==='move'||e.target.closest('[data-cam],[data-handle],[data-area-label]'))return;
+  e.preventDefault();touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  try{svg.setPointerCapture(e.pointerId)}catch{}
+  if(touches.size===1){pan={id:e.pointerId,start:{x:e.clientX,y:e.clientY},box:getViewBox(svg)};pinchState=null}
+  else if(touches.size===2){const t=[...touches.values()],mid={x:(t[0].x+t[1].x)/2,y:(t[0].y+t[1].y)/2};pinchState={distance:Math.max(1,Math.hypot(t[0].x-t[1].x,t[0].y-t[1].y)),mid,anchor:scenePoint(mid.x,mid.y),box:getViewBox(svg)};pan=null}
+ },{capture:true});
+ svg.addEventListener('pointermove',e=>{
+  if(!touches.has(e.pointerId))return;
+  touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const r=svg.getBoundingClientRect();
+  if(touches.size===2&&pinchState){
+   const t=[...touches.values()],mid={x:(t[0].x+t[1].x)/2,y:(t[0].y+t[1].y)/2};
+   const distance=Math.max(1,Math.hypot(t[0].x-t[1].x,t[0].y-t[1].y));
+   const b=pinchState.box,f=Math.max(.15,Math.min(8,pinchState.distance/distance)),w=b[2]*f,h=b[3]*f;
+   const scale=Math.min(r.width/w,r.height/h),usedW=w*scale,usedH=h*scale;
+   const fx=(mid.x-r.left-(r.width-usedW)/2)/usedW,fy=(mid.y-r.top-(r.height-usedH)/2)/usedH;
+   setViewBox(svg,[pinchState.anchor.x-fx*w,pinchState.anchor.y-fy*h,w,h]);changed=true;
+  }else if(touches.size===1&&pan&&pan.id===e.pointerId){
+   const b=pan.box,scale=Math.min(r.width/b[2],r.height/b[3]);
+   setViewBox(svg,[b[0]-(e.clientX-pan.start.x)/scale,b[1]-(e.clientY-pan.start.y)/scale,b[2],b[3]]);changed=true;
+  }
+ },{capture:true});
+ function finish(e){if(!touches.has(e.pointerId))return;touches.delete(e.pointerId);if(touches.size<2)pinchState=null;if(touches.size===0){pan=null;if(changed){rememberPlanView(svg);changed=false}}}
+ svg.addEventListener('pointerup',finish,{capture:true});svg.addEventListener('pointercancel',finish,{capture:true});
+})();function openDetail(id){
+ detailId=id;const c=plan?.cameras.find(x=>x.id===id);if(!c)return;
+ $('detailTitle').textContent='Camera '+c.num;$('detailNumber').value=c.num;
+ setDetailCameraType(c.type);$('detailNotes').value=c.notes||'';
+ $('detail').classList.remove('hidden');$('surveyArea').classList.add('fsp-detail-open');
+ const panel=$('detail'),area=$('surveyArea'),areaBox=area.getBoundingClientRect();
+ panel.style.bottom='auto';panel.style.right='auto';
+ const marker=$('surveyScene').getScreenCTM();
+ let markerX=areaBox.width/2,markerY=areaBox.height/2;
+ if(marker){const pt0=$('surveyCanvas').createSVGPoint();pt0.x=c.x;pt0.y=c.y;const screenPoint=pt0.matrixTransform(marker);markerX=screenPoint.x-areaBox.left;markerY=screenPoint.y-areaBox.top}
+ const panelW=panel.offsetWidth,panelH=panel.offsetHeight;
+ let left=markerX<areaBox.width/2?areaBox.width-panelW-12:12;
+ let top=markerY>areaBox.height/2?12:areaBox.height-panelH-12;
+ panel.style.left=Math.max(4,Math.min(areaBox.width-panelW-4,left))+'px';
+ panel.style.top=Math.max(4,Math.min(areaBox.height-panelH-4,top))+'px';
+}
+let detailDragState=null;
+$('detailDrag').addEventListener('pointerdown',e=>{
+ if(e.target.closest('button'))return;
+ e.preventDefault();const box=$('detail').getBoundingClientRect(),area=$('surveyArea').getBoundingClientRect();
+ detailDragState={id:e.pointerId,dx:e.clientX-box.left,dy:e.clientY-box.top,area};
+ $('detailDrag').setPointerCapture(e.pointerId);
+});
+$('detailDrag').addEventListener('pointermove',e=>{
+ const d=detailDragState;if(!d||e.pointerId!==d.id)return;
+ e.preventDefault();const panel=$('detail');
+ panel.style.left=Math.max(4,Math.min(d.area.width-panel.offsetWidth-4,e.clientX-d.area.left-d.dx))+'px';
+ panel.style.top=Math.max(4,Math.min(d.area.height-panel.offsetHeight-4,e.clientY-d.area.top-d.dy))+'px';
+ panel.style.bottom='auto';
+});
+for(const ev of ['pointerup','pointercancel'])$('detailDrag').addEventListener(ev,()=>{detailDragState=null});
+function closeDetail(){
+ detailId=null;$('detail').classList.add('hidden');$('surveyArea').classList.remove('fsp-detail-open');
+}
+function selectedDetailCameraType(){return document.querySelector('#detailType [data-camera-type].primary')?.dataset.cameraType||'New'}
+function setDetailCameraType(type){document.querySelectorAll('#detailType [data-camera-type]').forEach(b=>{const active=b.dataset.cameraType===(type==='Existing'?'Existing':'New');b.classList.toggle('primary',active);b.setAttribute('aria-pressed',String(active));});}
+function changeDetail(){
+ const c=plan?.cameras.find(x=>x.id===detailId);if(!c)return;
+ const n=$('detailNumber').value.trim();
+ if(!/^[0-9]+$/.test(n)){
+  alert('Camera number must contain digits only.');$('detailNumber').value=c.num;return;
+ }
+ const original=String(c.num);
+ const collision=survey.plans.flatMap(p=>p.cameras).find(x=>x.id!==c.id&&String(x.num)===n);
+ if(collision&&n!==original){
+  $('detailNumber').value=original;
+  confirmModal('Swap Camera Numbers','Swap Camera '+original+' and Camera '+n+'?',()=>{
+   const target=survey.plans.flatMap(p=>p.cameras).find(x=>x.id===collision.id);
+   const current=survey.plans.flatMap(p=>p.cameras).find(x=>x.id===c.id);
+   if(!target||!current||String(target.num)!==n||String(current.num)!==original)return;
+   target.num=original;current.num=n;
+   $('detailNumber').value=n;$('detailTitle').textContent='Camera '+n;
+   touch();updateSurvey();
+  });
+  return;
+ }
+ c.num=n;c.type=selectedDetailCameraType();c.notes=$('detailNotes').value;
+ $('detailTitle').textContent='Camera '+c.num;touch();updateSurvey();
+}
+$('detailNumber').onchange=changeDetail;document.querySelectorAll('#detailType [data-camera-type]').forEach(b=>b.onclick=()=>{setDetailCameraType(b.dataset.cameraType);changeDetail();});$('detailNotes').oninput=changeDetail;$('closeDetail').onclick=closeDetail;$('doneDetail').onclick=closeDetail;$('deleteCamera').onclick=()=>{const c=plan.cameras.find(x=>x.id===detailId);if(c)confirmModal('Delete Camera '+c.num,'Remove this camera from the plan?',()=>{plan.cameras=plan.cameras.filter(x=>x.id!==c.id);selected=null;closeDetail();touch();updateSurvey()})};
+$('minTools').onclick=()=>{$('floatTools').classList.add('hidden');$('restoreTools').classList.remove('hidden')};$('restoreTools').onclick=()=>{$('floatTools').classList.remove('hidden');$('restoreTools').classList.add('hidden')};let moveTool=null;$('dragTools').addEventListener('pointerdown',e=>{const box=$('floatTools').getBoundingClientRect(),parent=$('surveyArea').getBoundingClientRect();moveTool={id:e.pointerId,dx:e.clientX-box.left,dy:e.clientY-box.top,parent};e.target.setPointerCapture(e.pointerId)});$('dragTools').addEventListener('pointermove',e=>{if(!moveTool||moveTool.id!==e.pointerId)return;const box=$('floatTools');box.style.left=Math.max(0,Math.min(moveTool.parent.width-box.offsetWidth,e.clientX-moveTool.parent.left-moveTool.dx))+'px';box.style.top=Math.max(0,Math.min(moveTool.parent.height-box.offsetHeight,e.clientY-moveTool.parent.top-moveTool.dy))+'px';box.style.right='auto';box.style.bottom='auto';box.style.height='max-content'});$('dragTools').addEventListener('pointerup',()=>moveTool=null);$('surveyMore').onclick=()=>selectModal('More',[{label:'Cable Routes (V17.111)',action:()=>window.fspCableEnter?window.fspCableEnter():alert('Cable init error: '+(window.fspCableError||'unknown'))},{label:'Add MDF/IDF',action:()=>window.fspRackAdd?window.fspRackAdd():alert('Equipment init error: '+(window.fspCableError||'unknown'))},{label:'Show / Hide Cable Routes',action:()=>window.fspCableToggle?window.fspCableToggle():alert('Cable init error: '+(window.fspCableError||'unknown'))},{label:'Existing Camera',action:()=>activateCamera('Existing')},{label:'Take Site Photo',action:()=>$('sitePhoto').click()},{label:'Floor / Area Notes',action:()=>{if(!plan)return;promptModal('Notes — '+plan.name,'<textarea id="floorNotes" rows="7" placeholder="Notes for this floor or area…">'+esc(plan.notes||'')+'</textarea>',()=>{plan.notes=$('floorNotes').value;touch()},'Done')}},{label:'Edit Plan',action:()=>openSharedView('plans')},{label:'Export Backup',action:exportData}]);$('takePhoto').onclick=()=>$('sitePhoto').click();$('sitePhoto').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const img=await imageData(f);survey.sitePhotos.push({id:uid(),image:img,date:Date.now()});touch();alert('Site photo saved with this survey ('+survey.sitePhotos.length+' total).')}catch(err){alert(err.message)}};
+async function imageData(file){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=()=>rej(Error('Unable to read image'));r.onload=()=>{const img=new Image();img.onerror=()=>rej(Error('Unsupported image'));img.onload=()=>{const scale=Math.min(1,1700/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);const x=c.getContext('2d');x.fillStyle='white';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.8))};img.src=r.result};r.readAsDataURL(file)})}async function pdfData(file){if(!window.pdfjsLib){const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';await new Promise((res,rej)=>{s.onload=res;s.onerror=()=>rej(Error('PDF import needs internet on first use. Image/photo import works offline.'));document.head.append(s)})}const lib=window.pdfjsLib;lib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;const pg=await doc.getPage(1),v=pg.getViewport({scale:1}),view=pg.getViewport({scale:Math.min(2,1700/Math.max(v.width,v.height))}),c=document.createElement('canvas');c.width=view.width;c.height=view.height;await pg.render({canvasContext:c.getContext('2d'),viewport:view}).promise;return c.toDataURL('image/jpeg',.8)}async function prepareCrop(dataUrl){return new Promise((resolve,reject)=>{
+ $('cropTitle').textContent='Preview & Crop Floor Plan';$('cropInstructions').textContent='Drag a box around the area to keep, or confirm the whole plan.';$('cropApply').textContent='Confirm Floor Plan ✓';const back=$('cropBack'),cv=$('cropCanvas'),ctx=cv.getContext('2d'),img=new Image();let rotation=0,sel=null,down=null,base=null,preview=null;
+ const redraw=()=>{if(!base)return;if(preview){cv.width=preview.width;cv.height=preview.height;ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(preview,0,0);return}const maxW=1200,maxH=800,scale=Math.min(maxW/base.width,maxH/base.height,1);cv.width=Math.round(base.width*scale);cv.height=Math.round(base.height*scale);ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(base,0,0,cv.width,cv.height);if(sel){ctx.fillStyle='#0005';ctx.fillRect(0,0,cv.width,cv.height);ctx.clearRect(sel.x,sel.y,sel.w,sel.h);ctx.drawImage(base,sel.x/scale,sel.y/scale,sel.w/scale,sel.h/scale,sel.x,sel.y,sel.w,sel.h);ctx.strokeStyle='#f59e0b';ctx.lineWidth=3;ctx.setLineDash([8,5]);ctx.strokeRect(sel.x,sel.y,sel.w,sel.h);ctx.setLineDash([])}};
+ const rebuild=()=>{base=document.createElement('canvas');base.width=rotation%180?img.height:img.width;base.height=rotation%180?img.width:img.height;const x=base.getContext('2d');x.translate(base.width/2,base.height/2);x.rotate(rotation*Math.PI/180);x.drawImage(img,-img.width/2,-img.height/2);sel=null;redraw()};
+ const pos=e=>{const r=cv.getBoundingClientRect(),scale=Math.min(r.width/cv.width,r.height/cv.height),w=cv.width*scale,h=cv.height*scale,left=r.left+(r.width-w)/2,top=r.top+(r.height-h)/2;return{x:Math.max(0,Math.min(cv.width,(e.clientX-left)/scale)),y:Math.max(0,Math.min(cv.height,(e.clientY-top)/scale))}};
+ const pd=e=>{if(preview)return;e.preventDefault();down=pos(e);cv.setPointerCapture(e.pointerId)};const pm=e=>{if(!down||preview)return;e.preventDefault();const p=pos(e);sel={x:Math.min(down.x,p.x),y:Math.min(down.y,p.y),w:Math.abs(p.x-down.x),h:Math.abs(p.y-down.y)};redraw()};const pu=()=>{if(preview)return;down=null;if(sel&&(sel.w<15||sel.h<15))sel=null;redraw()};
+ cv.addEventListener('pointerdown',pd);cv.addEventListener('pointermove',pm);cv.addEventListener('pointerup',pu);
+ function cleanup(){back.classList.add('hidden');cv.removeEventListener('pointerdown',pd);cv.removeEventListener('pointermove',pm);cv.removeEventListener('pointerup',pu)}
+ function outputCrop(crop){const output=document.createElement('canvas');let x=0,y=0,w=base.width,h=base.height;if(crop&&sel){const sx=base.width/cv.width,sy=base.height/cv.height;x=Math.max(0,Math.round(sel.x*sx));y=Math.max(0,Math.round(sel.y*sy));w=Math.min(base.width-x,Math.max(1,Math.round(sel.w*sx)));h=Math.min(base.height-y,Math.max(1,Math.round(sel.h*sy)))}output.width=w;output.height=h;output.getContext('2d').drawImage(base,x,y,w,h,0,0,w,h);return output}
+ function done(crop){const output=preview||outputCrop(crop);cleanup();resolve(output.toDataURL('image/jpeg',.88))}
+ function clearPreview(){preview=null;$('cropTitle').textContent='Preview & Crop Floor Plan';$('cropInstructions').textContent='Drag a box around the area to keep, or confirm the whole plan.';$('cropApply').textContent='Confirm Floor Plan ✓';redraw()}
+ $('cropRotate').onclick=()=>{rotation=(rotation+90)%360;rebuild()};$('cropReset').onclick=()=>{sel=null;clearPreview()};$('cropCancel').onclick=()=>{cleanup();resolve(null)};$('cropApply').onclick=()=>done(!!sel);
+ img.onload=()=>{back.classList.remove('hidden');rebuild()};img.onerror=()=>reject(Error('Unable to preview plan'));img.src=dataUrl;
+})}
+async function onPlanFile(e){const f=e.target.files[0];e.target.value='';if(!f)return;try{setStatus('Importing…');const raw=f.type==='application/pdf'||/\.pdf$/i.test(f.name)?await pdfData(f):await imageData(f);const image=await prepareCrop(raw);if(!image){setStatus('Import canceled');return}if(uploadMode==='replace')replacePlan(image);else makePlan(image);if(plan){const tmp=new Image();tmp.src=image;await tmp.decode();plan.imageWidth=tmp.naturalWidth;plan.imageHeight=tmp.naturalHeight;plan.confirmed=true;touch()}editing=false;drawNewPlanId=null;advancedDrawing=false;tool='pan';zoomed=false;updatePlans();fitPlanView();await saveQueue;if(revision===savedRevision)setStatus('Saved ✓')}catch(err){setStatus('Import failed');alert(err.message)}}
+$('planFile').onchange=onPlanFile;$('planPhoto').onchange=onPlanFile;
+function exportData(){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='FieldSurveyPro-V17-Backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}$('exportBackup').onclick=exportData;$('importBackup').onclick=()=>$('backupFile').click();$('backupFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.surveys))throw Error('Not a valid backup');confirmModal('Import Backup','Replace all V17 test surveys with this backup?',()=>{data=d;current();save();renderList()})}catch(err){alert(err.message)}};window.addEventListener('pagehide',()=>{try{localStorage.setItem(MIRROR_KEY,JSON.stringify(data));wallRecoverySnapshot()}catch(e){console.warn('Final snapshot failed',e)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){try{localStorage.setItem(MIRROR_KEY,JSON.stringify(data));wallRecoverySnapshot()}catch(e){console.warn('Background snapshot failed',e)}}});window.addEventListener('beforeunload',e=>{if(revision!==savedRevision){e.preventDefault();e.returnValue=''}});// V17.53 storage diagnostics. Read-only: does not modify survey data.
+let diagnosticStartup=null;
+function diagnosticCounts(snapshot,id){
+ const sv=snapshot?.surveys?.find(x=>x.id===id);
+ return sv?{survey:sv.name,plans:(sv.plans||[]).map(p=>({name:p.name,walls:p.walls?.length||0,dimensions:p.dimensions?.length||0}))}:null;
+}
+async function showStorageDiagnostics(){
+ const id=data.active||data.surveys?.[0]?.id;
+ const sv=data.surveys?.find(x=>x.id===id);
+ let mirror=null,legacy=null,idbCopy=null,recovery=null,independent=null,errors=[];
+ try{mirror=parseStored(localStorage.getItem(MIRROR_KEY))}catch(e){errors.push('Mirror: '+e.message)}
+ try{legacy=parseStored(localStorage.getItem(KEY))}catch(e){errors.push('Legacy: '+e.message)}
+ try{recovery=JSON.parse(localStorage.getItem(WALL_RECOVERY_KEY)||'{}')}catch(e){errors.push('Recovery: '+e.message)}
+ if(db)try{idbCopy=parseStored(await new Promise((resolve,reject)=>{const req=db.transaction('state','readonly').objectStore('state').get(KEY);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)}))}catch(e){errors.push('IndexedDB: '+e.message)}
+ if(sv)try{independent=(sv.plans||[]).map(p=>{const v=JSON.parse(localStorage.getItem('fsp-test-isolated-blue-walls-v1751-'+sv.id+'-'+p.id)||'null');return {plan:p.name,walls:v?.walls?.length||0}})}catch(e){errors.push('Separate backup: '+e.message)}
+ const report={
+  version:'V17.59',surveyId:id||'none',time:new Date().toLocaleString(),geometry:(sv?.plans||[]).map(p=>({plan:p.name,bounds:savedWallBounds(p),firstWall:p.walls?.[0]?.points||null})),viewport:{plan:$('planCanvas').getAttribute('viewBox'),survey:$('surveyCanvas').getAttribute('viewBox'),planPaths:$('planScene').querySelectorAll('path.wall').length,surveyPaths:$('surveyScene').querySelectorAll('path.wall').length},
+  current:diagnosticCounts(data,id),
+  indexedDB:diagnosticCounts(idbCopy,id),
+  mirror:diagnosticCounts(mirror,id),
+  legacy:diagnosticCounts(legacy,id),
+  recovery:(sv?.plans||[]).map(p=>({plan:p.name,walls:recovery?.[sv.id+'|'+p.id]?.walls?.length||0})),
+  separateBackup:independent,
+  startup:diagnosticStartup,
+  errors
+ };
+ const overlay=document.createElement('div');overlay.style.cssText='position:fixed;inset:0;background:#0009;z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:12px';
+ const panel=document.createElement('div');panel.style.cssText='background:white;color:#152f46;border-radius:12px;padding:16px;max-width:650px;width:100%;max-height:90vh;overflow:auto;font:14px system-ui';
+ const title=document.createElement('h3');title.textContent='V17.65 — Wall Geometry Test';
+ const pre=document.createElement('pre');pre.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;background:#f2f5f8;padding:10px;border-radius:6px;font:12px monospace';pre.textContent=JSON.stringify(report,null,2);
+ const copy=document.createElement('button');copy.textContent='Copy Results';copy.style.cssText='padding:10px;margin-right:10px';copy.onclick=async()=>{try{await navigator.clipboard.writeText(pre.textContent);copy.textContent='Copied ✓'}catch(e){window.prompt('Copy this report',pre.textContent)}};
+ const close=document.createElement('button');close.textContent='Close';close.style.cssText='padding:10px';close.onclick=()=>overlay.remove();
+ panel.append(title,pre,copy,close);overlay.append(panel);document.body.append(overlay);
+}
+// V17.61: Storage Test control removed. showStorageDiagnostics() remains for future troubleshooting.
+
+try{
+/* V17.111 isolated cable routing prototype. Plan-local data, no change to measurement logic. */
+(function(){
+let cableMode=false, cableVisible=false, placingRack=false, drawing=null, candidate=null;
+const cableNS='http://www.w3.org/2000/svg', svg=$('surveyCanvas');
+const style=document.createElement('style');style.textContent=`
+#fspCableBar{position:absolute;left:8px;bottom:10px;z-index:12;display:flex;flex-wrap:wrap;gap:5px;padding:7px;background:#153754ee;border:1px solid #6086a5;border-radius:12px;max-width:calc(100% - 20px)}
+#fspCableBar button{font-size:12px;min-height:37px;padding:6px 9px}
+#surveyArea.fsp-cabling #surveyCanvas{touch-action:none}
+`;document.head.appendChild(style);
+const bar=document.createElement('div');bar.id='fspCableBar';bar.className='hidden';bar.innerHTML='<button id="fspRack">+ MDF/IDF</button><button id="fspUndo">Undo Route</button><button id="fspCableSummary">Summary</button><button id="fspCableHelp" title="Cable routing instructions">? Help</button><button id="fspCableDone" class="primary">Done</button>';$('surveyArea').appendChild(bar);
+function racks(){return plan?(plan.fspRacks ||= []):[]}
+function moveRackAndRoutes(r,p){
+ const dx=p.x-r.x,dy=p.y-r.y;
+ if(!dx&&!dy)return;
+ // Shift the common destination point and any other points exactly at the former rack location.
+ // Other bends and camera-side endpoints remain unchanged.
+ for(const route of routes()){
+  if(route.rackId!==r.id||!route.points?.length)continue;
+  for(const point of route.points){
+   if(Math.hypot(point.x-r.x,point.y-r.y)<1.5){point.x+=dx;point.y+=dy}
+  }
+  // Always anchor the end of each home run at its selected distribution frame.
+  const last=route.points[route.points.length-1];
+  last.x=p.x;last.y=p.y;
+ }
+ r.x=p.x;r.y=p.y;
+}
+function rackName(r){return r.type==='MDF'?'MDF':'IDF '+(r.ordinal||1)}
+function syncRackNames(){let idf=0;for(const r of racks()){if(r.type==='IDF')r.ordinal=++idf;r.name=rackName(r)}}
+function routes(){return plan?(plan.fspRoutes ||= []):[]}
+function point(e){return pt(e,svg)}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function nearSegment(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1)));const q={x:a.x+t*dx,y:a.y+t*dy};return {d:dist(p,q),q,t}}
+function appendPath(root,points,color,width,dash){if(points.length<2)return;const p=document.createElementNS(cableNS,'path');p.setAttribute('d',linePath(points));p.setAttribute('fill','none');p.setAttribute('stroke',color);p.setAttribute('stroke-width',width);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');if(dash)p.setAttribute('stroke-dasharray',dash);p.setAttribute('pointer-events','none');root.appendChild(p)}
+
+/* V17.112 cable footage. Dimensions are plan SVG units, not screen pixels.
+   Never infer footage without a recorded dimension. */
+/* The sketch is not necessarily drawn to scale. Calibrate horizontal and
+   vertical axes separately from entered dimensions rather than treating
+   differently proportioned sketch sides as contradictory measurements. */
+function cableScale(){
+ const axes={x:[],y:[]};
+ const add=(a,b,m)=>{
+  if(!a||!b||!m)return;
+  const ft=Number(m.feet||0)+Number(m.inches||0)/12,dx=b.x-a.x,dy=b.y-a.y;
+  const length=Math.hypot(dx,dy);
+  if(length<=5||ft<=0||!Number.isFinite(ft))return;
+  const axis=Math.abs(dx)>=Math.abs(dy)?'x':'y';
+  axes[axis].push({ratio:ft/length,estimated:!!(m.estimated||m.method==='Estimated')});
+ };
+ for(const d of plan.dimensions||[])add(d.a,d.b,d.measure);
+ for(const w of plan.walls||[])if(w.points?.length)add(w.points[0],w.points.at(-1),w.measure);
+ if(!axes.x.length||!axes.y.length)return null;
+ const median=items=>{const arr=items.map(x=>x.ratio).sort((a,b)=>a-b);return arr[Math.floor(arr.length/2)]};
+ const x=median(axes.x),y=median(axes.y);
+ const conflict=axes.x.some(v=>Math.abs(v.ratio/x-1)>.2)||axes.y.some(v=>Math.abs(v.ratio/y-1)>.2);
+ return {x,y,conflict,estimated:[...axes.x,...axes.y].some(v=>v.estimated)};
+}
+function routeHorizontal(r,scale){
+ if(!scale||scale.conflict)return null;
+ let feet=0;
+ for(let i=1;i<r.points.length;i++){
+  const a=r.points[i-1],b=r.points[i];
+  feet+=Math.hypot((b.x-a.x)*scale.x,(b.y-a.y)*scale.y);
+ }
+ return feet;
+}
+function routeTotals(r){
+ const scale=cableScale(),manual=Number(r.fspEstimateFt),hasManual=r.fspEstimateFt!==undefined&&r.fspEstimateFt!==null&&r.fspEstimateFt!=='';
+ const horizontal=hasManual&&Number.isFinite(manual)&&manual>=0?manual:scale&&!scale.conflict?routeHorizontal(r,scale):null;
+ const vertical=Math.max(0,Number(r.fspVerticalFt)||0),start=Math.max(0,Number(r.fspSlackStartFt??10)||0),end=Math.max(0,Number(r.fspSlackEndFt??10)||0);
+ return {horizontal,vertical,start,end,total:horizontal===null?null:horizontal+vertical+start+end,status:horizontal===null?'Unmeasured':hasManual||scale?.estimated?'Estimated':'Calculated',conflict:!!scale?.conflict};
+}
+function routeName(r){const c=plan.cameras.find(c=>c.id===r.cameraId);return 'C'+(c?.num??r.cameraNum)+' — '+(c?.notes?.trim()||'Camera '+(c?.num??r.cameraNum))}
+function footage(n){return Number(n.toFixed(1))+' ft'}
+function cableDetail(r){
+ const t=routeTotals(r),scale=cableScale();
+ const calculated=scale&&!scale.conflict?footage(routeHorizontal(r,scale)):'Not available';
+ const html='<p><strong>'+esc(routeName(r))+'</strong></p><p class="muted">Floor-plan horizontal calculation: '+calculated+'</p>'+
+ (scale?.conflict?'<p style="color:#b45309">Recorded plan measurements disagree. Enter a manual estimate or correct the plan measurements.</p>':'')+
+ '<label class="muted">Horizontal cable run estimate (feet, optional override)</label><input id="fspEstimateFt" type="number" min="0" step="0.1" placeholder="Leave blank to use measured plan" value="'+esc(r.fspEstimateFt??'')+'">'+
+ '<label class="muted">Vertical runs (feet)</label><input id="fspVerticalFt" type="number" min="0" step="0.1" value="'+esc(r.fspVerticalFt??0)+'">'+
+ '<label class="muted">Slack at camera (feet)</label><input id="fspSlackStartFt" type="number" min="0" step="0.1" value="'+esc(r.fspSlackStartFt??10)+'">'+
+ '<label class="muted">Slack at MDF/IDF (feet)</label><input id="fspSlackEndFt" type="number" min="0" step="0.1" value="'+esc(r.fspSlackEndFt??10)+'">'+
+ '<p><strong>Current total: '+(t.total===null?'Not measured':footage(t.total)+' ('+t.status+')')+'</strong></p>';
+ promptModal('Cable length — '+esc(routeName(r)),html,()=>{
+  const ids=['fspEstimateFt','fspVerticalFt','fspSlackStartFt','fspSlackEndFt'],values=ids.map(id=>$(id).value.trim());
+  if(values.some((v,i)=>v!==''&&(!Number.isFinite(Number(v))||Number(v)<0))){alert('Enter a valid nonnegative cable length.');return}
+  r.fspEstimateFt=values[0]===''?null:Number(values[0]);
+  r.fspVerticalFt=values[1]===''?0:Number(values[1]);
+  r.fspSlackStartFt=values[2]===''?10:Number(values[2]);
+  r.fspSlackEndFt=values[3]===''?10:Number(values[3]);
+  touch();refresh();
+ },'Save');
+}
+function cableSummary(){
+ if(!plan)return;
+ const rs=routes(),items=rs.map(r=>({r,t:routeTotals(r)})),known=items.filter(x=>x.t.total!==null);
+ const total=known.reduce((sum,x)=>sum+x.t.total,0),unknown=items.length-known.length;
+ const html='<div class="menu">'+items.map((x,i)=>'<button data-fsp-length="'+i+'">'+esc(routeName(x.r))+' — '+(x.t.total===null?'Not measured':footage(x.t.total)+' ('+x.t.status+')')+'</button>').join('')+'</div>'+
+ '<p><strong>Total known cable: '+footage(total)+'</strong></p>'+
+ (unknown?'<p class="muted">'+unknown+' cable(s) without lengths are excluded from total.</p>':'')+
+ '<p class="muted">Totals include vertical footage and 10 ft slack at each end by default. Shared pathways count once per cable.</p>';
+ promptModal('Cable lengths',html,()=>{},'Done');
+ $('modalBody').querySelectorAll('[data-fsp-length]').forEach(b=>b.onclick=()=>{const r=items[Number(b.dataset.fspLength)]?.r;if(r){closeModal();cableDetail(r)}});
+}
+
+
+const CABLE_HELP_KEY='fsp-cable-help-dismissed-v1';
+function cableHelp(){
+ promptModal('How to Use Cable Routes',
+ '<p><strong>1.</strong> Draw a route from a camera to the MDF/IDF.</p>'+
+ '<p><strong>2.</strong> The cable footage appears automatically when the floor plan has measurements.</p>'+
+ '<p><strong>3.</strong> Tap a footage label to adjust length, vertical runs or slack.</p>'+
+ '<p><strong>4.</strong> Tap a shared-pathway label (e.g. 10 cables) to select an individual cable.</p>'+
+ '<p class="muted">You can reopen these instructions with ? Help.</p>',
+ ()=>{try{localStorage.setItem(CABLE_HELP_KEY,'1')}catch(e){}},'Got it');
+ // Closing via Cancel or X also dismisses the first-time hint.
+ const cancel=$('modalCancel');
+ const previous=cancel.onclick;
+ cancel.onclick=()=>{try{localStorage.setItem(CABLE_HELP_KEY,'1')}catch(e){};cancel.onclick=previous;closeModal()};
+}
+$('fspCableHelp').onclick=cableHelp;
+$('fspCableSummary').onclick=cableSummary;
+function sharedCableList(ids){
+ const items=ids.map(id=>routes().find(r=>r.cameraId===id)).filter(Boolean)
+ .sort((a,b)=>Number(plan.cameras.find(c=>c.id===a.cameraId)?.num||0)-Number(plan.cameras.find(c=>c.id===b.cameraId)?.num||0));
+ const html='<div class="menu">'+items.map((r,i)=>{const t=routeTotals(r);return '<button data-shared-cable="'+i+'">'+esc(routeName(r))+' — '+(t.total===null?'Not measured':footage(t.total)+' ('+t.status+')')+'</button>'}).join('')+'</div><p class="muted">Tap a camera cable to adjust its length.</p>';
+ promptModal('Shared pathway — '+items.length+' cables',html,()=>{},'Close');
+ $('modalBody').querySelectorAll('[data-shared-cable]').forEach(b=>b.onclick=()=>{const r=items[Number(b.dataset.sharedCable)];if(r){closeModal();cableDetail(r)}});
+}
+
+function drawExtras(root,isSurvey){
+ if(!isSurvey||!plan)return;
+ // Keep each saved cable home-run start anchored to its camera after camera drags.
+ for(const route of routes()){
+  const cam=plan.cameras.find(c=>c.id===route.cameraId);
+  if(cam&&route.points?.length){route.points[0].x=cam.x;route.points[0].y=cam.y}
+ }
+ const routesNow=routes(),show=cableMode||cableVisible;
+ syncRackNames();
+ if(show){
+  for(const r of routesNow)appendPath(root,r.points,'#0d9488',3.5);
+  // Detect shared portions geometrically, even if routes split at different bend points.
+  // A cable may join the middle of another cable's long segment.
+  const segments=[];
+  for(const r of routesNow)for(let i=0;i<r.points.length-1;i++){
+   const a=r.points[i],b=r.points[i+1],length=dist(a,b);
+   if(length>5)segments.push({a,b,length,cameraId:r.cameraId});
+  }
+  const candidates=[];
+  for(const seg of segments){
+   const ids=new Set([seg.cameraId]);
+   const mid={x:(seg.a.x+seg.b.x)/2,y:(seg.a.y+seg.b.y)/2};
+   for(const other of segments){
+    if(other.cameraId===seg.cameraId)continue;
+    const hit=nearSegment(mid,other.a,other.b);
+    const vx=seg.b.x-seg.a.x,vy=seg.b.y-seg.a.y;
+    const wx=other.b.x-other.a.x,wy=other.b.y-other.a.y;
+    const parallel=Math.abs((vx*wx+vy*wy)/(seg.length*other.length));
+    if(hit.d<6&&parallel>.985)ids.add(other.cameraId);
+   }
+   if(ids.size>1)candidates.push({x:mid.x,y:mid.y,cameras:ids,length:seg.length});
+  }
+  // One count badge per connected shared section, preferring the longest segment.
+  candidates.sort((a,b)=>b.length-a.length);
+  const clusters=[];
+  for(const item of candidates){
+   const matching=clusters.find(c=>[...item.cameras].sort().join('|')===[...c.cameras].sort().join('|'));
+   if(matching){for(const id of item.cameras)matching.cameras.add(id)}
+   else clusters.push({x:item.x,y:item.y,cameras:new Set(item.cameras)});
+  }
+  for(const cluster of clusters){
+   const g=document.createElementNS(cableNS,'g');
+   g.setAttribute('data-fsp-shared',Array.from(cluster.cameras).join(','));
+   g.setAttribute('style','cursor:pointer');
+   const count=cluster.cameras.size,label=count+' cables',w=Math.max(65,label.length*8+20);
+   const rect=document.createElementNS(cableNS,'rect');
+   for(const [k,v] of Object.entries({x:cluster.x-w/2,y:cluster.y-24,width:w,height:27,rx:8,fill:'#fff',stroke:'#0d9488','stroke-width':2}))rect.setAttribute(k,v);
+   g.appendChild(rect);
+   const text=document.createElementNS(cableNS,'text');
+   for(const [k,v] of Object.entries({x:cluster.x,y:cluster.y-6,'text-anchor':'middle','font-size':13,'font-weight':'bold',fill:'#075f55','pointer-events':'none'}))text.setAttribute(k,v);
+   text.textContent=label;g.appendChild(text);root.appendChild(g);
+  }
+  // Show an editable length badge beside each camera's unique route start.
+  // Shared portions retain only their cable-count badge.
+  for(const r of routesNow){
+   if(!r.points?.length)continue;
+   const p=r.points[0],t=routeTotals(r),label=t.total===null?'— ft':(t.status==='Estimated'?'~':'')+footage(t.total);
+   const g=document.createElementNS(cableNS,'g');
+   g.setAttribute('data-fsp-length',r.id);
+   g.setAttribute('style','cursor:pointer');
+   const w=Math.max(66,label.length*8+20),x=p.x+25,y=p.y+20;
+   const rect=document.createElementNS(cableNS,'rect');
+   for(const [k,v] of Object.entries({x,y,width:w,height:27,rx:8,fill:'#fff',stroke:'#0d9488','stroke-width':2}))rect.setAttribute(k,v);
+   g.appendChild(rect);
+   const text=document.createElementNS(cableNS,'text');
+   for(const [k,v] of Object.entries({x:x+w/2,y:y+18,'text-anchor':'middle','font-size':13,'font-weight':'bold',fill:'#075f55','pointer-events':'none'}))text.setAttribute(k,v);
+   text.textContent=label;g.appendChild(text);root.appendChild(g);
+  }
+  for(const r of routesNow){const p=r.points[0],q=document.createElementNS(cableNS,'text');q.setAttribute('x',p.x+12);q.setAttribute('y',p.y-13);q.setAttribute('font-size','14');q.setAttribute('fill','#087f70');q.setAttribute('stroke','white');q.setAttribute('stroke-width','3');q.setAttribute('paint-order','stroke');q.setAttribute('pointer-events','none');q.textContent='C'+(plan.cameras.find(c=>c.id===r.cameraId)?.num??r.cameraNum);root.appendChild(q)}
+ }
+ for(const r of racks()){
+  const g=document.createElementNS(cableNS,'g');g.setAttribute('data-fsp-rack',r.id);
+  const rect=document.createElementNS(cableNS,'rect');for(const [k,v] of Object.entries({x:r.x-20,y:r.y-18,width:40,height:36,rx:5,fill:r.type==='MDF'?'#1689ed':'#f59e0b',stroke:'#fff','stroke-width':4}))rect.setAttribute(k,v);g.appendChild(rect);
+  const t=document.createElementNS(cableNS,'text');for(const [k,v] of Object.entries({x:r.x,y:r.y+4,'text-anchor':'middle','font-size':r.type==='MDF'?13:11,fill:r.type==='MDF'?'#fff':'#172033','font-weight':'bold','pointer-events':'none'}))t.setAttribute(k,v);t.textContent=rackName(r);g.appendChild(t);root.appendChild(g)
+ }
+ if(drawing)appendPath(root,drawing.points,'#eab308',4,'7 4');
+}
+const baseRender=renderScene;
+renderScene=function(target,isSurvey){baseRender(target,isSurvey);drawExtras($(target),isSurvey)};
+function refresh(){if(screen==='survey')renderScene('surveyScene',true)}
+function menu(){
+ selectModal('More',[{label:'Existing Camera',action:()=>activateCamera('Existing')},{label:'Cable Routes',action:()=>enter()},{label:'Cable Lengths',action:()=>cableSummary()},{label:'Add MDF/IDF',action:()=>chooseRack()},{label:cableVisible?'Hide Cable Routes':'Show Cable Routes',action:()=>{cableVisible=!cableVisible;refresh()}},{label:'Take Site Photo',action:()=>$('sitePhoto').click()},{label:'Floor / Area Notes',action:()=>{if(!plan)return;promptModal('Notes — '+plan.name,'<textarea id="floorNotes" rows="7">'+esc(plan.notes||'')+'</textarea>',()=>{plan.notes=$('floorNotes').value;touch()},'Done')}},{label:'Edit Plan',action:()=>openSharedView('plans')},{label:'Export Backup',action:exportData}])
+}
+window.fspCableEnter=enter;window.fspRackAdd=chooseRack;window.fspCableToggle=()=>{cableVisible=!cableVisible;refresh()};$('surveyMore').onclick=menu;
+function enter(){if(!plan)return;cableMode=true;placingRack=false;placing=false;selected=null;closeDetail();$('surveyArea').classList.add('fsp-cabling');bar.classList.remove('hidden');$('floatTools').classList.add('hidden');$('surveyHint').textContent='Draw from a camera to its MDF/IDF, or touch an existing route to connect';refresh();try{if(localStorage.getItem(CABLE_HELP_KEY)!=='1')cableHelp()}catch(e){cableHelp()}}
+function leave(){cableMode=false;placingRack=false;drawing=null;candidate=null;cableVisible=false;$('surveyArea').classList.remove('fsp-cabling');bar.classList.add('hidden');$('floatTools').classList.remove('hidden');$('surveyHint').textContent='Tap + Camera to place a camera';refresh()}
+$('fspCableDone').onclick=leave;
+$('fspRack').onclick=chooseRack;
+$('fspUndo').onclick=()=>{if(drawing){drawing=null;refresh();return}if(!routes().length)return;confirmModal('Undo cable route','Remove the last cable route?',()=>{routes().pop();touch();refresh()})};
+function chooseRack(){if(!plan)return;selectModal('Add equipment marker',[{label:'MDF',action:()=>startRack('MDF')},{label:'IDF',action:()=>startRack('IDF')}])}
+function startRack(type){if(screen!=='survey')show('survey');placingRack=type;placing=false;selected=null;closeDetail();$('surveyHint').textContent='Tap floor plan to place '+type}
+function straighten(points){if(points.length<3)return points;const out=[points[0]];let anchor=0;for(let i=2;i<points.length;i++){const a=points[anchor],b=points[i],mid=points[i-1],d=nearSegment(mid,a,b).d;if(d>8){out.push(mid);anchor=i-1}}out.push(points.at(-1));return out.filter((p,i)=>!i||dist(p,out[i-1]||p)>0.5)}
+function closestRack(p){return racks().map(r=>({r,d:dist(p,r)})).sort((a,b)=>a.d-b.d)[0]}
+function closestRoute(p,fromRack){let best=null;for(const r of routes()){if(r.rackId!==fromRack)continue;for(let i=0;i<r.points.length-1;i++){const hit=nearSegment(p,r.points[i],r.points[i+1]);if(!best||hit.d<best.d)best={...hit,route:r,index:i}}}return best}
+function complete(path,rack){const c=plan.cameras.find(c=>c.id===drawing.camId);if(!c)return;const record={id:uid(),cameraId:c.id,cameraNum:c.num,rackId:rack.id,points:path};const old=routes().findIndex(r=>r.cameraId===c.id);if(old>=0)routes().splice(old,1);routes().push(record);drawing=null;touch();refresh();$('surveyHint').textContent='Cable C'+c.num+' saved to '+rack.name}
+function finalize(){
+ if(!drawing)return;const path=straighten(drawing.points);if(path.length<2){drawing=null;refresh();return}
+ const near=closestRack(path.at(-1));
+ if(near&&near.d<45){path.push({x:near.r.x,y:near.r.y});complete(path,near.r);return}
+ const candidates=racks().map(r=>({label:r.name,action:()=>{const hit=closestRoute(path.at(-1),r.id);if(hit&&hit.d<35){candidate={path,rack:r,hit};promptModal('Connect to shared pathway','<p>Use the existing cable pathway to '+esc(r.name)+'?</p>',()=>{const x=candidate;if(!x)return;complete([...x.path.slice(0,-1),x.hit.q,...x.hit.route.points.slice(x.hit.index+1)],x.rack);candidate=null},'Connect')}else{alert('Finish your line at '+r.name+', or near an existing route to '+r.name+'.')}}}));
+ if(!candidates.length){alert('Place an MDF/IDF marker first.');drawing=null;refresh();return}
+ selectModal('Select cable destination',candidates)
+}
+// Rack drag capture on parent: runs before camera/plan handlers bound on SVG.
+// Cable count and footage badges open directly from the floor plan.
+$('surveyArea').addEventListener('pointerdown',e=>{
+ const count=e.target.closest('[data-fsp-shared]'),length=e.target.closest('[data-fsp-length]');
+ if(!plan||(!count&&!length))return;
+ e.preventDefault();e.stopPropagation();
+ if(count)sharedCableList(count.getAttribute('data-fsp-shared').split(','));
+ else{const r=routes().find(r=>r.id===length.getAttribute('data-fsp-length'));if(r)cableDetail(r)}
+},true);
+let rackMove=null;
+const rackSurface=$('surveyArea');
+rackSurface.addEventListener('pointerdown',e=>{
+ const hit=e.target.closest('[data-fsp-rack]');
+ if(!hit||!plan||placingRack)return;
+ const r=racks().find(x=>x.id===hit.dataset.fspRack);
+ if(!r)return;
+ e.preventDefault();e.stopPropagation();
+ rackMove={id:e.pointerId,r};
+ try{rackSurface.setPointerCapture(e.pointerId)}catch{}
+ $('surveyHint').textContent='Drag '+rackName(r)+' to reposition';
+},true);
+rackSurface.addEventListener('pointermove',e=>{
+ if(!rackMove||rackMove.id!==e.pointerId)return;
+ e.preventDefault();e.stopPropagation();
+ const p=point(e);
+ if(p){moveRackAndRoutes(rackMove.r,p);refresh()}
+},true);
+function endRackMove(e){
+ if(!rackMove||rackMove.id!==e.pointerId)return;
+ e.preventDefault();e.stopPropagation();
+ rackMove=null;touch();refresh();
+}
+rackSurface.addEventListener('pointerup',endRackMove,true);
+rackSurface.addEventListener('pointercancel',endRackMove,true);
+let dragRack=null;
+svg.addEventListener('pointerdown',e=>{
+ const rackTarget=e.target.closest('[data-fsp-rack]');
+ if(!cableMode&&!placingRack&&!rackTarget)return;
+ if(e.pointerType==='touch'&&e.isPrimary===false)return;
+ e.preventDefault();e.stopImmediatePropagation();
+ const p=point(e);if(!p)return;
+ if(rackTarget&&!placingRack){const r=racks().find(r=>r.id===rackTarget.dataset.fspRack);if(r){dragRack={r,id:e.pointerId};svg.setPointerCapture(e.pointerId);$('surveyHint').textContent='Moving '+rackName(r)}return}
+ if(placingRack){const type=placingRack;placingRack=false;const count=racks().filter(r=>r.type===type).length+1;const r={id:uid(),type,name:type==='MDF'?'MDF':type+' '+count,ordinal:type==='IDF'?count:undefined,x:p.x,y:p.y};racks().push(r);touch();refresh();$('surveyHint').textContent=r.name+' placed';return}
+  const cam=e.target.closest('[data-cam]'),c=cam&&plan.cameras.find(c=>c.id===cam.dataset.cam);
+ if(!c){$('surveyHint').textContent='Start the route by touching a camera';return}
+ drawing={camId:c.id,points:[{x:c.x,y:c.y},p],id:e.pointerId};svg.setPointerCapture(e.pointerId);refresh()
+ },true);
+ svg.addEventListener('pointermove',e=>{if(dragRack&&dragRack.id===e.pointerId){e.preventDefault();e.stopImmediatePropagation();const p=point(e);if(p){moveRackAndRoutes(dragRack.r,p);refresh()}return}if(!drawing||drawing.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();const p=point(e);if(p&&dist(p,drawing.points.at(-1))>4){drawing.points.push(p);refresh()}},true);
+ svg.addEventListener('pointerup',e=>{if(dragRack&&dragRack.id===e.pointerId){e.preventDefault();e.stopImmediatePropagation();dragRack=null;touch();refresh();return}if(!drawing||drawing.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();finalize()},true);
+ svg.addEventListener('pointercancel',e=>{if(drawing&&drawing.id===e.pointerId){drawing=null;refresh()}if(dragRack&&dragRack.id===e.pointerId){dragRack=null;touch()}},true);
+ const originalShow=show;show=function(name){if(name!=='survey'&&cableMode)leave();originalShow(name)};
+})();
+
+}catch(fspError){window.fspCableError=String(fspError&&fspError.stack||fspError);console.error('Cable init failed',fspError);}
+
+read();
+})();
+
+
+</script><script>/* V17.24 floating toolbar controls */
+(()=>{
+ const screen=document.getElementById('plans'),bar=document.getElementById('planTools'),done=document.getElementById('drawingDoneBar');
+ if(!screen||!bar||!done)return;
+ const toggle=document.createElement('button');toggle.id='fspToggleTools';toggle.type='button';toggle.textContent='−';toggle.title='Hide/restore toolbar';bar.prepend(toggle);
+ const drag=document.createElement('button');drag.id='fspDragTools';drag.type='button';drag.textContent='⠿';drag.title='Drag toolbar';bar.insertBefore(drag,toggle.nextSibling);
+ const secondary=['panTool','autoWall','showDims','clear','moreDrawing','backDraw'];
+ for(const id of secondary){const b=document.getElementById(id);if(b)b.classList.add('fsp-secondary')}
+ // Undo is always a primary, visible, tappable control in the floating editor.
+ const undoButton=document.getElementById('undo');
+ if(undoButton){undoButton.classList.remove('fsp-secondary');undoButton.type='button';undoButton.style.setProperty('display','inline-flex','important');undoButton.style.setProperty('align-items','center');undoButton.style.setProperty('justify-content','center');undoButton.style.setProperty('background','#b45309','important');undoButton.style.setProperty('border-color','#fbbf24','important');undoButton.style.setProperty('position','relative');undoButton.style.setProperty('z-index','15');}
+ function sync(){const editing=!done.classList.contains('hidden')&&!screen.classList.contains('hidden');screen.classList.toggle('fsp-fullscreen',editing);if(!editing){bar.classList.remove('fsp-collapsed');toggle.textContent='−'}}
+ toggle.onclick=()=>{const collapsed=bar.classList.toggle('fsp-collapsed');toggle.textContent=collapsed?'☰':'−';toggle.title=collapsed?'Restore toolbar':'Hide toolbar'};
+ let moving=null;
+ drag.addEventListener('pointerdown',e=>{e.preventDefault();const r=bar.getBoundingClientRect();moving={id:e.pointerId,dx:e.clientX-r.left,dy:e.clientY-r.top};drag.setPointerCapture(e.pointerId)});
+ drag.addEventListener('pointermove',e=>{if(!moving||e.pointerId!==moving.id)return;const x=Math.max(0,Math.min(innerWidth-bar.offsetWidth,e.clientX-moving.dx)),y=Math.max(0,Math.min(innerHeight-bar.offsetHeight,e.clientY-moving.dy));bar.style.setProperty('left',x+'px','important');bar.style.setProperty('top',y+'px','important');bar.style.setProperty('bottom','auto','important');bar.style.setProperty('right','auto','important')});
+ drag.addEventListener('pointerup',()=>moving=null);drag.addEventListener('pointercancel',()=>moving=null);
+ window.addEventListener('orientationchange',()=>{bar.style.removeProperty('top');bar.style.removeProperty('bottom');bar.style.removeProperty('left');bar.style.removeProperty('right')});
+ new MutationObserver(sync).observe(done,{attributes:true,attributeFilter:['class']});new MutationObserver(sync).observe(screen,{attributes:true,attributeFilter:['class']});sync();
+})();
+</script>
+<script>
+/* Field Survey Pro: detect newer published builds without interrupting unsaved work. */
+(function(){
+ const current='17.78';
+ let checking=false,offered='',lastCheck=0;
+ async function checkForUpdate(){
+  if(checking||document.hidden||Date.now()-lastCheck<30000)return;
+  checking=true;lastCheck=Date.now();
+  try{
+   const url=new URL(location.pathname,location.href);
+   url.searchParams.set('fsp_check',String(Date.now()));
+   const response=await fetch(url.toString(),{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
+   if(!response.ok)return;
+   const html=await response.text();
+   const match=html.match(/Field Survey Pro V(\\d+\\.\\d+) [—-]/);
+   if(!match)return;
+   const next=match[1];
+   const num=v=>v.split('.').reduce((n,x)=>n*1000+Number(x),0);
+   if(num(next)<=num(current)||offered===next)return;
+   offered=next;
+   const existing=document.getElementById('fsp-update-banner');
+   if(existing)existing.remove();
+   const bar=document.createElement('div');
+   bar.id='fsp-update-banner';
+   bar.setAttribute('role','status');
+   bar.style.cssText='position:fixed;left:12px;right:12px;bottom:12px;z-index:999999;max-width:580px;margin:auto;background:#153754;color:#fff;border:2px solid #7dbaf3;border-radius:12px;padding:12px;box-shadow:0 5px 25px #0009;display:flex;align-items:center;gap:10px;flex-wrap:wrap';
+   const label=document.createElement('span');
+   label.textContent='Field Survey Pro V'+next+' is available.';
+   label.style.cssText='flex:1;min-width:170px;font-weight:600';
+   const update=document.createElement('button');
+   update.type='button';update.textContent='Update now';
+   update.style.cssText='background:#2676c5;border:1px solid #90c8ff';
+   update.onclick=()=>{
+    const target=new URL(location.href);
+    target.searchParams.set('v',next.replace('.',''));
+    target.searchParams.set('refresh',String(Date.now()));
+    location.replace(target.toString());
+   };
+   const later=document.createElement('button');
+   later.type='button';later.textContent='Later';
+   later.onclick=()=>bar.remove();
+   bar.append(label,update,later);document.body.append(bar);
+  }catch(e){/* Offline surveys must continue to work. */}
+  finally{checking=false}
+ }
+ window.addEventListener('focus',checkForUpdate);
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkForUpdate()});
+ setInterval(checkForUpdate,5*60*1000);
+ setTimeout(checkForUpdate,12000);
+})();
+</script><script>
+/* V17.79: Android landscape soft keyboard viewport handling; no survey data changes. */
+(()=>{
+ const viewport=window.visualViewport;
+ if(!viewport)return;
+ let baseline=0;
+ const isLandscape=()=>matchMedia('(orientation: landscape)').matches;
+ const isEditing=()=>document.activeElement?.matches?.('input,textarea,select,[contenteditable="true"]');
+ function adjust(){
+  if(!isLandscape()){
+   document.documentElement.classList.remove('keyboard-visible');
+   document.documentElement.style.removeProperty('--fsp-visible-height');
+   document.documentElement.style.removeProperty('--fsp-visible-top');
+   baseline=0;return;
+  }
+  if(!isEditing()) baseline=Math.max(baseline,viewport.height);
+  else if(!baseline) baseline=Math.max(window.innerHeight,viewport.height);
+  const keyboardOpen=isEditing() && (baseline-viewport.height>110 || window.innerHeight-viewport.height>110);
+  document.documentElement.classList.toggle('keyboard-visible',!!keyboardOpen);
+  if(keyboardOpen){
+   document.documentElement.style.setProperty('--fsp-visible-height',Math.round(viewport.height)+'px');
+   document.documentElement.style.setProperty('--fsp-visible-top',Math.round(viewport.offsetTop)+'px');
+   const field=document.activeElement;
+   // Position floating distance entry above the keyboard even when the browser
+   // reports a reduced visual viewport without resizing the layout viewport.
+   const distanceBack=document.getElementById('modalBack');
+   if(distanceBack?.classList.contains('fsp-distance-dialog')){
+    distanceBack.style.setProperty('--fsp-distance-keyboard','1');
+   }
+   requestAnimationFrame(()=>{if(field===document.activeElement && field.getBoundingClientRect().bottom>viewport.height-8)field.scrollIntoView({block:'nearest',behavior:'instant'});});
+  }else {document.documentElement.style.removeProperty('--fsp-visible-height');document.documentElement.style.removeProperty('--fsp-visible-top');}
+ }
+ viewport.addEventListener('resize',adjust);
+ window.addEventListener('orientationchange',()=>{baseline=0;setTimeout(adjust,150)});
+ document.addEventListener('focusin',()=>setTimeout(adjust,150));
+ document.addEventListener('focusout',()=>setTimeout(adjust,150));
+ adjust();
+})();
+</script></body></html>
