@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>Field Survey Pro V17.121 — Plans & Cameras</title><!-- Field Survey Pro V17.35: position dimension before distance entry --><!-- Field Survey Pro V17.32: independent dimension hit targets and validation --><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Field Survey Pro V17.121 — Plans & Cameras</title><!-- Field Survey Pro V17.35: position dimension before distance entry --><!-- Field Survey Pro V17.32: independent dimension hit targets and validation --><style>
 *{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;font-family:system-ui,Arial;background:#0b192a;color:#eef5ff}button,input,select,textarea{font:inherit}button{background:#204d79;color:white;border:1px solid #6186a8;border-radius:10px;padding:10px;min-height:43px;font-weight:600}button:disabled{opacity:.4}.primary{background:#2676c5;border-color:#66aaf1}.danger{background:#683344}.muted{color:#b2c8df;font-size:13px}.screen{height:100dvh;display:flex;flex-direction:column}.hidden{display:none!important}header{display:flex;align-items:center;gap:8px;padding:8px;background:#153754;min-height:52px}header strong{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}header button{min-height:35px;padding:6px 10px}#save{font-size:11px;color:#a4e7c3;white-space:nowrap}.content{overflow:auto;flex:1;padding:16px}.stack{display:grid;gap:12px;max-width:600px;margin:auto}.card{background:#17334e;border:1px solid #385d7b;border-radius:13px;padding:15px}.row{display:flex;align-items:center;gap:8px}.row>*{min-width:0}.row .grow{flex:1}input,select,textarea{width:100%;border:1px solid #a5b9cb;border-radius:9px;padding:10px;min-height:44px;background:#fff;color:#17293b}textarea{min-height:65px}.full{width:100%}.menu{display:grid;gap:8px}.menu button{text-align:left}#planArea,#surveyArea{flex:1;min-height:0;position:relative;background:#e8eef4;margin:5px;border-radius:9px;overflow:hidden}svg{display:block;width:100%;height:100%;touch-action:none;user-select:none;-webkit-user-select:none}#planCanvas,#surveyCanvas{background:#fff}svg .wall{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}svg .pin{touch-action:none}svg .pin circle{stroke:white;stroke-width:2.5;vector-effect:non-scaling-stroke}svg .pin text{fill:white;font-size:17px;font-weight:800;text-anchor:middle;dominant-baseline:central;pointer-events:none}svg .cone{pointer-events:none;fill:#f59b3b35;stroke:#e48b29;stroke-width:2}svg .handle{fill:#ffe171;stroke:#183b60;stroke-width:2}#planCanvas image,#surveyCanvas image{pointer-events:none;user-select:none;-webkit-user-select:none}#planTools{padding:7px;display:flex;gap:7px;background:#173754;overflow-x:auto}#planTools button{white-space:nowrap;flex:1;font-size:13px}#floatTools{position:absolute;right:10px;top:60px;display:flex;flex-direction:column;gap:6px;padding:7px;background:#12395dec;border:1px solid #6c92b5;border-radius:13px;z-index:3;touch-action:none;box-shadow:0 5px 14px #0004}#floatTools button{font-size:12px;min-height:40px;padding:7px}#dragTools{font-size:13px;text-align:center;color:#c3dbf4;cursor:grab;touch-action:none;padding:3px}#restoreTools{position:absolute;right:8px;top:64px;z-index:3}#detail{position:absolute;bottom:10px;left:10px;width:min(340px,calc(100% - 20px));max-height:75%;overflow:auto;z-index:5;background:#173957;border:1px solid #90afc8;border-radius:13px;padding:12px;box-shadow:0 6px 22px #0006}#detailDrag{touch-action:none;user-select:none;cursor:grab}#detail label{font-size:12px;display:block;margin:9px 0 4px}.modalBack{position:fixed;inset:0;background:#0008;z-index:20;display:grid;place-items:center;padding:15px}.modal{background:#183c5e;border:1px solid #7da5c6;border-radius:15px;padding:18px;width:min(380px,100%);display:grid;gap:12px}.modal h3{margin:0}.hint{position:absolute;left:12px;top:12px;color:#35526b;font-size:12px;background:#ffffffe0;padding:6px;border-radius:7px;pointer-events:none;max-width:65%}.topbar{display:flex;align-items:center;gap:7px;padding:7px;background:#183854}.topbar select{flex:1;min-width:0}.small{font-size:12px}.divider{height:1px;background:#476582;margin:8px 0}@media(orientation:landscape){header{min-height:42px;padding:4px 8px}#floatTools{top:12px}#restoreTools{top:12px}.content{padding:10px}}
 #planTools{flex:0 0 auto;overflow:visible;display:flex;flex-wrap:wrap;gap:5px;padding:6px}#planTools.hidden{display:none!important}#planTools button{flex:1 1 auto;font-size:12px;padding:7px 8px;min-height:37px}#drawingDoneBar{background:#143754;padding:7px 10px 10px;flex-shrink:0}#drawingDoneBar button{width:100%;min-height:48px;font-size:17px}#drawingDoneBar.hidden{display:none!important}#planBottom{padding:8px;display:grid;gap:7px;background:#143754}#planBottom button.hidden{display:none!important}#planArea.empty{flex:0 0 auto;min-height:170px;height:170px;display:flex;align-items:center;justify-content:center}#planArea.empty svg{display:none}#planArea.empty .hint{position:static;text-align:center;max-width:100%;font-size:16px;padding:15px}#planArea.empty + #planTools{display:none!important}#planSelect.empty,#planMore.hidden{display:none!important}.topbar:has(#planSelect.empty){display:none}#planTools button.activeTool{background:#2676c5;border-color:#66aaf1}@media (orientation:landscape){
 #planTools{flex-wrap:nowrap;overflow-x:auto;padding:3px 5px;gap:4px}
@@ -189,51 +189,50 @@
 #planCanvas .area-label text,#surveyCanvas .area-label text{paint-order:stroke;stroke:white;stroke-width:5;stroke-linejoin:round;font-weight:800;font-size:22px;fill:#166534}
 #planCanvas .area-label rect,#surveyCanvas .area-label rect{fill:#f0fdf4;stroke:#16a34a;stroke-width:1.5;opacity:.94}
 
-/* V17.81: keep the floating distance entry fully usable above the landscape keyboard. */
-@media (orientation:landscape) {
- html.keyboard-visible #modalBack.fsp-distance-dialog .modal {
-  position:fixed!important;
-  top:calc(var(--fsp-visible-top,0px) + 3px)!important;
-  left:8px!important;right:auto!important;bottom:auto!important;
-  width:min(330px,calc(100vw - 16px))!important;
-  max-height:calc(var(--fsp-visible-height,100dvh) - 6px)!important;
-  overflow-y:auto!important;
-  padding:7px 10px!important;gap:3px!important;
- }
- html.keyboard-visible #modalBack.fsp-distance-dialog #modalTitle {
-  font-size:14px!important;padding:0 0 3px!important;min-height:0!important;
- }
- html.keyboard-visible #modalBack.fsp-distance-dialog #modalBody label {margin:2px 0!important;font-size:12px!important}
- html.keyboard-visible #modalBack.fsp-distance-dialog #modalBody input {min-height:30px!important;padding:3px 7px!important}
- html.keyboard-visible #modalBack.fsp-distance-dialog .row button {min-height:30px!important;padding:3px 8px!important}
-}
-/* V17.80: keep landscape text-entry dialog inside visible keyboard viewport. */
-@media (orientation:landscape) {
- html.keyboard-visible #modalBack:not(.fsp-distance-dialog) {
-  position:fixed!important;top:var(--fsp-visible-top,0px)!important;left:0!important;
-  right:0!important;bottom:auto!important;height:var(--fsp-visible-height,100dvh)!important;
-  display:flex!important;align-items:flex-start!important;justify-content:center!important;
-  padding:4px 10px!important;overflow-y:auto!important;
- }
- html.keyboard-visible #modalBack:not(.fsp-distance-dialog) .modal {
-  flex:0 1 min(440px,100%)!important;
-  max-height:calc(var(--fsp-visible-height,100dvh) - 8px)!important;
-  overflow-y:auto!important;overscroll-behavior:contain!important;
- }
- html.keyboard-visible #modalBack:not(.fsp-distance-dialog) #modalBody {min-height:0!important}
- html.keyboard-visible #modalBack:not(.fsp-distance-dialog) input:focus,
- html.keyboard-visible #modalBack:not(.fsp-distance-dialog) textarea:focus {scroll-margin-bottom:54px}
-}
-/* V17.79 landscape keyboard accommodation */
-@media (orientation: landscape) {
-  html.keyboard-visible, html.keyboard-visible body { height: var(--fsp-visible-height, 100dvh); }
-  html.keyboard-visible .screen { height: var(--fsp-visible-height, 100dvh); }
-  html.keyboard-visible .modalBack { height: var(--fsp-visible-height, 100dvh); bottom: auto; align-items: start; overflow-y: auto; }
-  html.keyboard-visible .modal { max-height: calc(var(--fsp-visible-height, 100dvh) - 20px); overflow-y: auto; }
-  html.keyboard-visible #detail { max-height: calc(var(--fsp-visible-height, 100dvh) - 20px); overflow-y: auto; }
-}
 #modalBack.fsp-area-dialog .modal{max-height:calc(100dvh - 30px);overflow-y:auto}
-</style><style>/* V17.121 mobile toolbar visibility */ @media(max-width:800px){#planTools{max-height:32vh;overflow-y:auto;overscroll-behavior:contain}#floatTools{max-height:38vh;overflow-y:auto}#drawingDoneBar,#dimensionPositionBar{z-index:180}} </style></head><body>
+</style><style>/* V17.121 mobile toolbar visibility */ @media(max-width:800px){#planTools{max-height:32vh;overflow-y:auto;overscroll-behavior:contain}#floatTools{max-height:38vh;overflow-y:auto}#drawingDoneBar,#dimensionPositionBar{z-index:180}} </style><style>
+/* Mobile accessibility: reserve navigation/action space; viewport state is never survey geometry. */
+:root{--fsp-safe-top:env(safe-area-inset-top,0px);--fsp-safe-right:env(safe-area-inset-right,0px);--fsp-safe-bottom:env(safe-area-inset-bottom,0px);--fsp-safe-left:env(safe-area-inset-left,0px)}
+body{position:fixed;top:var(--fsp-visible-top,0px);left:var(--fsp-visible-left,0px);width:var(--fsp-visible-width,100%);height:var(--fsp-visible-height,100dvh)}
+.screen,#plans.fsp-fullscreen,#survey{height:var(--fsp-visible-height,100dvh);padding:var(--fsp-safe-top) var(--fsp-safe-right) var(--fsp-safe-bottom) var(--fsp-safe-left)}
+#plans>header,#plans>.topbar,#plans>#planBottom{flex-shrink:0}
+#plans.fsp-fullscreen>header{position:relative;top:auto;left:auto;width:100%;max-width:none;min-height:44px;flex:0 0 auto;padding:4px 6px;background:#153754;pointer-events:auto}
+#plans.fsp-fullscreen>header strong{display:block;font-size:13px;min-width:0}
+#plans.fsp-fullscreen #planArea{position:relative!important;inset:auto!important;width:auto!important;height:auto!important;flex:1 1 0!important;min-height:0!important;margin:0!important}
+#plans.fsp-fullscreen #planTools:not(.hidden),#plans.fsp-fullscreen #planTools.fsp-expanded:not(.hidden),#plans.fsp-fullscreen #planTools.fsp-collapsed:not(.hidden){position:relative!important;inset:auto!important;flex:0 0 auto;width:calc(100% - 12px)!important;max-width:calc(100% - 12px)!important;max-height:none!important;flex-wrap:nowrap!important;margin:4px 6px;padding:5px!important;overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x!important;overscroll-behavior:contain}
+#plans.fsp-fullscreen #planTools:not(.fsp-collapsed) button.fsp-secondary:not(.hidden){display:inline-flex!important}
+#plans.fsp-fullscreen #planTools #backDraw{display:none!important}
+#plans.fsp-fullscreen #planTools.fsp-collapsed:not(.hidden){width:50px!important}
+#plans.fsp-fullscreen #planTools button{min-height:36px!important}
+/* Collapse scrolls with the row so it cannot cover another control. */
+#plans.fsp-fullscreen #planTools #fspToggleTools{touch-action:manipulation}
+#plans.fsp-fullscreen #drawingDoneBar:not(.hidden){position:relative!important;inset:auto!important;flex:0 0 auto;width:100%!important;padding:4px 6px!important;background:#143754!important;transform:none!important}
+#plans.fsp-fullscreen #drawingDoneBar button{width:100%;min-height:44px!important}
+#plans #dimensionPositionBar{position:relative;inset:auto;transform:none;flex:0 0 auto;width:calc(100% - 12px);max-width:calc(100% - 12px);margin:3px 6px;padding:4px;gap:5px}
+#dimensionPositionBar .tip{flex:1;max-width:none;font-size:12px}
+#measureHelp{max-height:calc(100% - 16px);overflow:auto;overscroll-behavior:contain;pointer-events:auto}
+#survey #surveyArea{inset:var(--fsp-safe-top) var(--fsp-safe-right) var(--fsp-safe-bottom) var(--fsp-safe-left)!important;width:auto!important;height:auto!important}
+#survey #floatTools{bottom:56px;max-height:calc(100% - 108px)!important;max-width:calc(100% - 16px);touch-action:pan-y;overscroll-behavior:contain}
+#survey #dragTools{touch-action:none}
+#survey #restoreTools{bottom:56px}
+#survey #surveyDone{bottom:8px}
+#survey #fspCableBar{bottom:56px;max-width:calc(100% - 16px);flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;touch-action:pan-x;overscroll-behavior:contain}
+#survey #fspCableBar button{flex:0 0 auto;white-space:nowrap}
+#detailDrag{position:sticky;top:0;z-index:2;background:#173957}
+#detail>.row:last-child{position:sticky;bottom:0;z-index:2;background:#173957;padding:5px 0}
+#detail input,#detail textarea{scroll-margin-block:50px}
+#modalBack:not(.hidden),#cropBack:not(.hidden){top:calc(var(--fsp-visible-top,0px) + var(--fsp-safe-top))!important;left:calc(var(--fsp-visible-left,0px) + var(--fsp-safe-left))!important;right:auto!important;bottom:auto!important;width:calc(var(--fsp-visible-width,100vw) - var(--fsp-safe-left) - var(--fsp-safe-right));height:calc(var(--fsp-visible-height,100dvh) - var(--fsp-safe-top) - var(--fsp-safe-bottom))!important;padding:6px!important;overflow:auto}
+#modalBack:not(.hidden):not(.fsp-distance-dialog){display:grid!important;place-items:center!important}
+#modalBack .modal,#modalBack.fsp-area-dialog .modal,#modalBack.fsp-distance-dialog .modal{max-height:calc(var(--fsp-visible-height,100dvh) - var(--fsp-safe-top) - var(--fsp-safe-bottom) - 12px)!important;grid-template-rows:auto auto minmax(0,1fr) auto;gap:8px!important}
+#modalBack #modalBody{min-height:0;overflow-y:auto;overscroll-behavior:contain;scroll-padding:8px}
+#modalBack .modal .menu{max-height:none;overflow:visible}
+html.keyboard-visible #modalBack.fsp-distance-dialog .modal{top:calc(var(--fsp-visible-top,0px) + var(--fsp-safe-top) + 6px)!important;left:calc(var(--fsp-visible-left,0px) + var(--fsp-safe-left) + 6px)!important}
+#cropBack .modal{max-height:calc(var(--fsp-visible-height,100dvh) - var(--fsp-safe-top) - var(--fsp-safe-bottom) - 12px)}
+
+html.keyboard-visible #modalBack .modal,html.keyboard-visible #modalBack.fsp-distance-dialog .modal{max-height:calc(var(--fsp-visible-height,100dvh) - var(--fsp-safe-top) - var(--fsp-safe-bottom) - 12px)!important}
+#modalBack .modal{width:min(440px,calc(var(--fsp-visible-width,100vw) - var(--fsp-safe-left) - var(--fsp-safe-right) - 12px))!important}
+#modalBack.fsp-distance-dialog .modal{width:min(330px,calc(var(--fsp-visible-width,100vw) - var(--fsp-safe-left) - var(--fsp-safe-right) - 12px))!important}
+</style></head><body>
 <section id="home" class="screen"><header><strong>Field Survey Pro <span class="small">V17.111 TEST</span></strong></header><div class="content"><div class="stack"><button id="continue" class="primary hidden">Continue Survey</button><button id="newSurvey" class="primary">+ New Survey</button><button id="allSurveys">All Surveys</button><div class="card muted">V17 test: Plans and camera placement. This version uses separate test storage; your older V16 surveys are not changed. Export a backup before relying on phone storage.</div></div></div></section>
 <section id="list" class="screen hidden"><header><button data-go="home">← Home</button><strong>All Surveys</strong></header><div class="content"><div class="stack"><input id="search" placeholder="Search surveys"><div id="surveyRows" class="menu"></div><button id="importBackup">Import V17 Backup</button><button id="exportBackup">Export V17 Backup</button></div></div></section>
 <section id="plans" class="screen hidden"><header><button data-go="home">← Back</button><strong id="plansTitle">Plans</strong><span id="save">Saved ✓</span></header><div class="topbar"><select id="planSelect" aria-label="Plan"></select><button id="planMore">⋯</button><button id="fitPlan" class="hidden" title="Reset view">Fit</button></div><div id="planArea"><button id="rotatePlanView" class="fsp-rotate" type="button" title="Rotate floor plan 90 degrees">↻ 90°</button><div id="zoomTools"><button id="zoomOut">−</button><button id="zoomIn">+</button></div><svg id="planCanvas" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><g id="planScene"></g><g id="strokePreview" pointer-events="none"></g></svg><div class="hint" id="planHint">Add a plan to begin</div></div><div id="dimensionPositionBar" class="hidden"><span class="tip">Drag either endpoint to adjust</span><button id="dimensionCancel">Cancel</button><button id="dimensionPositionDone" class="primary">Done ✓</button></div><div id="planTools" class="hidden"><button id="backDraw">← Back</button><button id="panTool">Select / Pan</button><button id="line">Line</button><button id="free">Freehand</button><button id="drawColor" type="button" title="Drawing color">🔵 Color</button><button id="autoWall">Auto Wall</button><button id="measureWall">Measure</button><button id="measureHelpButton" type="button" title="Measurement instructions">? Help</button><button id="areaTool" type="button" class="hidden" aria-hidden="true" tabindex="-1">Calculate Area</button><button id="moreDrawing" class="hidden">More ▾</button><button id="showDims">Hide Dimensions</button><button id="undo">Undo Wall</button><button id="clear">Clear Drawing</button></div><div id="drawingDoneBar" class="hidden"><button id="finishEdit" class="primary">Done ✓</button></div><div id="planBottom"><button id="addPlan">+ Add Floor Plan</button><button id="editPlan">Edit Plan</button><button id="toSurvey" class="primary">+ Add Camera</button></div></section>
@@ -1562,7 +1561,27 @@ function changeDetail(){
  $('detailTitle').textContent='Camera '+c.num;touch();updateSurvey();
 }
 $('detailNumber').onchange=changeDetail;document.querySelectorAll('#detailType [data-camera-type]').forEach(b=>b.onclick=()=>{setDetailCameraType(b.dataset.cameraType);changeDetail();});$('detailNotes').oninput=changeDetail;$('closeDetail').onclick=closeDetail;$('doneDetail').onclick=closeDetail;$('deleteCamera').onclick=()=>{const c=plan.cameras.find(x=>x.id===detailId);if(c)confirmModal('Delete Camera '+c.num,'Remove this camera from the plan?',()=>{plan.cameras=plan.cameras.filter(x=>x.id!==c.id);selected=null;closeDetail();touch();updateSurvey()})};
-$('minTools').onclick=()=>{$('floatTools').classList.add('hidden');$('restoreTools').classList.remove('hidden')};$('restoreTools').onclick=()=>{$('floatTools').classList.remove('hidden');$('restoreTools').classList.add('hidden')};let moveTool=null;$('dragTools').addEventListener('pointerdown',e=>{const box=$('floatTools').getBoundingClientRect(),parent=$('surveyArea').getBoundingClientRect();moveTool={id:e.pointerId,dx:e.clientX-box.left,dy:e.clientY-box.top,parent};e.target.setPointerCapture(e.pointerId)});$('dragTools').addEventListener('pointermove',e=>{if(!moveTool||moveTool.id!==e.pointerId)return;const box=$('floatTools');box.style.left=Math.max(0,Math.min(moveTool.parent.width-box.offsetWidth,e.clientX-moveTool.parent.left-moveTool.dx))+'px';box.style.top=Math.max(0,Math.min(moveTool.parent.height-box.offsetHeight,e.clientY-moveTool.parent.top-moveTool.dy))+'px';box.style.right='auto';box.style.bottom='auto';box.style.height='max-content'});$('dragTools').addEventListener('pointerup',()=>moveTool=null);$('surveyMore').onclick=()=>selectModal('More',[{label:'Cable Routes (V17.111)',action:()=>window.fspCableEnter?window.fspCableEnter():alert('Cable init error: '+(window.fspCableError||'unknown'))},{label:'Add MDF/IDF',action:()=>window.fspRackAdd?window.fspRackAdd():alert('Equipment init error: '+(window.fspCableError||'unknown'))},{label:'Show / Hide Cable Routes',action:()=>window.fspCableToggle?window.fspCableToggle():alert('Cable init error: '+(window.fspCableError||'unknown'))},{label:'Existing Camera',action:()=>activateCamera('Existing')},{label:'Take Site Photo',action:()=>$('sitePhoto').click()},{label:'Floor / Area Notes',action:()=>{if(!plan)return;promptModal('Notes — '+plan.name,'<textarea id="floorNotes" rows="7" placeholder="Notes for this floor or area…">'+esc(plan.notes||'')+'</textarea>',()=>{plan.notes=$('floorNotes').value;touch()},'Done')}},{label:'Edit Plan',action:()=>openSharedView('plans')},{label:'Export Backup',action:exportData}]);$('takePhoto').onclick=()=>$('sitePhoto').click();$('sitePhoto').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const img=await imageData(f);survey.sitePhotos.push({id:uid(),image:img,date:Date.now()});touch();alert('Site photo saved with this survey ('+survey.sitePhotos.length+' total).')}catch(err){alert(err.message)}};
+$('minTools').onclick=()=>{$('floatTools').classList.add('hidden');$('restoreTools').classList.remove('hidden')};$('restoreTools').onclick=()=>{$('floatTools').classList.remove('hidden');$('restoreTools').classList.add('hidden')};let moveTool=null;
+function cameraToolbarBounds(){
+ const parent=$('surveyArea').getBoundingClientRect(),rotate=$('rotateSurveyView').getBoundingClientRect(),done=$('surveyDone').getBoundingClientRect();
+ return {parent,left:parent.left+4,right:parent.right-4,top:Math.max(parent.top+4,rotate.bottom+4),bottom:Math.min(parent.bottom-4,done.top-4)};
+}
+function positionCameraToolbar(left,top){
+ const box=$('floatTools'),b=cameraToolbarBounds();
+ box.style.left=(Math.max(b.left,Math.min(b.right-box.offsetWidth,left))-b.parent.left)+'px';
+ box.style.top=(Math.max(b.top,Math.min(b.bottom-box.offsetHeight,top))-b.parent.top)+'px';
+ box.style.right='auto';box.style.bottom='auto';
+}
+function fitCameraToolbar(){
+ if(screen!=='survey'||getComputedStyle($('floatTools')).display==='none')return;
+ const box=$('floatTools');if(box.style.left){const r=box.getBoundingClientRect();positionCameraToolbar(r.left,r.top)}
+}
+$('dragTools').addEventListener('pointerdown',e=>{e.preventDefault();const r=$('floatTools').getBoundingClientRect();moveTool={id:e.pointerId,dx:e.clientX-r.left,dy:e.clientY-r.top};e.target.setPointerCapture(e.pointerId)});
+$('dragTools').addEventListener('pointermove',e=>{if(moveTool?.id===e.pointerId)positionCameraToolbar(e.clientX-moveTool.dx,e.clientY-moveTool.dy)});
+for(const name of ['pointerup','pointercancel'])$('dragTools').addEventListener(name,()=>moveTool=null);
+window.addEventListener('fsp-viewport-change',()=>{moveTool=null;fitCameraToolbar();fitOpenDetail()});
+const cameraToolbarObserver=new MutationObserver(fitCameraToolbar);for(const target of [$('floatTools'),$('surveyArea')])cameraToolbarObserver.observe(target,{attributes:true,attributeFilter:['class']});
+$('surveyMore').onclick=()=>selectModal('More',[{label:'Cable Routes (V17.111)',action:()=>window.fspCableEnter?window.fspCableEnter():alert('Cable init error: '+(window.fspCableError||'unknown'))},{label:'Add MDF/IDF',action:()=>window.fspRackAdd?window.fspRackAdd():alert('Equipment init error: '+(window.fspCableError||'unknown'))},{label:'Show / Hide Cable Routes',action:()=>window.fspCableToggle?window.fspCableToggle():alert('Cable init error: '+(window.fspCableError||'unknown'))},{label:'Existing Camera',action:()=>activateCamera('Existing')},{label:'Take Site Photo',action:()=>$('sitePhoto').click()},{label:'Floor / Area Notes',action:()=>{if(!plan)return;promptModal('Notes — '+plan.name,'<textarea id="floorNotes" rows="7" placeholder="Notes for this floor or area…">'+esc(plan.notes||'')+'</textarea>',()=>{plan.notes=$('floorNotes').value;touch()},'Done')}},{label:'Edit Plan',action:()=>openSharedView('plans')},{label:'Export Backup',action:exportData}]);$('takePhoto').onclick=()=>$('sitePhoto').click();$('sitePhoto').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const img=await imageData(f);survey.sitePhotos.push({id:uid(),image:img,date:Date.now()});touch();alert('Site photo saved with this survey ('+survey.sitePhotos.length+' total).')}catch(err){alert(err.message)}};
 async function imageData(file){return new Promise((res,rej)=>{const r=new FileReader();r.onerror=()=>rej(Error('Unable to read image'));r.onload=()=>{const img=new Image();img.onerror=()=>rej(Error('Unsupported image'));img.onload=()=>{const scale=Math.min(1,1700/Math.max(img.width,img.height));const c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);const x=c.getContext('2d');x.fillStyle='white';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',.8))};img.src=r.result};r.readAsDataURL(file)})}async function pdfData(file){if(!window.pdfjsLib){const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';await new Promise((res,rej)=>{s.onload=res;s.onerror=()=>rej(Error('PDF import needs internet on first use. Image/photo import works offline.'));document.head.append(s)})}const lib=window.pdfjsLib;lib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;const pg=await doc.getPage(1),v=pg.getViewport({scale:1}),view=pg.getViewport({scale:Math.min(2,1700/Math.max(v.width,v.height))}),c=document.createElement('canvas');c.width=view.width;c.height=view.height;await pg.render({canvasContext:c.getContext('2d'),viewport:view}).promise;return c.toDataURL('image/jpeg',.8)}async function prepareCrop(dataUrl){return new Promise((resolve,reject)=>{
  $('cropTitle').textContent='Preview & Crop Floor Plan';$('cropInstructions').textContent='Drag a box around the area to keep, or confirm the whole plan.';$('cropApply').textContent='Confirm Floor Plan ✓';const back=$('cropBack'),cv=$('cropCanvas'),ctx=cv.getContext('2d'),img=new Image();let rotation=0,sel=null,down=null,base=null,preview=null;
  const redraw=()=>{if(!base)return;if(preview){cv.width=preview.width;cv.height=preview.height;ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(preview,0,0);return}const maxW=1200,maxH=800,scale=Math.min(maxW/base.width,maxH/base.height,1);cv.width=Math.round(base.width*scale);cv.height=Math.round(base.height*scale);ctx.clearRect(0,0,cv.width,cv.height);ctx.drawImage(base,0,0,cv.width,cv.height);if(sel){ctx.fillStyle='#0005';ctx.fillRect(0,0,cv.width,cv.height);ctx.clearRect(sel.x,sel.y,sel.w,sel.h);ctx.drawImage(base,sel.x/scale,sel.y/scale,sel.w/scale,sel.h/scale,sel.x,sel.y,sel.w,sel.h);ctx.strokeStyle='#f59e0b';ctx.lineWidth=3;ctx.setLineDash([8,5]);ctx.strokeRect(sel.x,sel.y,sel.w,sel.h);ctx.setLineDash([])}};
@@ -1937,16 +1956,23 @@ read();
  const drag=document.createElement('button');drag.id='fspDragTools';drag.type='button';drag.textContent='⠿';drag.title='Drag toolbar';bar.insertBefore(drag,toggle.nextSibling);
  const secondary=['panTool','autoWall','showDims','clear','moreDrawing','backDraw'];
  for(const id of secondary){const b=document.getElementById(id);if(b)b.classList.add('fsp-secondary')}
- // Undo is always a primary, visible, tappable control in the floating editor.
+ // Undo remains a primary control; the toolbar toggle can collapse all tools.
  const undoButton=document.getElementById('undo');
- if(undoButton){undoButton.classList.remove('fsp-secondary');undoButton.type='button';undoButton.style.setProperty('display','inline-flex','important');undoButton.style.setProperty('align-items','center');undoButton.style.setProperty('justify-content','center');undoButton.style.setProperty('background','#b45309','important');undoButton.style.setProperty('border-color','#fbbf24','important');undoButton.style.setProperty('position','relative');undoButton.style.setProperty('z-index','15');}
+ if(undoButton){undoButton.classList.remove('fsp-secondary');undoButton.type='button';undoButton.style.setProperty('display','inline-flex');undoButton.style.setProperty('align-items','center');undoButton.style.setProperty('justify-content','center');undoButton.style.setProperty('background','#b45309','important');undoButton.style.setProperty('border-color','#fbbf24','important');undoButton.style.setProperty('position','relative');undoButton.style.setProperty('z-index','15');}
  function sync(){const editing=!done.classList.contains('hidden')&&!screen.classList.contains('hidden');screen.classList.toggle('fsp-fullscreen',editing);if(!editing){bar.classList.remove('fsp-collapsed');toggle.textContent='−'}}
  toggle.onclick=()=>{const collapsed=bar.classList.toggle('fsp-collapsed');toggle.textContent=collapsed?'☰':'−';toggle.title=collapsed?'Restore toolbar':'Hide toolbar'};
  let moving=null;
- drag.addEventListener('pointerdown',e=>{e.preventDefault();const r=bar.getBoundingClientRect();moving={id:e.pointerId,dx:e.clientX-r.left,dy:e.clientY-r.top};drag.setPointerCapture(e.pointerId)});
- drag.addEventListener('pointermove',e=>{if(!moving||e.pointerId!==moving.id)return;const x=Math.max(0,Math.min(innerWidth-bar.offsetWidth,e.clientX-moving.dx)),y=Math.max(0,Math.min(innerHeight-bar.offsetHeight,e.clientY-moving.dy));bar.style.setProperty('left',x+'px','important');bar.style.setProperty('top',y+'px','important');bar.style.setProperty('bottom','auto','important');bar.style.setProperty('right','auto','important')});
+ function resetToolbar(){moving=null;bar.style.removeProperty('transform')}
+ drag.addEventListener('pointerdown',e=>{e.preventDefault();bar.style.removeProperty('transform');const r=bar.getBoundingClientRect();moving={id:e.pointerId,x:e.clientX,y:e.clientY,box:r};drag.setPointerCapture(e.pointerId)});
+ drag.addEventListener('pointermove',e=>{
+  if(!moving||e.pointerId!==moving.id)return;
+  const header=screen.querySelector('header').getBoundingClientRect(),footer=done.getBoundingClientRect(),r=moving.box;
+  const x=Math.max(header.left-r.left,Math.min(header.right-r.right,e.clientX-moving.x));
+  const y=Math.max(header.bottom-r.top,Math.min(footer.top-r.bottom,e.clientY-moving.y));
+  bar.style.transform=`translate(${x}px,${y}px)`;
+ });
  drag.addEventListener('pointerup',()=>moving=null);drag.addEventListener('pointercancel',()=>moving=null);
- window.addEventListener('orientationchange',()=>{bar.style.removeProperty('top');bar.style.removeProperty('bottom');bar.style.removeProperty('left');bar.style.removeProperty('right')});
+ window.addEventListener('fsp-viewport-change',resetToolbar);toggle.addEventListener('click',resetToolbar);
  new MutationObserver(sync).observe(done,{attributes:true,attributeFilter:['class']});new MutationObserver(sync).observe(screen,{attributes:true,attributeFilter:['class']});sync();
 })();
 </script>
@@ -2001,56 +2027,24 @@ read();
  setTimeout(checkForUpdate,12000);
 })();
 </script><script>
-/* V17.79: Android landscape soft keyboard viewport handling; no survey data changes. */
+/* Use the visible browser viewport in both orientations, including pan/keyboard offsets. */
 (()=>{
- const viewport=window.visualViewport;
- if(!viewport)return;
- let baseline=0;
- const isLandscape=()=>matchMedia('(orientation: landscape)').matches;
- const isEditing=()=>document.activeElement?.matches?.('input,textarea,select,[contenteditable="true"]');
+ const vv=window.visualViewport,root=document.documentElement;
+ let pending=false,baseline=0,orientation=innerWidth>innerHeight;
  function adjust(){
-  if(!isLandscape()){
-   document.documentElement.classList.remove('keyboard-visible');
-   document.documentElement.style.removeProperty('--fsp-visible-height');
-   document.documentElement.style.removeProperty('--fsp-visible-top');
-   baseline=0;return;
-  }
-  if(!isEditing()) baseline=Math.max(baseline,viewport.height);
-  else if(!baseline) baseline=Math.max(window.innerHeight,viewport.height);
-  const keyboardOpen=isEditing() && (baseline-viewport.height>110 || window.innerHeight-viewport.height>110);
-  document.documentElement.classList.toggle('keyboard-visible',!!keyboardOpen);
-  if(keyboardOpen){
-   document.documentElement.style.setProperty('--fsp-visible-height',Math.round(viewport.height)+'px');
-   document.documentElement.style.setProperty('--fsp-visible-top',Math.round(viewport.offsetTop)+'px');
-   const field=document.activeElement;
-   // Position floating distance entry above the keyboard even when the browser
-   // reports a reduced visual viewport without resizing the layout viewport.
-   const distanceBack=document.getElementById('modalBack');
-   if(distanceBack?.classList.contains('fsp-distance-dialog')){
-    distanceBack.style.setProperty('--fsp-distance-keyboard','1');
-   }
-   requestAnimationFrame(()=>{if(field===document.activeElement && field.getBoundingClientRect().bottom>viewport.height-8)field.scrollIntoView({block:'nearest',behavior:'instant'});});
-  }else {document.documentElement.style.removeProperty('--fsp-visible-height');document.documentElement.style.removeProperty('--fsp-visible-top');}
+  const landscape=innerWidth>innerHeight;if(landscape!==orientation){baseline=0;orientation=landscape}
+  const height=vv?.height||innerHeight,width=vv?.width||innerWidth,top=vv?.offsetTop||0,left=vv?.offsetLeft||0;
+  for(const [key,value] of Object.entries({height,width,top,left}))root.style.setProperty('--fsp-visible-'+key,value+'px');
+  const field=document.activeElement,editing=field?.matches?.('input,textarea,select,[contenteditable="true"]');
+  if(!editing)baseline=Math.max(height,innerHeight);
+  root.classList.toggle('keyboard-visible',!!editing&&Math.max(innerHeight,baseline)-height>100);
+  if(pending)return;pending=true;requestAnimationFrame(()=>{
+   pending=false;window.dispatchEvent(new Event('fsp-viewport-change'));
+   if(editing&&field===document.activeElement)field.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+  });
  }
- viewport.addEventListener('resize',adjust);
- window.addEventListener('orientationchange',()=>{baseline=0;setTimeout(adjust,150)});
- document.addEventListener('focusin',()=>setTimeout(adjust,150));
- document.addEventListener('focusout',()=>setTimeout(adjust,150));
- adjust();
-})();
-</script><script>
-// V17.121: keep action buttons accessible above the on-screen keyboard.
-(function(){
- if(!window.visualViewport)return;
- const vv=window.visualViewport;
- const ids=['drawingDoneBar','dimensionPositionBar'];
- function adjust(){
-  const overlap=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);
-  for(const id of ids){
-   const e=document.getElementById(id);if(!e)continue;
-   e.style.transform=overlap>80?'translateY(-'+Math.round(overlap)+'px)':'';
-  }
- }
- vv.addEventListener('resize',adjust);vv.addEventListener('scroll',adjust);adjust();
+ vv?.addEventListener('resize',adjust);vv?.addEventListener('scroll',adjust);
+ window.addEventListener('resize',adjust);window.addEventListener('orientationchange',()=>{baseline=0;adjust()});
+ document.addEventListener('focusin',adjust);document.addEventListener('focusout',()=>requestAnimationFrame(adjust));adjust();
 })();
 </script></body></html>

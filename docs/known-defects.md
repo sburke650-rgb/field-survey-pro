@@ -1,7 +1,7 @@
 # Known defects — V17.121
 
 Baseline: `850eafbff6546911954655ee9fb893c0277fb9fb`.
-These are local inventory IDs, not GitHub issue numbers. Fixes #1–#5 are implemented only in the unnumbered `development/index.html` for architectural review. Published snapshots remain unchanged.
+These are local inventory IDs, not GitHub issue numbers. Fixes #1–#6 are implemented only in the unnumbered `development/index.html` for architectural review. Published snapshots remain unchanged.
 
 | ID | Confirmed problem | Automated evidence | Required resolution |
 | --- | --- | --- | --- |
@@ -16,7 +16,8 @@ Expected failures assert desired behavior; they do not invert assertions or skip
 
 - Area entry and previously inaccessible trace/rectangle/manual workflows are repaired in development by Fix #5; see `docs/area-tool-accessibility.md`. New reachability tests failed before the repair and now run as ordinary regressions. Physical phone acceptance remains pending.
 - Recovery of walls/cameras/surveys from stale snapshots needs a complete deletion matrix; the first automated conflict reproduction covers legacy measurements only.
-- Toolbar safe-space/occlusion, gesture cancellation, multi-touch, rotation, keyboard and background/resume require phone acceptance. Desktop camera/cone checks do not reproduce the reported panning problem.
+- Fix #6 repairs reproduced header/canvas, hidden toolbar-control, cable/Done and keyboard-dialog overlap in development; see `docs/mobile-toolbar-accessibility.md`. Geometry/hit testing, Android touch emulation, safe-area and visual-keyboard simulations are automated. Physical phone acceptance (including background/resume) remains required. Desktop camera/cone checks do not reproduce the reported panning problem.
+- Existing drawn-plan Done recalculation regenerates derived auto-area IDs; the calculation and coordinates remain intact. Identified while comparing layout-only changes; `refreshAutoArea()` is unchanged in Fix #6. Stabilizing those derived IDs remains a separate follow-up.
 - Shared routes still copy downstream polylines rather than maintain a topology graph. Fix #2 adds joining/count/length coverage; large-survey phone performance and trunk-edit propagation remain unverified.
 - No voice recording or separate hardware/model selector was found. New/Existing status is implemented. These are requirements questions, not authorized additions.
 - Offline editing after initial load is implemented; cold-start offline application delivery is not established (no service worker found).
