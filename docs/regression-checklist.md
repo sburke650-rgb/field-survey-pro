@@ -5,7 +5,7 @@
 Recovery commit: `850eafbff6546911954655ee9fb893c0277fb9fb`.
 Local annotated tag: `recovery/v17.121` (not pushed).
 Default regression target: `/development/`; the original KD-004 expected-failure reproduction explicitly targets `/test/v17-121/`. Root is V17.78 and `/test/` is V17.81.
-Existing HTML snapshots are unchanged. `development/index.html` is the unnumbered editable copy derived from V17.121, with only Fix #1 storage changes. No V17.122 is created. It retains baseline version labels and is not a release.
+Existing HTML snapshots are unchanged. `development/index.html` is the unnumbered editable copy derived from V17.121, with Fix #1 storage and Fix #2 cable geometry changes. No V17.122 is created. It retains baseline version labels and is not a release.
 
 ## Reproduce locally
 
@@ -37,7 +37,7 @@ The test runner owns a loopback Python server on port 8765 and refuses to reuse 
 - [x] Camera drag, fixed viewport/walls, and connected route-start anchoring.
 - [x] Cone angle persistence without camera/viewport movement.
 - [x] MDF and IDF movement with connected endpoints and intermediate bends.
-- [x] Shipped cable simplifier corner preservation (KD-001 expected failure).
+- [x] Shipped cable geometry corner preservation (KD-001 now passes in development).
 - [x] Rendered Camera Details movement (KD-002 expected failure).
 - [x] Neutral Draw and Edit entry (KD-003 expected failures).
 - [x] Offline camera editing and stored geometry retention after reconnect/reload.
@@ -53,7 +53,8 @@ The saved multi-bend route fixture is exercised on storage reopening and equipme
 - [ ] Camera number swaps/cancellation, duplicate and invalid input, status editing.
 - [ ] Camera/cone persistence after reload; angle wraparound and multiple rotations.
 - [ ] Feet/meters, L-shapes, traced polygons, missing/conflicting dimensions and area entry reachability.
-- [ ] Route drawing through UI, L/U/S bends, sampling densities, zoom levels, shared-path joining/counts and footage.
+- [x] Route drawing through UI, L/U/multiple bends and reversals, sampling densities, shared-path joining/counts and footage.
+- [ ] Zoom-level sweeps, very long-route stress, and physical-phone routing acceptance.
 - [ ] Deletion matrix for stale mirror, IndexedDB, legacy and independent wall backups; camera, wall, route, plan and survey deletion.
 - [ ] Storage quota/backend failures and accurate degraded/failed-save status.
 - [ ] Automated narrow-viewport control reachability and toolbar occlusion checks.
@@ -91,3 +92,7 @@ Retain plain finite plan-space coordinates, stable IDs, equipment/camera/route r
 ## Fix #1 architectural review
 
 See [Survey data reconciliation](survey-data-reconciliation.md) for the deletion-ledger schema, compatibility policy, new tests, and remaining risks. The published KD-004 failure is retained; development repair checks are ordinary passing tests. Physical-phone checks remain unrun.
+
+## Fix #2 architectural review
+
+See [Cable route geometry](cable-route-geometry.md) for reproduced failures, lossless cleanup policy, endpoint/metadata compatibility, tests and remaining limitations. KD-001 is an ordinary passing regression; no known-defect test is removed. Published snapshots and UI remain unchanged.
