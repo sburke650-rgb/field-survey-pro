@@ -104,3 +104,7 @@ See [Movable Camera Details](camera-details-drag.md) for reproduction, bounds/ge
 ## Fix #4 architectural review
 
 See [Draw/Edit tool selection](draw-edit-tool-selection.md) for reproduction, neutral navigation policy, explicit-tool transitions, regression coverage and remaining device acceptance. Both original KD-003 tests now pass normally. No persisted format changes or published HTML changes are included.
+
+## Fix #5 architectural review
+
+See [Area tool accessibility](area-tool-accessibility.md) for reproduction, explicit Area menu choices, neutral entry, trace finish/cancel/corner Undo, unchanged geometry formats and regression evidence. Before release, repeat uploaded/drawn Area workflows on real Android Chrome and iPhone Safari in both orientations, including keyboard, pinch, cancellation, background/resume, backup and reopening.

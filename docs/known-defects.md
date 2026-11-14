@@ -1,7 +1,7 @@
 # Known defects — V17.121
 
 Baseline: `850eafbff6546911954655ee9fb893c0277fb9fb`.
-These are local inventory IDs, not GitHub issue numbers. Fixes #1–#4 are implemented only in the unnumbered `development/index.html` for architectural review. Published snapshots remain unchanged.
+These are local inventory IDs, not GitHub issue numbers. Fixes #1–#5 are implemented only in the unnumbered `development/index.html` for architectural review. Published snapshots remain unchanged.
 
 | ID | Confirmed problem | Automated evidence | Required resolution |
 | --- | --- | --- | --- |
@@ -14,7 +14,7 @@ Expected failures assert desired behavior; they do not invert assertions or skip
 
 ## Other findings requiring follow-up
 
-- Uploaded-plan tracing exists but its Area entry is hidden by toolbar logic. Manual area functions remain with limited entry paths. Add dedicated reachability fixtures before repairs.
+- Area entry and previously inaccessible trace/rectangle/manual workflows are repaired in development by Fix #5; see `docs/area-tool-accessibility.md`. New reachability tests failed before the repair and now run as ordinary regressions. Physical phone acceptance remains pending.
 - Recovery of walls/cameras/surveys from stale snapshots needs a complete deletion matrix; the first automated conflict reproduction covers legacy measurements only.
 - Toolbar safe-space/occlusion, gesture cancellation, multi-touch, rotation, keyboard and background/resume require phone acceptance. Desktop camera/cone checks do not reproduce the reported panning problem.
 - Shared routes still copy downstream polylines rather than maintain a topology graph. Fix #2 adds joining/count/length coverage; large-survey phone performance and trunk-edit propagation remain unverified.
