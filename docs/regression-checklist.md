@@ -5,7 +5,7 @@
 Recovery commit: `850eafbff6546911954655ee9fb893c0277fb9fb`.
 Local annotated tag: `recovery/v17.121` (not pushed).
 Default regression target: `/development/`; the original KD-004 expected-failure reproduction explicitly targets `/test/v17-121/`. Root is V17.78 and `/test/` is V17.81.
-Existing HTML snapshots are unchanged. `development/index.html` is the unnumbered editable copy derived from V17.121, with Fix #1 storage, Fix #2 cable geometry and Fix #3 Camera Details movement changes. No V17.122 is created. It retains baseline version labels and is not a release.
+Existing HTML snapshots are unchanged. `development/index.html` is the unnumbered editable copy derived from V17.121, with Fixes #1–#4 (storage, cable geometry, Camera Details movement, and neutral tool entry). No V17.122 is created. It retains baseline version labels and is not a release.
 
 ## Reproduce locally
 
@@ -39,7 +39,7 @@ The test runner owns a loopback Python server on port 8765 and refuses to reuse 
 - [x] MDF and IDF movement with connected endpoints and intermediate bends.
 - [x] Shipped cable geometry corner preservation (KD-001 now passes in development).
 - [x] Rendered Camera Details movement (KD-002 now passes), portrait/landscape bounds, controls, mouse/touch scrolling and cancellation.
-- [x] Neutral Draw and Edit entry (KD-003 expected failures).
+- [x] Neutral Draw/Edit entry (KD-003 now passes), drawn/uploaded tool selection, safe navigation, Undo/Done/Back/Cancel and reopening.
 - [x] Offline camera editing and stored geometry retention after reconnect/reload.
 
 The saved multi-bend route fixture is exercised on storage reopening and equipment movement. The corner-loss test executes source-extracted functions in a VM; it is supplemental algorithm coverage, not a route-drawing UI acceptance test. Source boundaries are asserted so extraction drift fails visibly.
@@ -100,3 +100,7 @@ See [Cable route geometry](cable-route-geometry.md) for reproduced failures, los
 ## Fix #3 architectural review
 
 See [Movable Camera Details](camera-details-drag.md) for reproduction, bounds/gesture handling, touch activation policy, tests and real-device limitations. KD-002 is an ordinary passing regression. Published snapshots and menu markup are unchanged.
+
+## Fix #4 architectural review
+
+See [Draw/Edit tool selection](draw-edit-tool-selection.md) for reproduction, neutral navigation policy, explicit-tool transitions, regression coverage and remaining device acceptance. Both original KD-003 tests now pass normally. No persisted format changes or published HTML changes are included.
