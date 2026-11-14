@@ -153,7 +153,6 @@ for (const entry of ['Draw', 'Edit']) {
     if (entry === 'Edit') await page.locator('#editPlan').click();
     else { await page.locator('#addPlan').click(); await page.getByRole('button', { name: 'Draw Plan', exact: true }).click(); }
     const tool = await page.locator('#planCanvas').getAttribute('data-active-tool');
-    test.fail(true, 'KD-003: entry handler explicitly selects line');
     expect(tool).toBe('pan');
   });
 }
