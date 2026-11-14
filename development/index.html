@@ -246,7 +246,7 @@ html.keyboard-visible #modalBack .modal,html.keyboard-visible #modalBack.fsp-dis
 #plans.fsp-fullscreen #planTools #fspToggleTools,
 #plans.fsp-fullscreen #planTools #fspDragTools,
 #plans.fsp-fullscreen #planTools #backDraw{display:none!important}
-#plans.fsp-fullscreen #planTools button:not(#line):not(#free):not(#measureWall):not(#areaTool):not(#undo):not(#fspEditMore){display:none!important}
+#plans.fsp-fullscreen #planTools button:where(:not(#line):not(#free):not(#measureWall):not(#areaTool):not(#undo):not(#fspEditMore)){display:none!important}
 #plans.fsp-fullscreen #planTools #line,
 #plans.fsp-fullscreen #planTools #free,
 #plans.fsp-fullscreen #planTools #measureWall,
@@ -2089,7 +2089,7 @@ read();
  const more=document.createElement('button');more.id='fspEditMore';more.type='button';more.textContent='More ▾';more.setAttribute('aria-expanded','false');
  const undo=document.getElementById('undo');undo.insertAdjacentElement('afterend',more);
  function close(){bar.classList.remove('fsp-ux-more-open');more.textContent='More ▾';more.setAttribute('aria-expanded','false')}
- more.addEventListener('click',()=>{const open=bar.classList.toggle('fsp-ux-more-open');more.textContent=open?'Less ▴':'More ▾';more.setAttribute('aria-expanded',String(open))});
+ more.addEventListener('click',()=>{const open=bar.classList.toggle('fsp-ux-more-open');const advanced=document.getElementById('moreDrawing');if(open&&advanced&&!advanced.classList.contains('hidden')&&advanced.textContent.includes('More'))advanced.click();more.textContent=open?'Less ▴':'More ▾';more.setAttribute('aria-expanded',String(open))});
  document.getElementById('finishEdit')?.addEventListener('click',close);
  bar.addEventListener('click',e=>{if(e.target.closest('#line,#free,#measureWall,#areaTool,#undo'))close()});
 })();
