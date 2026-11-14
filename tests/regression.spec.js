@@ -133,7 +133,6 @@ test('KD-001 cable simplification preserves a sampled right-angle bend', async (
   vm.runInContext(slice('function dist(a,b)', 'function appendPath(') + slice('function straighten(', 'function closestRack('), context);
   const points = Array.from({ length: 21 }, (_, i) => ({ x: Math.min(i, 10) * 5, y: Math.max(0, i - 10) * 5 }));
   const result = context.straighten(points);
-  test.fail(true, 'KD-001: cable simplifier discards right-angle corners');
   expect(result).toContainEqual({ x: 50, y: 0 });
 });
 

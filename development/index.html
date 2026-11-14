@@ -1513,18 +1513,13 @@ const style=document.createElement('style');style.textContent=`
 const bar=document.createElement('div');bar.id='fspCableBar';bar.className='hidden';bar.innerHTML='<button id="fspRack">+ MDF/IDF</button><button id="fspUndo">Undo Route</button><button id="fspCableSummary">Summary</button><button id="fspCableHelp" title="Cable routing instructions">? Help</button><button id="fspCableDone" class="primary">Done</button>';$('surveyArea').appendChild(bar);
 function racks(){return plan?(plan.fspRacks ||= []):[]}
 function moveRackAndRoutes(r,p){
- const dx=p.x-r.x,dy=p.y-r.y;
- if(!dx&&!dy)return;
- // Shift the common destination point and any other points exactly at the former rack location.
- // Other bends and camera-side endpoints remain unchanged.
+ if(p.x===r.x&&p.y===r.y)return;
+ // Only the connected destination follows equipment. An interior point may
+ // intentionally cross the old rack position and must remain where drawn.
  for(const route of routes()){
   if(route.rackId!==r.id||!route.points?.length)continue;
-  for(const point of route.points){
-   if(Math.hypot(point.x-r.x,point.y-r.y)<1.5){point.x+=dx;point.y+=dy}
-  }
-  // Always anchor the end of each home run at its selected distribution frame.
-  const last=route.points[route.points.length-1];
-  last.x=p.x;last.y=p.y;
+  const i=route.points.length-1;
+  route.points[i]={...route.points[i],x:p.x,y:p.y};
  }
  r.x=p.x;r.y=p.y;
 }
@@ -1639,7 +1634,7 @@ function drawExtras(root,isSurvey){
  // Keep each saved cable home-run start anchored to its camera after camera drags.
  for(const route of routes()){
   const cam=plan.cameras.find(c=>c.id===route.cameraId);
-  if(cam&&route.points?.length){route.points[0].x=cam.x;route.points[0].y=cam.y}
+  if(cam&&route.points?.length)route.points[0]={...route.points[0],x:cam.x,y:cam.y};
  }
  const routesNow=routes(),show=cableMode||cableVisible;
  syncRackNames();
@@ -1650,7 +1645,8 @@ function drawExtras(root,isSurvey){
   const segments=[];
   for(const r of routesNow)for(let i=0;i<r.points.length-1;i++){
    const a=r.points[i],b=r.points[i+1],length=dist(a,b);
-   if(length>5)segments.push({a,b,length,cameraId:r.cameraId});
+   // Retained samples may be less than five plan units apart.
+   if(length>0)segments.push({a,b,length,cameraId:r.cameraId});
   }
   const candidates=[];
   for(const seg of segments){
@@ -1725,15 +1721,33 @@ $('fspRack').onclick=chooseRack;
 $('fspUndo').onclick=()=>{if(drawing){drawing=null;refresh();return}if(!routes().length)return;confirmModal('Undo cable route','Remove the last cable route?',()=>{routes().pop();touch();refresh()})};
 function chooseRack(){if(!plan)return;selectModal('Add equipment marker',[{label:'MDF',action:()=>startRack('MDF')},{label:'IDF',action:()=>startRack('IDF')}])}
 function startRack(type){if(screen!=='survey')show('survey');placingRack=type;placing=false;selected=null;closeDetail();$('surveyHint').textContent='Tap floor plan to place '+type}
-function straighten(points){if(points.length<3)return points;const out=[points[0]];let anchor=0;for(let i=2;i<points.length;i++){const a=points[anchor],b=points[i],mid=points[i-1],d=nearSegment(mid,a,b).d;if(d>8){out.push(mid);anchor=i-1}}out.push(points.at(-1));return out.filter((p,i)=>!i||dist(p,out[i-1]||p)>0.5)}
+function straighten(points){
+ // Cable samples represent the technician's pathway, not a shape to infer.
+ // Only identical consecutive coordinates are redundant: no distance/angle
+ // tolerance may discard a bend, reversal, or intermediate point.
+ const out=[];
+ for(const p of points){
+  const last=out.at(-1);
+  if(!last||p.x!==last.x||p.y!==last.y)out.push({...p});
+ }
+ return out;
+}
 function closestRack(p){return racks().map(r=>({r,d:dist(p,r)})).sort((a,b)=>a.d-b.d)[0]}
 function closestRoute(p,fromRack){let best=null;for(const r of routes()){if(r.rackId!==fromRack)continue;for(let i=0;i<r.points.length-1;i++){const hit=nearSegment(p,r.points[i],r.points[i+1]);if(!best||hit.d<best.d)best={...hit,route:r,index:i}}}return best}
-function complete(path,rack){const c=plan.cameras.find(c=>c.id===drawing.camId);if(!c)return;const record={id:uid(),cameraId:c.id,cameraNum:c.num,rackId:rack.id,points:path};const old=routes().findIndex(r=>r.cameraId===c.id);if(old>=0)routes().splice(old,1);routes().push(record);drawing=null;touch();refresh();$('surveyHint').textContent='Cable C'+c.num+' saved to '+rack.name}
+function complete(path,rack){
+ const c=plan.cameras.find(c=>c.id===drawing.camId);if(!c)return;
+ const old=routes().findIndex(r=>r.cameraId===c.id),previous=old>=0?routes()[old]:null;
+ // Rerouting changes geometry/destination, not saved footage, identity, or
+ // extension fields. Copy points so joined pathways never share objects.
+ const record={...previous,id:previous?.id||uid(),cameraId:c.id,cameraNum:c.num,rackId:rack.id,points:straighten(path)};
+ if(old>=0)routes().splice(old,1,record);else routes().push(record);
+ drawing=null;touch();refresh();$('surveyHint').textContent='Cable C'+c.num+' saved to '+rack.name;
+}
 function finalize(){
  if(!drawing)return;const path=straighten(drawing.points);if(path.length<2){drawing=null;refresh();return}
  const near=closestRack(path.at(-1));
  if(near&&near.d<45){path.push({x:near.r.x,y:near.r.y});complete(path,near.r);return}
- const candidates=racks().map(r=>({label:r.name,action:()=>{const hit=closestRoute(path.at(-1),r.id);if(hit&&hit.d<35){candidate={path,rack:r,hit};promptModal('Connect to shared pathway','<p>Use the existing cable pathway to '+esc(r.name)+'?</p>',()=>{const x=candidate;if(!x)return;complete([...x.path.slice(0,-1),x.hit.q,...x.hit.route.points.slice(x.hit.index+1)],x.rack);candidate=null},'Connect')}else{alert('Finish your line at '+r.name+', or near an existing route to '+r.name+'.')}}}));
+ const candidates=racks().map(r=>({label:r.name,action:()=>{const hit=closestRoute(path.at(-1),r.id);if(hit&&hit.d<35){candidate={path,rack:r,hit};promptModal('Connect to shared pathway','<p>Use the existing cable pathway to '+esc(r.name)+'?</p>',()=>{const x=candidate;if(!x)return;complete([...x.path,x.hit.q,...x.hit.route.points.slice(x.hit.index+1)],x.rack);candidate=null},'Connect')}else{alert('Finish your line at '+r.name+', or near an existing route to '+r.name+'.')}}}));
  if(!candidates.length){alert('Place an MDF/IDF marker first.');drawing=null;refresh();return}
  selectModal('Select cable destination',candidates)
 }
@@ -1784,8 +1798,8 @@ svg.addEventListener('pointerdown',e=>{
  if(!c){$('surveyHint').textContent='Start the route by touching a camera';return}
  drawing={camId:c.id,points:[{x:c.x,y:c.y},p],id:e.pointerId};svg.setPointerCapture(e.pointerId);refresh()
  },true);
- svg.addEventListener('pointermove',e=>{if(dragRack&&dragRack.id===e.pointerId){e.preventDefault();e.stopImmediatePropagation();const p=point(e);if(p){moveRackAndRoutes(dragRack.r,p);refresh()}return}if(!drawing||drawing.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();const p=point(e);if(p&&dist(p,drawing.points.at(-1))>4){drawing.points.push(p);refresh()}},true);
- svg.addEventListener('pointerup',e=>{if(dragRack&&dragRack.id===e.pointerId){e.preventDefault();e.stopImmediatePropagation();dragRack=null;touch();refresh();return}if(!drawing||drawing.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();finalize()},true);
+ svg.addEventListener('pointermove',e=>{if(dragRack&&dragRack.id===e.pointerId){e.preventDefault();e.stopImmediatePropagation();const p=point(e);if(p){moveRackAndRoutes(dragRack.r,p);refresh()}return}if(!drawing||drawing.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();const p=point(e);if(p&&dist(p,drawing.points.at(-1))>0){drawing.points.push(p);refresh()}},true);
+ svg.addEventListener('pointerup',e=>{if(dragRack&&dragRack.id===e.pointerId){e.preventDefault();e.stopImmediatePropagation();dragRack=null;touch();refresh();return}if(!drawing||drawing.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();const p=point(e);if(p&&dist(p,drawing.points.at(-1))>0)drawing.points.push(p);finalize()},true);
  svg.addEventListener('pointercancel',e=>{if(drawing&&drawing.id===e.pointerId){drawing=null;refresh()}if(dragRack&&dragRack.id===e.pointerId){dragRack=null;touch()}},true);
  const originalShow=show;show=function(name){if(name!=='survey'&&cableMode)leave();originalShow(name)};
 })();
