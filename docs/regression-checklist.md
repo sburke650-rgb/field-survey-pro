@@ -5,7 +5,7 @@
 Recovery commit: `850eafbff6546911954655ee9fb893c0277fb9fb`.
 Local annotated tag: `recovery/v17.121` (not pushed).
 Default regression target: `/development/`; the original KD-004 expected-failure reproduction explicitly targets `/test/v17-121/`. Root is V17.78 and `/test/` is V17.81.
-Existing HTML snapshots are unchanged. `development/index.html` is the unnumbered editable copy derived from V17.121, with Fixes #1–#4 (storage, cable geometry, Camera Details movement, and neutral tool entry). No V17.122 is created. It retains baseline version labels and is not a release.
+Existing HTML snapshots are unchanged. `development/index.html` is the unnumbered editable copy derived from V17.121, with Fixes #1–#6 (storage, cable geometry, Camera Details movement, neutral tool entry, Area entry and mobile layout). No V17.122 is created. It retains baseline version labels and is not a release.
 
 ## Reproduce locally
 
@@ -108,3 +108,7 @@ See [Draw/Edit tool selection](draw-edit-tool-selection.md) for reproduction, ne
 ## Fix #5 architectural review
 
 See [Area tool accessibility](area-tool-accessibility.md) for reproduction, explicit Area menu choices, neutral entry, trace finish/cancel/corner Undo, unchanged geometry formats and regression evidence. Before release, repeat uploaded/drawn Area workflows on real Android Chrome and iPhone Safari in both orientations, including keyboard, pinch, cancellation, background/resume, backup and reopening.
+
+## Fix #6 architectural review
+
+See [Mobile toolbar accessibility](mobile-toolbar-accessibility.md) for baseline overlap reproduction, reserved navigation/Done space, scrollable controls, bounded floating toolbars, safe-area and visual-viewport handling, test outcomes and physical-phone checklist. Simulated Android touch/keyboard/insets do not replace Android Chrome and iPhone Safari acceptance. Published snapshots and persisted formats remain unchanged.
