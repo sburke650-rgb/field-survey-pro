@@ -50,6 +50,8 @@ test('Freehand exposes its options without making Undo disappear', async ({ page
   await openEditor(page, { width: 360, height: 640 });
   await page.locator('#free').tap();
   await directlyHittable(page, '#undo');
+  await directlyHittable(page, '#fspEditMore');
+  await page.locator('#fspEditMore').tap();
   await directlyHittable(page, '#drawColor');
   await directlyHittable(page, '#autoWall');
   await directlyHittable(page, '#finishEdit');
