@@ -255,6 +255,10 @@ html.keyboard-visible #modalBack .modal,html.keyboard-visible #modalBack.fsp-dis
 #plans.fsp-fullscreen #planTools #fspEditMore{display:inline-flex!important;align-items:center;justify-content:center}
 #plans.fsp-fullscreen #planTools.fsp-ux-more-open button:not(#backDraw):not(#fspToggleTools):not(#fspDragTools):not(.hidden){display:inline-flex!important}
 #plans.fsp-fullscreen #planTools #fspEditMore{background:#204d79}
+/* Hidden state must win over the primary-action display overrides. */
+#plans.fsp-fullscreen #planTools button.hidden,
+#plans.fsp-fullscreen #planTools.fsp-ux-more-open button.hidden{display:none!important}
+#plans.fsp-fullscreen #planTools.fsp-ux-more-open{max-height:min(55vh,340px)!important;overflow-y:auto!important;overscroll-behavior:contain}
 </style>
 </head><body>
 <section id="home" class="screen"><header><strong>Field Survey Pro <span class="small">V17.111 TEST</span></strong></header><div class="content"><div class="stack"><button id="continue" class="primary hidden">Continue Survey</button><button id="newSurvey" class="primary">+ New Survey</button><button id="allSurveys">All Surveys</button><div class="card muted">V17 test: Plans and camera placement. This version uses separate test storage; your older V16 surveys are not changed. Export a backup before relying on phone storage.</div></div></div></section>
