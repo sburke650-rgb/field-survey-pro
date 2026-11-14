@@ -1,0 +1,14 @@
+{
+  "name": "field-survey-pro",
+  "devDependencies": {
+    "@playwright/test": "1.65.1"
+  },
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:report": "playwright show-report"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

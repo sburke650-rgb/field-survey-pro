@@ -1,0 +1,188 @@
+{
+  "active": "survey-1",
+  "surveys": [
+    {
+      "id": "survey-1",
+      "name": "Synthetic regression site",
+      "activePlan": "plan-1",
+      "updated": 1,
+      "sitePhotos": [],
+      "notes": "Synthetic data only",
+      "plans": [
+        {
+          "id": "plan-1",
+          "name": "Plan 1",
+          "confirmed": true,
+          "image": null,
+          "viewRotationOverride": 0,
+          "walls": [
+            {
+              "id": "wall-0",
+              "points": [
+                {
+                  "x": 100,
+                  "y": 100
+                },
+                {
+                  "x": 900,
+                  "y": 100
+                }
+              ]
+            },
+            {
+              "id": "wall-1",
+              "points": [
+                {
+                  "x": 900,
+                  "y": 100
+                },
+                {
+                  "x": 900,
+                  "y": 600
+                }
+              ]
+            },
+            {
+              "id": "wall-2",
+              "points": [
+                {
+                  "x": 900,
+                  "y": 600
+                },
+                {
+                  "x": 100,
+                  "y": 600
+                }
+              ]
+            },
+            {
+              "id": "wall-3",
+              "points": [
+                {
+                  "x": 100,
+                  "y": 600
+                },
+                {
+                  "x": 100,
+                  "y": 100
+                }
+              ]
+            }
+          ],
+          "cameras": [
+            {
+              "id": "cam-1",
+              "num": "1",
+              "type": "Existing",
+              "x": 350,
+              "y": 350,
+              "angle": 0,
+              "notes": "Synthetic camera"
+            }
+          ],
+          "dimensions": [
+            {
+              "id": "dim-x",
+              "a": {
+                "x": 100,
+                "y": 100
+              },
+              "b": {
+                "x": 900,
+                "y": 100
+              },
+              "measure": {
+                "feet": 100,
+                "inches": 0,
+                "displayUnit": "ft"
+              }
+            },
+            {
+              "id": "dim-y",
+              "a": {
+                "x": 900,
+                "y": 100
+              },
+              "b": {
+                "x": 900,
+                "y": 600
+              },
+              "measure": {
+                "feet": 50,
+                "inches": 0,
+                "displayUnit": "ft"
+              }
+            }
+          ],
+          "areas": [
+            {
+              "id": "area-1",
+              "kind": "auto-drawn",
+              "name": "Building Area",
+              "sqft": 5000,
+              "pos": {
+                "x": 500,
+                "y": 350
+              },
+              "group": ""
+            }
+          ],
+          "fspRacks": [
+            {
+              "id": "rack-1",
+              "type": "MDF",
+              "name": "MDF",
+              "x": 800,
+              "y": 450
+            }
+          ],
+          "fspRoutes": [
+            {
+              "id": "route-1",
+              "cameraId": "cam-1",
+              "cameraNum": "1",
+              "rackId": "rack-1",
+              "points": [
+                {
+                  "x": 350,
+                  "y": 350
+                },
+                {
+                  "x": 600,
+                  "y": 350
+                },
+                {
+                  "x": 600,
+                  "y": 450
+                },
+                {
+                  "x": 800,
+                  "y": 450
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "plan-2",
+          "name": "Plan 2",
+          "confirmed": true,
+          "image": null,
+          "viewRotationOverride": 0,
+          "walls": [],
+          "cameras": [
+            {
+              "id": "cam-2",
+              "num": "2",
+              "type": "New",
+              "x": 300,
+              "y": 300,
+              "angle": 0,
+              "notes": "Second plan"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
