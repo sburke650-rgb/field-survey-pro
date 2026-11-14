@@ -4,8 +4,8 @@
 
 Recovery commit: `850eafbff6546911954655ee9fb893c0277fb9fb`.
 Local annotated tag: `recovery/v17.121` (not pushed).
-Regression target: `/test/v17-121/`. Root is V17.78 and `/test/` is V17.81.
-Existing HTML snapshots are unchanged. No V17.122 or canonical editable successor is created by this work. Select the future canonical source explicitly before repairs, then make the test target explicit in the same reviewed change.
+Default regression target: `/development/`; the original KD-004 expected-failure reproduction explicitly targets `/test/v17-121/`. Root is V17.78 and `/test/` is V17.81.
+Existing HTML snapshots are unchanged. `development/index.html` is the unnumbered editable copy derived from V17.121, with only Fix #1 storage changes. No V17.122 is created. It retains baseline version labels and is not a release.
 
 ## Reproduce locally
 
@@ -47,8 +47,9 @@ The saved multi-bend route fixture is exercised on storage reopening and equipme
 ## Coverage to add before related repairs/releases
 
 - [ ] Untitled surveys; renaming, closing/reopening and switching multiple surveys.
-- [ ] Retained IndexedDB across an actual browser process restart (current coverage tests same-context reload and a new context restored from localStorage).
-- [ ] JSON backup export/import, unknown fields, invalid imports, photos and text notes.
+- [x] Retained storage across an actual Chromium process restart with a disposable persistent profile.
+- [x] Legacy JSON backup export/import, unknown fields, and intentional older-backup restore with healthy storage.
+- [ ] Invalid imports, photos/text-note round-trips, and partial-write import conflicts.
 - [ ] Camera number swaps/cancellation, duplicate and invalid input, status editing.
 - [ ] Camera/cone persistence after reload; angle wraparound and multiple rotations.
 - [ ] Feet/meters, L-shapes, traced polygons, missing/conflicting dimensions and area entry reachability.
@@ -86,3 +87,7 @@ PR descriptions must include behavior before/after, affected target, test outcom
 ## Future AI compatibility — no AI implementation
 
 Retain plain finite plan-space coordinates, stable IDs, equipment/camera/route references, measurement units and estimated/measured provenance. Keep view rotation/zoom separate. Preserve unknown backup fields. Document schema versions and require migrations plus compatibility fixtures before changing persisted structures. Shared-path topology and full calculation provenance are future design work, not part of these safeguards.
+
+## Fix #1 architectural review
+
+See [Survey data reconciliation](survey-data-reconciliation.md) for the deletion-ledger schema, compatibility policy, new tests, and remaining risks. The published KD-004 failure is retained; development repair checks are ordinary passing tests. Physical-phone checks remain unrun.

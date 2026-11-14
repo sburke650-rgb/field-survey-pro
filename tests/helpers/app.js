@@ -1,14 +1,14 @@
 const { expect } = require('@playwright/test');
 const fixture = require('../fixtures/survey.json');
 const KEY = 'fsp-test-isolated-v1-plans-cameras';
-const TARGET = '/test/v17-121/';
-async function seed(page, { legacy = false, state = fixture } = {}) {
+const TARGET = '/development/';
+async function seed(page, { legacy = false, state = fixture, target = TARGET } = {}) {
   await page.addInitScript(({ state, key, legacy }) => {
     if (sessionStorage.getItem('regression-seeded')) return;
     localStorage.setItem(legacy ? key : key + '-full-mirror-v1748', JSON.stringify(state));
     sessionStorage.setItem('regression-seeded', 'yes');
   }, { state, key: KEY, legacy });
-  await page.goto(TARGET);
+  await page.goto(target);
   await page.locator('#continue').click();
 }
 async function saved(page) {
