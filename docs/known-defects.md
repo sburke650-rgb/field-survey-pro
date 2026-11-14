@@ -1,12 +1,12 @@
 # Known defects — V17.121
 
 Baseline: `850eafbff6546911954655ee9fb893c0277fb9fb`.
-These are local inventory IDs, not GitHub issue numbers. Fixes #1 and #2 are implemented only in the unnumbered `development/index.html` for architectural review. Published snapshots remain unchanged.
+These are local inventory IDs, not GitHub issue numbers. Fixes #1–#3 are implemented only in the unnumbered `development/index.html` for architectural review. Published snapshots remain unchanged.
 
 | ID | Confirmed problem | Automated evidence | Required resolution |
 | --- | --- | --- | --- |
 | KD-001 | Sampled right-angle cable route becomes a diagonal in `straighten()` | Original assertion now passes; expanded geometry/UI/save/shared-path tests pass | Development repair; see `docs/cable-route-geometry.md` |
-| KD-002 | Camera Details inline drag positions lose to important CSS | Browser drag asserts actual panel displacement; expected failure | Restore reachable dragging without moving canvas |
+| KD-002 | Camera Details inline drag positions lose to important CSS | Original assertion now passes; added mouse/touch boundary, controls and scrolling regressions | Development repair; see `docs/camera-details-drag.md` |
 | KD-003 | Draw and Edit entry explicitly select Line | Two browser tests assert neutral Pan entry; expected failures | Approved neutral entry in both workflows |
 | KD-004 | A stale legacy snapshot restores a deleted measurement | Published-snapshot reproduction remains an expected failure; development repair tests pass | Plan-local versioned deletion ledger; see `docs/survey-data-reconciliation.md` |
 
@@ -22,4 +22,4 @@ Expected failures assert desired behavior; they do not invert assertions or skip
 - Offline editing after initial load is implemented; cold-start offline application delivery is not established (no service worker found).
 - Root and generic test entry points are older versions. No production entry point is changed here.
 
-KD-001 and KD-004 are repaired in development, not in the published baseline. Other confirmed defects remain release blockers. Passing the safeguard baseline with expected failures is not V17.122 release acceptance.
+KD-001, KD-002 and KD-004 are repaired in development, not in the published baseline. Other confirmed defects remain release blockers. Passing the safeguard baseline with expected failures is not V17.122 release acceptance.

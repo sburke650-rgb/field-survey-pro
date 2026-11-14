@@ -155,12 +155,12 @@
 #surveyArea.fsp-detail-open #floatTools,
 #surveyArea.fsp-detail-open #restoreTools,
 #surveyArea.fsp-detail-open #surveyDone{display:none!important}
-#surveyArea #detail{position:absolute!important;left:10px!important;right:auto!important;top:auto!important;bottom:10px!important;width:min(310px,calc(100% - 20px))!important;max-height:min(390px,calc(100% - 20px))!important;padding:11px!important;overflow:auto!important;z-index:60!important}
+#surveyArea #detail{position:absolute!important;left:10px;right:auto;top:auto;bottom:10px;width:min(310px,calc(100% - 20px),var(--detail-visible-width,100vw))!important;max-height:min(390px,calc(100% - 20px),var(--detail-visible-height,100dvh))!important;padding:11px!important;overflow:auto!important;z-index:60!important}
 #surveyArea #detail label{margin:6px 0 3px!important}
 #surveyArea #detail input,#surveyArea #detail select{min-height:36px!important;padding:6px 9px!important}
 #surveyArea #detail textarea{min-height:48px!important;height:54px!important;padding:6px 9px!important}
 #surveyArea #detail button{min-height:36px!important;padding:6px 8px!important}
-@media(orientation:landscape){#surveyArea #detail{max-height:calc(100% - 14px)!important;bottom:7px!important;left:7px!important;width:min(340px,calc(100% - 14px))!important}}
+@media(orientation:landscape){#surveyArea #detail{max-height:min(calc(100% - 14px),var(--detail-visible-height,100dvh))!important;bottom:7px;left:7px;width:min(340px,calc(100% - 14px),var(--detail-visible-width,100vw))!important}}
 /* Preserve a readable number while retaining the enlarged invisible touch target */
 #surveyCanvas .pin text{font-size:16px!important;font-weight:800!important;paint-order:stroke;stroke:#0003;stroke-width:.4px}
 
@@ -1383,39 +1383,101 @@ function bindSurvey(){const svg=$('surveyCanvas');svg.addEventListener('pointerd
  },{capture:true});
  function finish(e){if(!touches.has(e.pointerId))return;touches.delete(e.pointerId);if(touches.size<2)pinchState=null;if(touches.size===0){pan=null;if(changed){rememberPlanView(svg);changed=false}}}
  svg.addEventListener('pointerup',finish,{capture:true});svg.addEventListener('pointercancel',finish,{capture:true});
-})();function openDetail(id){
+})();
+function detailViewportBounds(){
+ const area=$('surveyArea').getBoundingClientRect(),v=window.visualViewport;
+ const x=v?.offsetLeft||0,y=v?.offsetTop||0;
+ return {area,left:Math.max(area.left,x)+4,top:Math.max(area.top,y)+4,
+  right:Math.min(area.right,x+(v?.width||innerWidth))-4,
+  bottom:Math.min(area.bottom,y+(v?.height||innerHeight))-4};
+}
+function positionDetail(clientLeft,clientTop){
+ const panel=$('detail'),b=detailViewportBounds();
+ // Size constraints preserve internal scrolling when a keyboard, zoom or
+ // orientation change leaves less room than the normal panel dimensions.
+ panel.style.setProperty('--detail-visible-width',Math.max(0,b.right-b.left)+'px');
+ panel.style.setProperty('--detail-visible-height',Math.max(0,b.bottom-b.top)+'px');
+ const box=panel.getBoundingClientRect();
+ const left=Math.max(b.left,Math.min(b.right-box.width,clientLeft));
+ const top=Math.max(b.top,Math.min(b.bottom-box.height,clientTop));
+ panel.style.left=(left-b.area.left)+'px';panel.style.top=(top-b.area.top)+'px';
+ panel.style.bottom='auto';panel.style.right='auto';
+}
+function fitOpenDetail(){
+ if(screen!=='survey'||$('detail').classList.contains('hidden'))return;
+ const r=$('detail').getBoundingClientRect();positionDetail(r.left,r.top);
+}
+function openDetail(id){
  detailId=id;const c=plan?.cameras.find(x=>x.id===id);if(!c)return;
  $('detailTitle').textContent='Camera '+c.num;$('detailNumber').value=c.num;
  setDetailCameraType(c.type);$('detailNotes').value=c.notes||'';
  $('detail').classList.remove('hidden');$('surveyArea').classList.add('fsp-detail-open');
- const panel=$('detail'),area=$('surveyArea'),areaBox=area.getBoundingClientRect();
- panel.style.bottom='auto';panel.style.right='auto';
+ const panel=$('detail'),areaBox=$('surveyArea').getBoundingClientRect();
+ positionDetail(areaBox.left+4,areaBox.top+4);
  const marker=$('surveyScene').getScreenCTM();
  let markerX=areaBox.width/2,markerY=areaBox.height/2;
  if(marker){const pt0=$('surveyCanvas').createSVGPoint();pt0.x=c.x;pt0.y=c.y;const screenPoint=pt0.matrixTransform(marker);markerX=screenPoint.x-areaBox.left;markerY=screenPoint.y-areaBox.top}
- const panelW=panel.offsetWidth,panelH=panel.offsetHeight;
- let left=markerX<areaBox.width/2?areaBox.width-panelW-12:12;
- let top=markerY>areaBox.height/2?12:areaBox.height-panelH-12;
- panel.style.left=Math.max(4,Math.min(areaBox.width-panelW-4,left))+'px';
- panel.style.top=Math.max(4,Math.min(areaBox.height-panelH-4,top))+'px';
+ const left=markerX<areaBox.width/2?areaBox.width-panel.offsetWidth-12:12;
+ const top=markerY>areaBox.height/2?12:areaBox.height-panel.offsetHeight-12;
+ positionDetail(areaBox.left+left,areaBox.top+top);
 }
 let detailDragState=null;
+function endDetailDrag(e){
+ const d=detailDragState;if(!d||(e&&e.pointerId!==d.id))return;
+ detailDragState=null;
+ // Native pointerup/cancel releases capture after dispatch. Only a programmatic
+ // close needs an explicit release.
+ if(!e&&d.capture.hasPointerCapture(d.id))d.capture.releasePointerCapture(d.id);
+}
 $('detailDrag').addEventListener('pointerdown',e=>{
- if(e.target.closest('button'))return;
- e.preventDefault();const box=$('detail').getBoundingClientRect(),area=$('surveyArea').getBoundingClientRect();
- detailDragState={id:e.pointerId,dx:e.clientX-box.left,dy:e.clientY-box.top,area};
- $('detailDrag').setPointerCapture(e.pointerId);
+ if(e.target.closest('button,input,textarea,select,a,[contenteditable]')||detailDragState||e.isPrimary===false||(e.pointerType==='mouse'&&e.button!==0))return;
+ const box=$('detail').getBoundingClientRect();
+ detailDragState={id:e.pointerId,dx:e.clientX-box.left,dy:e.clientY-box.top,capture:e.target};
+ // Touch pointers already have implicit capture on the initial header target.
+ if(e.pointerType!=='touch')e.target.setPointerCapture(e.pointerId);
 });
 $('detailDrag').addEventListener('pointermove',e=>{
  const d=detailDragState;if(!d||e.pointerId!==d.id)return;
- e.preventDefault();const panel=$('detail');
- panel.style.left=Math.max(4,Math.min(d.area.width-panel.offsetWidth-4,e.clientX-d.area.left-d.dx))+'px';
- panel.style.top=Math.max(4,Math.min(d.area.height-panel.offsetHeight-4,e.clientY-d.area.top-d.dy))+'px';
- panel.style.bottom='auto';
+ positionDetail(e.clientX-d.dx,e.clientY-d.dy);
 });
-for(const ev of ['pointerup','pointercancel'])$('detailDrag').addEventListener(ev,()=>{detailDragState=null});
+for(const ev of ['pointerup','pointercancel','lostpointercapture'])$('detailDrag').addEventListener(ev,endDetailDrag);
+// Only the header starts panel movement. Fields and scrolling keep their
+// native defaults; the canvas is a sibling, not a panel ancestor.
+// A completed header drag can suppress the browser's compatibility click on
+// the next touch tap. Activate existing buttons once from a qualified touchend,
+// cancelling that tap's compatibility click. Mouse/keyboard clicks are unchanged.
+let detailButtonTouch=null;
+$('detail').addEventListener('touchstart',e=>{
+ const button=e.target.closest('button'),t=e.touches[0];
+ detailButtonTouch=e.touches.length===1&&button&&!button.disabled?
+  {button,id:t.identifier,x:t.clientX,y:t.clientY}:null;
+},{passive:true});
+$('detail').addEventListener('touchmove',e=>{
+ const d=detailButtonTouch,t=d&&Array.from(e.touches).find(t=>t.identifier===d.id);
+ if(!t||Math.hypot(t.clientX-d.x,t.clientY-d.y)>10)detailButtonTouch=null;
+},{passive:true});
+$('detail').addEventListener('touchcancel',()=>{detailButtonTouch=null},{passive:true});
+$('detail').addEventListener('pointercancel',()=>{detailButtonTouch=null},{passive:true});
+$('detail').addEventListener('click',e=>{
+ if(detailButtonTouch?.button===e.target.closest('button'))detailButtonTouch=null;
+},{capture:true});
+$('detail').addEventListener('touchend',e=>{
+ const d=detailButtonTouch;detailButtonTouch=null;
+ const t=d&&Array.from(e.changedTouches).find(t=>t.identifier===d.id);
+ if(!t||e.touches.length||detailDragState||!e.cancelable||d.button.disabled||
+  Math.hypot(t.clientX-d.x,t.clientY-d.y)>10||
+  document.elementFromPoint(t.clientX,t.clientY)?.closest('button')!==d.button)return;
+ e.preventDefault();d.button.focus({preventScroll:true});d.button.click();
+},{passive:false});
+window.addEventListener('resize',fitOpenDetail);
+window.addEventListener('orientationchange',fitOpenDetail);
+window.visualViewport?.addEventListener('resize',fitOpenDetail);
+window.visualViewport?.addEventListener('scroll',fitOpenDetail);
+if(typeof ResizeObserver==='function'){
+ const observer=new ResizeObserver(fitOpenDetail);observer.observe($('surveyArea'));observer.observe($('detail'));
+}
 function closeDetail(){
- detailId=null;$('detail').classList.add('hidden');$('surveyArea').classList.remove('fsp-detail-open');
+ endDetailDrag();detailButtonTouch=null;detailId=null;$('detail').classList.add('hidden');$('surveyArea').classList.remove('fsp-detail-open');
 }
 function selectedDetailCameraType(){return document.querySelector('#detailType [data-camera-type].primary')?.dataset.cameraType||'New'}
 function setDetailCameraType(type){document.querySelectorAll('#detailType [data-camera-type]').forEach(b=>{const active=b.dataset.cameraType===(type==='Existing'?'Existing':'New');b.classList.toggle('primary',active);b.setAttribute('aria-pressed',String(active));});}
