@@ -17,7 +17,7 @@ module.exports = defineConfig({
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
   webServer: {
     command: 'python3 -m http.server 8765 --bind 127.0.0.1 --directory .',
-    url: 'http://127.0.0.1:8765/test/v17-121/',
+    url: 'http://127.0.0.1:8765/development/',
     reuseExistingServer: false,
   },
 });

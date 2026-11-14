@@ -15,7 +15,7 @@
 
 ## Application and release identity
 - Root `index.html` is V17.78; `test/index.html` is V17.81. Verify targets before editing.
-- Current regression target is `test/v17-121/index.html`; the canonical future development file has not been selected. Do not implicitly update other entry points.
+- Unnumbered development source and default regression target: `development/index.html`. Published `test/v17-121/index.html` remains immutable and retains the original KD-004 reproduction. Do not implicitly update other entry points.
 - Preserve released snapshots unchanged. Keep release paths, titles, and version labels consistent.
 - Do not create a numbered release until explicitly authorized.
 

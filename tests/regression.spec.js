@@ -67,8 +67,9 @@ test('measurement deletion invalidates area and survives reload with current sna
   expect(data.surveys[0].plans[0].areas).toHaveLength(0);
 });
 
-test('KD-004 stale legacy snapshot must not resurrect a deleted measurement', async ({ page }) => {
-  await seed(page, { legacy: true }); await deleteMeasurement(page);
+test('[published V17.121] KD-004 stale legacy snapshot must not resurrect a deleted measurement', async ({ page }) => {
+  // Keep the published-snapshot reproduction; repaired behavior is tested separately.
+  await seed(page, { legacy: true, target: '/test/v17-121/' }); await deleteMeasurement(page);
   expect((await saved(page)).surveys[0].plans[0].dimensions).toHaveLength(1);
   await page.reload(); await page.locator('#continue').click();
   const data = await saved(page);
@@ -126,7 +127,7 @@ test(`${type} drag updates connected endpoint and preserves intermediate bends`,
 test('KD-001 cable simplification preserves a sampled right-angle bend', async () => {
   // Execute the exact shipped functions, not a duplicated test implementation.
   // This supplemental algorithm test does not replace future route-drawing UI coverage.
-  const html = readFileSync('test/v17-121/index.html', 'utf8');
+  const html = readFileSync('development/index.html', 'utf8');
   const slice = (a, b) => { const start = html.indexOf(a); const end = html.indexOf(b, start); expect(start).toBeGreaterThan(-1); expect(end).toBeGreaterThan(start); return html.slice(start, end); };
   const context = vm.createContext({});
   vm.runInContext(slice('function dist(a,b)', 'function appendPath(') + slice('function straighten(', 'function closestRack('), context);
