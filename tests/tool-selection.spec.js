@@ -178,7 +178,8 @@ test('Back to Sketch from the area guide does not implicitly activate Line', asy
   await seed(page, { state }); await page.locator('#editPlan').click();
   await page.locator('#measureWall').click();
   if (await page.locator('#dismissMeasureHelp').count()) await page.locator('#dismissMeasureHelp').click();
-  await page.locator('#areaTool').click(); await expect(page.locator('#modalTitle')).toHaveText('Measure the Building');
+  await page.locator('#areaTool').click();
+  await page.getByRole('button', { name: 'Calculate from drawn walls', exact: true }).click(); await expect(page.locator('#modalTitle')).toHaveText('Measure the Building');
   await page.getByRole('button', { name: 'Back to Sketch', exact: true }).click();
   await neutral(page); expect((await saved(page)).surveys[0].plans[0].walls).toEqual(p.walls);
 });
