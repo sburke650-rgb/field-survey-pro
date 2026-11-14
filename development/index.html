@@ -232,7 +232,31 @@ html.keyboard-visible #modalBack.fsp-distance-dialog .modal{top:calc(var(--fsp-v
 html.keyboard-visible #modalBack .modal,html.keyboard-visible #modalBack.fsp-distance-dialog .modal{max-height:calc(var(--fsp-visible-height,100dvh) - var(--fsp-safe-top) - var(--fsp-safe-bottom) - 12px)!important}
 #modalBack .modal{width:min(440px,calc(var(--fsp-visible-width,100vw) - var(--fsp-safe-left) - var(--fsp-safe-right) - 12px))!important}
 #modalBack.fsp-distance-dialog .modal{width:min(330px,calc(var(--fsp-visible-width,100vw) - var(--fsp-safe-left) - var(--fsp-safe-right) - 12px))!important}
-</style></head><body>
+</style><style>
+/* V17.122 UX audit repair: core actions visible without sideways scrolling. */
+#plans.fsp-fullscreen #planTools:not(.hidden),
+#plans.fsp-fullscreen #planTools.fsp-expanded:not(.hidden),
+#plans.fsp-fullscreen #planTools.fsp-collapsed:not(.hidden){
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ width:calc(100% - 12px)!important;max-width:calc(100% - 12px)!important;
+ overflow:visible!important;flex-wrap:wrap!important;touch-action:auto!important;
+ position:relative!important;transform:none!important;
+}
+#plans.fsp-fullscreen #planTools button{min-width:0!important;width:100%!important;white-space:normal!important;min-height:40px!important}
+#plans.fsp-fullscreen #planTools #fspToggleTools,
+#plans.fsp-fullscreen #planTools #fspDragTools,
+#plans.fsp-fullscreen #planTools #backDraw{display:none!important}
+#plans.fsp-fullscreen #planTools button:not(#line):not(#free):not(#measureWall):not(#areaTool):not(#undo):not(#fspEditMore){display:none!important}
+#plans.fsp-fullscreen #planTools #line,
+#plans.fsp-fullscreen #planTools #free,
+#plans.fsp-fullscreen #planTools #measureWall,
+#plans.fsp-fullscreen #planTools #areaTool,
+#plans.fsp-fullscreen #planTools #undo,
+#plans.fsp-fullscreen #planTools #fspEditMore{display:inline-flex!important;align-items:center;justify-content:center}
+#plans.fsp-fullscreen #planTools.fsp-ux-more-open button:not(#backDraw):not(#fspToggleTools):not(#fspDragTools):not(.hidden){display:inline-flex!important}
+#plans.fsp-fullscreen #planTools #fspEditMore{background:#204d79}
+</style>
+</head><body>
 <section id="home" class="screen"><header><strong>Field Survey Pro <span class="small">V17.111 TEST</span></strong></header><div class="content"><div class="stack"><button id="continue" class="primary hidden">Continue Survey</button><button id="newSurvey" class="primary">+ New Survey</button><button id="allSurveys">All Surveys</button><div class="card muted">V17 test: Plans and camera placement. This version uses separate test storage; your older V16 surveys are not changed. Export a backup before relying on phone storage.</div></div></div></section>
 <section id="list" class="screen hidden"><header><button data-go="home">← Home</button><strong>All Surveys</strong></header><div class="content"><div class="stack"><input id="search" placeholder="Search surveys"><div id="surveyRows" class="menu"></div><button id="importBackup">Import V17 Backup</button><button id="exportBackup">Export V17 Backup</button></div></div></section>
 <section id="plans" class="screen hidden"><header><button data-go="home">← Back</button><strong id="plansTitle">Plans</strong><span id="save">Saved ✓</span></header><div class="topbar"><select id="planSelect" aria-label="Plan"></select><button id="planMore">⋯</button><button id="fitPlan" class="hidden" title="Reset view">Fit</button></div><div id="planArea"><button id="rotatePlanView" class="fsp-rotate" type="button" title="Rotate floor plan 90 degrees">↻ 90°</button><div id="zoomTools"><button id="zoomOut">−</button><button id="zoomIn">+</button></div><svg id="planCanvas" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><g id="planScene"></g><g id="strokePreview" pointer-events="none"></g></svg><div class="hint" id="planHint">Add a plan to begin</div></div><div id="dimensionPositionBar" class="hidden"><span class="tip">Drag either endpoint to adjust</span><button id="dimensionCancel">Cancel</button><button id="dimensionPositionDone" class="primary">Done ✓</button></div><div id="planTools" class="hidden"><button id="backDraw">← Back</button><button id="panTool">Select / Pan</button><button id="line">Line</button><button id="free">Freehand</button><button id="drawColor" type="button" title="Drawing color">🔵 Color</button><button id="autoWall">Auto Wall</button><button id="measureWall">Measure</button><button id="measureHelpButton" type="button" title="Measurement instructions">? Help</button><button id="areaTool" type="button" class="hidden" aria-hidden="true" tabindex="-1">Calculate Area</button><button id="moreDrawing" class="hidden">More ▾</button><button id="showDims">Hide Dimensions</button><button id="undo">Undo Wall</button><button id="clear">Clear Drawing</button></div><div id="drawingDoneBar" class="hidden"><button id="finishEdit" class="primary">Done ✓</button></div><div id="planBottom"><button id="addPlan">+ Add Floor Plan</button><button id="editPlan">Edit Plan</button><button id="toSurvey" class="primary">+ Add Camera</button></div></section>
@@ -797,7 +821,7 @@ function markAreaDialog(){
 function syncAreaControls(){
  const tracing=editing&&!!traceArea;
  $('areaTool').classList.remove('hidden');$('areaTool').removeAttribute('aria-hidden');$('areaTool').removeAttribute('tabindex');
- $('areaTool').textContent=tracing?'Finish Area':'Area';
+ $('areaTool').textContent=tracing?'Finish Area':'Square Footage';
  $('undo').textContent=tracing?'Undo Corner':'Undo';$('undo').disabled=tracing&&!traceArea.points.length;
  $('finishEdit').textContent=tracing?'Finish Area ✓':'Done ✓';
  $('plans').querySelector('header [data-go="home"]').textContent=tracing?'Cancel Area':'← Back';
@@ -2047,4 +2071,17 @@ read();
  window.addEventListener('resize',adjust);window.addEventListener('orientationchange',()=>{baseline=0;adjust()});
  document.addEventListener('focusin',adjust);document.addEventListener('focusout',()=>requestAnimationFrame(adjust));adjust();
 })();
-</script></body></html>
+</script>
+<script>
+/* Keep the core Edit Plan controls visible; secondary tools remain accessible via More. */
+(function(){
+ const bar=document.getElementById('planTools');if(!bar||document.getElementById('fspEditMore'))return;
+ const more=document.createElement('button');more.id='fspEditMore';more.type='button';more.textContent='More ▾';more.setAttribute('aria-expanded','false');
+ const undo=document.getElementById('undo');undo.insertAdjacentElement('afterend',more);
+ function close(){bar.classList.remove('fsp-ux-more-open');more.textContent='More ▾';more.setAttribute('aria-expanded','false')}
+ more.addEventListener('click',()=>{const open=bar.classList.toggle('fsp-ux-more-open');more.textContent=open?'Less ▴':'More ▾';more.setAttribute('aria-expanded',String(open))});
+ document.getElementById('finishEdit')?.addEventListener('click',close);
+ bar.addEventListener('click',e=>{if(e.target.closest('#line,#free,#measureWall,#areaTool,#undo'))close()});
+})();
+</script>
+</body></html>
