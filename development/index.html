@@ -204,7 +204,8 @@ body{position:fixed;top:var(--fsp-visible-top,0px);left:var(--fsp-visible-left,0
 #plans.fsp-fullscreen #planTools #backDraw{display:none!important}
 #plans.fsp-fullscreen #planTools.fsp-collapsed:not(.hidden){width:50px!important}
 #plans.fsp-fullscreen #planTools button{min-height:36px!important}
-#plans.fsp-fullscreen #planTools #fspToggleTools{position:sticky;left:0;z-index:2;touch-action:manipulation}
+/* Collapse scrolls with the row so it cannot cover another control. */
+#plans.fsp-fullscreen #planTools #fspToggleTools{touch-action:manipulation}
 #plans.fsp-fullscreen #drawingDoneBar:not(.hidden){position:relative!important;inset:auto!important;flex:0 0 auto;width:100%!important;padding:4px 6px!important;background:#143754!important;transform:none!important}
 #plans.fsp-fullscreen #drawingDoneBar button{width:100%;min-height:44px!important}
 #plans #dimensionPositionBar{position:relative;inset:auto;transform:none;flex:0 0 auto;width:calc(100% - 12px);max-width:calc(100% - 12px);margin:3px 6px;padding:4px;gap:5px}

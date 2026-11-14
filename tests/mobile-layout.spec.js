@@ -19,11 +19,35 @@ async function start(page, viewport, uploaded = true) {
 }
 async function rect(page, selector) { return page.locator(selector).evaluate(el => { const r = el.getBoundingClientRect(); return { left:r.left, right:r.right, top:r.top, bottom:r.bottom, width:r.width, height:r.height }; }); }
 function separate(a,b) { expect(a.right <= b.left + .5 || b.right <= a.left + .5 || a.bottom <= b.top + .5 || b.bottom <= a.top + .5).toBe(true); }
-async function clickable(page, selector) {
-  const locator = page.locator(selector); await locator.scrollIntoViewIfNeeded();
-  await expect(locator).toBeVisible();
-  expect(await locator.evaluate(el => { const r = el.getBoundingClientRect(), v = visualViewport, x = r.left+r.width/2, y = r.top+r.height/2; return x >= v.offsetLeft && x < v.offsetLeft+v.width && y >= v.offsetTop && y < v.offsetTop+v.height && el.contains(document.elementFromPoint(x,y)); })).toBe(true);
-  await locator.tap({ trial: true });
+async function controlHitState(locator) {
+  return locator.evaluate(el => {
+    const r=el.getBoundingClientRect(),v=visualViewport;
+    const point={x:r.left+r.width/2,y:r.top+r.height/2},hit=document.elementFromPoint(point.x,point.y);
+    const describe=node=>node?{tag:node.tagName,id:node.id,classes:node.className}:null;
+    const rect=r=>({left:r.left,top:r.top,right:r.right,bottom:r.bottom,width:r.width,height:r.height});
+    const scroll=[];
+    for(let parent=el.parentElement;parent;parent=parent.parentElement){
+      if(parent.scrollWidth>parent.clientWidth||parent.scrollHeight>parent.clientHeight)scroll.push({element:describe(parent),rect:rect(parent.getBoundingClientRect()),left:parent.scrollLeft,top:parent.scrollTop,width:parent.clientWidth,height:parent.clientHeight,scrollWidth:parent.scrollWidth,scrollHeight:parent.scrollHeight});
+    }
+    const inViewport=point.x>=v.offsetLeft&&point.x<v.offsetLeft+v.width&&point.y>=v.offsetTop&&point.y<v.offsetTop+v.height;
+    return {accessible:inViewport&&el.contains(hit),inViewport,point,rect:rect(r),viewport:{left:v.offsetLeft,top:v.offsetTop,width:v.width,height:v.height},target:describe(el),hit:describe(hit),scroll};
+  });
+}
+async function clickable(page, selector, {timeout=3000}={}) {
+  const locator=page.locator(selector);await locator.scrollIntoViewIfNeeded();await expect(locator).toBeVisible();
+  const samples=[];
+  try {
+    // Scroll/paint and visual-viewport updates can settle on separate frames.
+    // Wait for the SAME strict center/viewport hit condition, never a substitute point.
+    await expect.poll(async()=>{
+      const state=await controlHitState(locator);samples.push(state);if(samples.length>12)samples.shift();return state.accessible;
+    },{timeout,intervals:[16,32,64,100],message:selector+' center must be inside the visual viewport and hit the control'}).toBe(true);
+    await locator.tap({trial:true});
+  } catch(error) {
+    await test.info().attach('control-hit-'+selector.replace(/[^a-z0-9]/gi,'-'),{body:JSON.stringify({selector,samples},null,2),contentType:'application/json'});
+    throw error;
+  }
+  if(samples.some(state=>!state.accessible))await test.info().attach('control-hit-settled-'+selector.replace(/[^a-z0-9]/gi,'-'),{body:JSON.stringify({selector,samples},null,2),contentType:'application/json'});
 }
 for (const viewport of [{width:412,height:915},{width:915,height:412},{width:740,height:320}]) {
   test(`editor separates header, workspace and Done at ${viewport.width}x${viewport.height}`, async ({ page }, testInfo) => {
@@ -174,4 +198,42 @@ test('Camera Details keeps input, Close and Done accessible above the keyboard',
   await page.evaluate(()=>mobileVisualViewport({})); const after=geometry(await saved(page));
   expect(after[0][0].walls).toEqual(before[0][0].walls); expect(after[0][0].fspRoutes).toEqual(before[0][0].fspRoutes);
   expect(after[0][0].cameras[0]).toMatchObject({...before[0][0].cameras[0],notes:'Synthetic mobile keyboard note'});
+});
+
+// A fully visible control can still be underneath a sticky sibling. Native
+// scrollIntoViewIfNeeded does not treat that sibling as viewport clipping.
+test('left-edge editor controls are not occluded by the collapse button',async({page})=>{
+  await start(page,{width:360,height:640});await page.locator('#editPlan').tap();
+  await page.locator('#planTools').evaluate(bar=>{
+    const target=document.querySelector('#areaTool').getBoundingClientRect(),r=bar.getBoundingClientRect();
+    bar.scrollLeft+=target.left-(r.left+12);
+  });
+  await page.evaluate(()=>new Promise(requestAnimationFrame));
+  await clickable(page,'#areaTool');
+  await page.locator('#areaTool').tap();await expect(page.locator('#modalTitle')).toHaveText('Calculate Area — Uploaded Plan');
+});
+
+// Strict hit checks must reject persistent occlusion, while waiting for a
+// transient browser/layout obstruction to clear without a forced click.
+async function coverControl(page,selector){
+  await page.locator(selector).scrollIntoViewIfNeeded();
+  await page.locator(selector).evaluate(el=>{
+    const r=el.getBoundingClientRect(),cover=document.createElement('div');cover.id='test-control-occluder';
+    Object.assign(cover.style,{position:'fixed',left:r.left+'px',top:r.top+'px',width:r.width+'px',height:r.height+'px',background:'red',zIndex:'2147483647'});document.body.append(cover);
+  });
+}
+test('reachability diagnostics reject a persistent control occluder',async({page})=>{
+  await start(page,{width:360,height:640});await page.locator('#editPlan').tap();await coverControl(page,'#areaTool');
+  const before=await controlHitState(page.locator('#areaTool'));expect(before.inViewport).toBe(true);expect(before.hit.id).toBe('test-control-occluder');
+  await expect(clickable(page,'#areaTool',{timeout:250})).rejects.toThrow('center must be inside the visual viewport and hit the control');
+  expect((await controlHitState(page.locator('#areaTool'))).accessible).toBe(false);
+  await page.locator('#test-control-occluder').evaluate(el=>el.remove());
+  await clickable(page,'#areaTool');await page.locator('#areaTool').tap();await expect(page.locator('#modalTitle')).toHaveText('Calculate Area — Uploaded Plan');
+});
+test('reachability waits for transient obstruction without relaxing the hit assertion',async({page})=>{
+  await start(page,{width:360,height:640});await page.locator('#editPlan').tap();await coverControl(page,'#areaTool');
+  expect((await controlHitState(page.locator('#areaTool'))).accessible).toBe(false);
+  await page.evaluate(()=>setTimeout(()=>document.querySelector('#test-control-occluder')?.remove(),500));
+  await clickable(page,'#areaTool');expect((await controlHitState(page.locator('#areaTool'))).accessible).toBe(true);
+  await page.locator('#areaTool').tap();await expect(page.locator('#modalTitle')).toHaveText('Calculate Area — Uploaded Plan');
 });
