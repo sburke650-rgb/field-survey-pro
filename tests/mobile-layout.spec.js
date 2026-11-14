@@ -61,10 +61,12 @@ for (const viewport of [{width:412,height:915},{width:915,height:412},{width:740
     await page.locator('#finishEdit').tap(); await expect(page.locator('#editPlan')).toBeVisible();
   });
 }
-test('uploaded More, Measure, Area and Undo are reachable without expanding a hidden control', async ({ page }) => {
+test('uploaded primary tools are directly reachable and secondary tools open through More', async ({ page }) => {
   await start(page,{width:360,height:640}); await page.locator('#editPlan').tap();
-  for(const id of ['measureWall','areaTool','undo','moreDrawing']) await clickable(page,'#'+id);
-  const before = await page.locator('#moreDrawing').textContent(); await page.locator('#moreDrawing').tap(); await expect(page.locator('#moreDrawing')).not.toHaveText(before);
+  for(const id of ['measureWall','areaTool','undo','fspEditMore']) await clickable(page,'#'+id);
+  await page.locator('#fspEditMore').tap();
+  for(const id of ['drawColor','showDims','measureHelpButton']) await clickable(page,'#'+id);
+  await clickable(page,'#finishEdit');
 });
 test('Cable Routes toolbar cannot cover survey Done on a short landscape phone', async ({ page }) => {
   await start(page,{width:740,height:320}); await page.locator('#toSurvey').tap();
@@ -121,22 +123,14 @@ test('new empty Draw Plan keeps Back and Done actionable without making changes'
   await page.locator('#editPlan').tap(); await page.locator('#plans header [data-go="home"]').tap(); await expect(page.locator('#home')).toBeVisible();
 });
 
-test('toolbar touch scrolling, collapse, restore and dragging leave navigation unobstructed',async({page,context})=>{
+test('compact editor toolbar keeps primary actions visible without scrolling and preserves geometry',async({page})=>{
   await start(page,{width:360,height:640}); await page.locator('#editPlan').tap(); const before=geometry(await saved(page));
-  const b=await rect(page,'#planTools'),cdp=await context.newCDPSession(page),y=b.top+b.height/2;
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:b.right-15,y,id:1}]});
-  for(let x=b.right-40;x>b.left+40;x-=30)await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y,id:1}]});
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-  expect(await page.locator('#planTools').evaluate(el=>el.scrollLeft)).toBeGreaterThan(0);
-  await page.locator('#planTools').evaluate(el=>new Promise(resolve=>{let previous=el.scrollLeft,stable=0;function frame(){const next=el.scrollLeft;stable=next===previous?stable+1:0;previous=next;if(stable>=8)resolve();else requestAnimationFrame(frame)}frame()}));
-  await page.locator('#fspToggleTools').tap(); await expect(page.locator('#planTools')).toHaveClass(/fsp-collapsed/);
-  await clickable(page,'#finishEdit'); await page.locator('#fspToggleTools').tap();
-  await page.locator('#areaTool').tap(); await page.locator('#modalOk').tap();
-  await page.locator('#fspDragTools').scrollIntoViewIfNeeded(); const h=await page.locator('#fspDragTools').boundingBox();
-  await drag(page,{x:h.x+h.width/2,y:h.y+h.height/2},{x:2,y:2});
-  separate(await rect(page,'#planTools'),await rect(page,'#plans header')); separate(await rect(page,'#planTools'),await rect(page,'#drawingDoneBar'));
-  await clickable(page,'#plans header [data-go="home"]'); await clickable(page,'#finishEdit');
-  await page.setViewportSize({width:640,height:280}); await clickable(page,'#measureWall'); await clickable(page,'#undo');
+  const overflow=await page.locator('#planTools').evaluate(el=>el.scrollWidth-el.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
+  for(const id of ['line','free','measureWall','areaTool','undo','fspEditMore']) await clickable(page,'#'+id);
+  await page.locator('#fspEditMore').tap(); await clickable(page,'#drawColor'); await clickable(page,'#autoWall');
+  await page.locator('#fspEditMore').tap(); await clickable(page,'#finishEdit');
+  await page.setViewportSize({width:640,height:280}); await clickable(page,'#undo');
   expect(geometry(await saved(page))).toEqual(before);
 });
 
