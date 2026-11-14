@@ -142,9 +142,8 @@ test('KD-002 Camera Details drag changes rendered panel position', async ({ page
   await expect(page.locator('#detail')).toBeVisible(); await page.mouse.up();
   await expect(page.locator('#detailType')).toContainText('Existing');
   const before = await page.locator('#detail').boundingBox(); const handle = await page.locator('#detailDrag').boundingBox();
-  await drag(page, { x: handle.x + 20, y: handle.y + 10 }, { x: handle.x + 120, y: handle.y - 80 });
+  await drag(page, { x: handle.x + 20, y: handle.y + 10 }, { x: handle.x + (before.x > 550 ? -100 : 100), y: handle.y + (before.y > 425 ? -90 : 90) });
   const after = await page.locator('#detail').boundingBox();
-  test.fail(true, 'KD-002: important CSS overrides inline drag positions');
   expect(Math.hypot(after.x - before.x, after.y - before.y)).toBeGreaterThan(30);
 });
 
