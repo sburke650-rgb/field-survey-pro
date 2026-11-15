@@ -130,11 +130,14 @@ for (const [layout, viewport] of [['portrait', { width: 390, height: 844 }], ['l
       await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: c.x, y: c.y, id: 0 }] });
       await expect(page.locator('#detail')).toBeVisible(); await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
       const before = await page.locator('#detail').boundingBox(), view = await page.locator('#surveyCanvas').getAttribute('viewBox'), data = await saved(page);
-      const h = await headerPoint(page); await touchDrag(session, page, h, { x: h.x + (before.x > viewport.width / 2 ? -100 : 100), y: h.y + (before.y > viewport.height / 2 ? -80 : 80) });
+      const h = await headerPoint(page), target = { x: h.x + (before.x > viewport.width / 2 ? -100 : 100), y: h.y + (before.y > viewport.height / 2 ? -80 : 80) };
+      await touchDrag(session, page, h, target);
       const after = await page.locator('#detail').boundingBox();
       expect(Math.hypot(after.x - before.x, after.y - before.y)).toBeGreaterThan(30);
-      if (layout === 'portrait') expect(after.y).toBeLessThan(before.y);
-      else expect(after.x).toBeLessThan(before.x);
+      // Preserving the shared plan viewport can change the panel's starting
+      // edge. Assert movement in the commanded direction, for either edge.
+      if (layout === 'portrait') expect(Math.sign(after.y - before.y)).toBe(Math.sign(target.y - h.y));
+      else expect(Math.sign(after.x - before.x)).toBe(Math.sign(target.x - h.x));
       await withinScreen(page);
       for (const target of [{ x: 1, y: 1 }, { x: viewport.width - 1, y: viewport.height - 1 }]) {
         await touchDrag(session, page, await headerPoint(page), target); await withinScreen(page);

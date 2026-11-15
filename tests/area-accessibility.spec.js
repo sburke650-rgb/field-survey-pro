@@ -149,6 +149,10 @@ for (const uploaded of [false, true]) {
       await page.locator('#plans header [data-go="home"]').tap();
       await expect(page.locator('#planCanvas')).toHaveAttribute('data-active-tool', 'pan');
       await page.setViewportSize({ width: 844, height: 390 });
+      // Orientation now preserves zoom rather than implicitly fitting. Explicitly
+      // fit this fixed-coordinate tracing fixture; keep every trace assertion.
+      await page.locator('#fitPlan').evaluate(button => button.click());
+      await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
       await beginTrace(page, true);
       for (const v of lShape) await tapCorner(page, ...v, true);
       await expect(page.locator('#planScene circle[data-trace-preview]')).toHaveCount(6);
