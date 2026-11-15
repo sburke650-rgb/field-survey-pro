@@ -469,7 +469,13 @@ if(back&&newId===p.id){if(p.walls.length===0){survey.plans=survey.plans.filter(x
 else finish()}
 $('backDraw').onclick=()=>leaveDrawing(true);
 async function completePlanEdit(){
- hideMeasureHelp();if(!plan)return;plan.confirmed=true;wallRecoverySnapshot();setStatus('Saving…');await save();if(revision!==savedRevision)return;editing=false;drawNewPlanId=null;zoomed=false;updatePlans();if(plan&&!plan.image)scheduleStablePlanFit();
+ hideMeasureHelp();if(!plan)return;
+ // Preserve the editor's actual view before the layout changes on Done.
+ // The old zoomed=false + delayed fit recentered the sketch differently in Plans.
+ rememberPlanView($('planCanvas'),false);
+ plan.confirmed=true;wallRecoverySnapshot();setStatus('Saving…');await save();if(revision!==savedRevision)return;
+ editing=false;drawNewPlanId=null;zoomed=true;updatePlans();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{if(screen==='plans'&&!editing&&plan)restorePlanView()}));
 }
 $('finishEdit').onclick=()=>{if(!plan)return;if(traceArea){finishAreaTrace();return}
  // V17.80: Done finishes the edit without requiring measurements.
