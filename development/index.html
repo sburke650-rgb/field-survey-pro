@@ -351,8 +351,13 @@ async function read(){let idbState=null,mirror=null,legacy=null;
     pl.walls=structuredClone(backup.walls);
     recoveredWalls++;
    }
-   // A saved zoom/pan state must never make a restored drawing appear blank.
-   if(pl.walls?.length&&pl.viewState)delete pl.viewState;
+   // Preserve a valid saved zoom/pan state across app restarts. Earlier code
+   // deleted it for every drawn plan, forcing a fresh fit on Continue Survey.
+   // Only discard malformed coordinates; keep valid user-selected views.
+   if(pl.viewState){
+    const v=pl.viewState;
+    if(![v.cx,v.cy,v.unitsPerPixel,v.rotation].every(Number.isFinite)||v.unitsPerPixel<=0)delete pl.viewState;
+   }
   }catch(e){console.warn('Wall restore failed for plan',pl.id,e)}
  }
  if(recoveredWalls)console.info('Recovered blue walls in',recoveredWalls,'plans');
