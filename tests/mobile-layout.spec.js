@@ -65,7 +65,8 @@ test('uploaded primary tools are directly reachable and secondary tools open thr
   await start(page,{width:360,height:640}); await page.locator('#editPlan').tap();
   for(const id of ['measureWall','areaTool','undo','fspEditMore']) await clickable(page,'#'+id);
   await page.locator('#fspEditMore').tap();
-  for(const id of ['drawColor','showDims','measureHelpButton']) await clickable(page,'#'+id);
+  for(const id of ['showDims','measureHelpButton']) await clickable(page,'#'+id);
+  await page.locator('#free').tap(); await clickable(page,'#drawColor');
   await clickable(page,'#finishEdit');
 });
 test('Cable Routes toolbar cannot cover survey Done on a short landscape phone', async ({ page }) => {
@@ -128,8 +129,7 @@ test('compact editor toolbar keeps primary actions visible without scrolling and
   const overflow=await page.locator('#planTools').evaluate(el=>el.scrollWidth-el.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
   for(const id of ['line','free','measureWall','areaTool','undo','fspEditMore']) await clickable(page,'#'+id);
-  await page.locator('#fspEditMore').tap(); await clickable(page,'#drawColor'); await clickable(page,'#autoWall');
-  await page.locator('#fspEditMore').tap(); await clickable(page,'#finishEdit');
+  await page.locator('#free').tap(); await clickable(page,'#drawColor'); await clickable(page,'#autoWall'); await clickable(page,'#finishEdit');
   await page.setViewportSize({width:640,height:280}); await clickable(page,'#undo');
   expect(geometry(await saved(page))).toEqual(before);
 });
