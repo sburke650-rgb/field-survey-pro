@@ -2094,4 +2094,51 @@ read();
  bar.addEventListener('click',e=>{if(e.target.closest('#line,#free,#measureWall,#areaTool,#undo'))close()});
 })();
 </script>
-</body></html>
+<!-- Approved Edit Plan layout prototype, 2026-11-15 -->
+<style id="fsp-approved-edit-layout">
+/* Fixed, non-draggable toolbar; Done is independently visible. */
+#plans.fsp-fullscreen #planTools:not(.hidden){position:absolute!important;left:8px!important;right:8px!important;top:auto!important;bottom:calc(60px + env(safe-area-inset-bottom,0px))!important;width:calc(100% - 16px)!important;max-width:none!important;display:flex!important;flex-wrap:nowrap!important;gap:4px!important;padding:5px!important;overflow:visible!important;touch-action:auto!important}
+#plans.fsp-fullscreen #planTools button{flex:1 1 0!important;min-width:0!important;padding:6px 3px!important;font-size:clamp(10px,2.6vw,13px)!important;min-height:43px!important}
+#plans.fsp-fullscreen #planTools #fspDragTools{display:none!important}
+#plans.fsp-fullscreen #planTools #fspToggleTools{flex:0 0 38px!important;order:-2!important}
+#plans.fsp-fullscreen #planTools #line{order:1}
+#plans.fsp-fullscreen #planTools #free{order:2}
+#plans.fsp-fullscreen #planTools #measureWall{order:3}
+#plans.fsp-fullscreen #planTools #undo{order:4}
+#plans.fsp-fullscreen #planTools #fspEditMore{order:5}
+#plans.fsp-fullscreen #planTools #areaTool{order:3}
+#plans.fsp-fullscreen #planTools #drawColor,#plans.fsp-fullscreen #planTools #autoWall{display:none!important}
+#plans.fsp-fullscreen #planTools.fsp-approved-collapsed:not(.hidden){width:48px!important;right:auto!important}
+#plans.fsp-fullscreen #planTools.fsp-approved-collapsed button:not(#fspToggleTools){display:none!important}
+#plans.fsp-fullscreen #planTools.fsp-approved-collapsed #fspToggleTools{display:block!important}
+#plans.fsp-fullscreen #drawingDoneBar:not(.hidden){position:absolute!important;bottom:calc(8px + env(safe-area-inset-bottom,0px))!important;right:8px!important;left:auto!important;width:auto!important;padding:0!important;background:transparent!important}
+#plans.fsp-fullscreen #drawingDoneBar #finishEdit{width:94px!important;min-width:94px!important;min-height:44px!important;font-size:14px!important;padding:6px 10px!important}
+#plans.fsp-fullscreen #planTools.fsp-ux-more-open{flex-wrap:wrap!important}
+#plans.fsp-fullscreen #planTools.fsp-ux-more-open button.fsp-secondary:not(.hidden){display:inline-flex!important;flex:1 0 28%!important}
+#fspFreeOptions{display:none;position:absolute;bottom:calc(100% + 5px);left:44px;background:#153754;border:1px solid #7197b9;border-radius:10px;padding:6px;gap:5px;box-shadow:0 3px 12px #0006;z-index:20}
+#fspFreeOptions.fsp-open{display:flex}
+#fspFreeOptions button{flex:0 0 auto!important;min-width:78px!important}
+#plans.fsp-fullscreen #planTools #fspEditMore{display:inline-flex!important}
+@media(orientation:landscape){#plans.fsp-fullscreen #planTools:not(.hidden){right:115px!important;width:calc(100% - 123px)!important;bottom:8px!important}#plans.fsp-fullscreen #planTools.fsp-approved-collapsed:not(.hidden){width:48px!important;right:auto!important}}
+</style>
+<script id="fsp-approved-edit-layout-js">
+(function(){
+ const bar=document.getElementById('planTools'),toggle=document.getElementById('fspToggleTools'),free=document.getElementById('free'),color=document.getElementById('drawColor'),auto=document.getElementById('autoWall'),more=document.getElementById('fspEditMore'),area=document.getElementById('areaTool');
+ if(!bar||!toggle||!free||!color||!auto||!more)return;
+ const options=document.createElement('div');options.id='fspFreeOptions';options.append(color,auto);bar.append(options);
+ const openFree=()=>options.classList.add('fsp-open'),closeFree=()=>options.classList.remove('fsp-open');
+ const originalFree=free.onclick;free.onclick=function(e){originalFree?.call(this,e);openFree();bar.classList.remove('fsp-ux-more-open');more.textContent='More ▾';more.setAttribute('aria-expanded','false')};
+ bar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b!==free&&b!==color&&b!==auto)closeFree();if(bar.classList.contains('fsp-ux-more-open')&&b!==more&&!b.matches('#fspToggleTools,#fspDragTools')){bar.classList.remove('fsp-ux-more-open');more.textContent='More ▾';more.setAttribute('aria-expanded','false')}});
+ toggle.onclick=function(e){e.preventDefault();e.stopImmediatePropagation();const collapsed=bar.classList.toggle('fsp-approved-collapsed');bar.classList.remove('fsp-collapsed','fsp-expanded');toggle.textContent=collapsed?'☰':'−';toggle.title=collapsed?'Expand drawing toolbar':'Collapse drawing toolbar';closeFree()};
+ const drag=document.getElementById('fspDragTools');if(drag)drag.style.display='none';
+ const reset=()=>{bar.classList.remove('fsp-approved-collapsed');toggle.textContent='−';closeFree()};
+ document.getElementById('editPlan')?.addEventListener('click',reset);
+ document.getElementById('finishEdit')?.addEventListener('click',()=>{closeFree();bar.classList.remove('fsp-ux-more-open')});
+ area.textContent='Square Footage';
+ const observer=new MutationObserver(()=>{if(area.textContent==='Calculate Area')area.textContent='Square Footage'});
+ observer.observe(area,{childList:true});
+ // Keep Auto Wall unavailable until the plan contains a freehand stroke.
+ const syncAuto=()=>{try{const p=typeof plan!=='undefined'?plan:null;auto.disabled=!(p&&p.walls&&p.walls.some(w=>w.type==='free'||w.kind==='free'||w.freehand||w.points?.length>2))}catch(e){auto.disabled=false}};
+ free.addEventListener('click',syncAuto);
+})();
+</script></body></html>
