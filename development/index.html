@@ -2091,7 +2091,7 @@ read();
  function close(){bar.classList.remove('fsp-ux-more-open');more.textContent='More ▾';more.setAttribute('aria-expanded','false')}
  more.addEventListener('click',()=>{const open=bar.classList.toggle('fsp-ux-more-open');const advanced=document.getElementById('moreDrawing');if(open&&advanced&&!advanced.classList.contains('hidden')&&advanced.textContent.includes('More'))advanced.click();more.textContent=open?'Less ▴':'More ▾';more.setAttribute('aria-expanded',String(open))});
  document.getElementById('finishEdit')?.addEventListener('click',close);
- bar.addEventListener('click',e=>{if(e.target.closest('#line,#free,#measureWall,#areaTool,#undo'))close()});
+ bar.addEventListener('click',e=>{if(e.target.closest('#line,#free,#measureWall,#areaTool'))close()});
 })();
 </script>
 <!-- Approved Edit Plan layout prototype, 2026-11-15 -->
@@ -2121,6 +2121,11 @@ read();
 #fspFreeOptions button{flex:0 0 auto!important;min-width:78px!important}
 #plans.fsp-fullscreen #planTools #fspEditMore{display:inline-flex!important}
 @media(orientation:landscape){#plans.fsp-fullscreen #planTools:not(.hidden){right:115px!important;width:calc(100% - 123px)!important;bottom:8px!important}#plans.fsp-fullscreen #planTools.fsp-approved-collapsed:not(.hidden){width:48px!important;right:auto!important}}
+/* Respect simulated and real phone safe-area insets. */
+#plans.fsp-fullscreen #planTools:not(.hidden){left:calc(max(8px, var(--fsp-safe-left, 0px)))!important;right:calc(max(8px, var(--fsp-safe-right, 0px)))!important;width:auto!important;bottom:calc(60px + max(env(safe-area-inset-bottom,0px), var(--fsp-safe-bottom,0px)))!important}
+#plans.fsp-fullscreen #drawingDoneBar:not(.hidden){right:calc(max(8px, var(--fsp-safe-right,0px)))!important;bottom:calc(8px + max(env(safe-area-inset-bottom,0px), var(--fsp-safe-bottom,0px)))!important}
+#plans.fsp-fullscreen header{margin-left:max(0px, calc(var(--fsp-safe-left,0px) - 14px))!important;margin-right:max(0px, calc(var(--fsp-safe-right,0px) - 14px))!important}
+@media(orientation:landscape){#plans.fsp-fullscreen #planTools:not(.hidden){right:calc(115px + var(--fsp-safe-right,0px))!important;width:auto!important}}
 </style>
 <script id="fsp-approved-edit-layout-js">
 (function(){
@@ -2129,7 +2134,7 @@ read();
  const options=document.createElement('div');options.id='fspFreeOptions';options.append(color,auto);bar.append(options);
  const openFree=()=>options.classList.add('fsp-open'),closeFree=()=>options.classList.remove('fsp-open');
  const originalFree=free.onclick;free.onclick=function(e){originalFree?.call(this,e);openFree();bar.classList.remove('fsp-ux-more-open');more.textContent='More ▾';more.setAttribute('aria-expanded','false')};
- bar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b!==free&&b!==color&&b!==auto)closeFree();if(bar.classList.contains('fsp-ux-more-open')&&b!==more&&!b.matches('#fspToggleTools,#fspDragTools')){bar.classList.remove('fsp-ux-more-open');more.textContent='More ▾';more.setAttribute('aria-expanded','false')}});
+ bar.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b!==free&&b!==color&&b!==auto&&b!==document.getElementById('undo')&&b!==more)closeFree();if(bar.classList.contains('fsp-ux-more-open')&&b!==more&&!b.matches('#fspToggleTools,#fspDragTools')){bar.classList.remove('fsp-ux-more-open');more.textContent='More ▾';more.setAttribute('aria-expanded','false')}});
  toggle.onclick=function(e){e.preventDefault();e.stopImmediatePropagation();const collapsed=bar.classList.toggle('fsp-approved-collapsed');bar.classList.remove('fsp-collapsed','fsp-expanded');toggle.textContent=collapsed?'☰':'−';toggle.title=collapsed?'Expand drawing toolbar':'Collapse drawing toolbar';closeFree()};
  const drag=document.getElementById('fspDragTools');if(drag)drag.style.display='none';
  const reset=()=>{bar.classList.remove('fsp-approved-collapsed');toggle.textContent='−';closeFree()};
