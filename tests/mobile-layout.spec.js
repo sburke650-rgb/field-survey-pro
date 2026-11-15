@@ -182,7 +182,12 @@ test('measurement endpoint Cancel/Done and distance input remain accessible in s
   await page.locator('#oDistance').focus(); await page.evaluate(()=>mobileVisualViewport({height:210,offsetTop:15}));
   await expect.poll(async()=> (await rect(page,'#modalBack .modal')).bottom).toBeLessThanOrEqual(213);
   await clickable(page,'#oDistance'); await page.locator('#oDistance').fill('100'); await clickable(page,'#modalOk'); await page.locator('#modalOk').tap();
-  await page.evaluate(()=>mobileVisualViewport({})); expect(geometry(await saved(page))).toEqual(before);
+  await expect(page.locator('#modalBack')).toBeHidden();
+  await page.evaluate(()=>mobileVisualViewport({}));
+  // Explicitly saving an unchanged legacy measurement records the unchecked
+  // Estimated flag as false. Its value, endpoints and all other data stay fixed.
+  const expected=structuredClone(before);expected[0][0].dimensions[0].measure.estimated=false;
+  expect(geometry(await saved(page))).toEqual(expected);
 });
 
 test('Camera Details keeps input, Close and Done accessible above the keyboard',async({page,context})=>{
