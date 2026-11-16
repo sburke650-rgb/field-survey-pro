@@ -29,7 +29,25 @@ No production behavior is changed to satisfy obsolete tests. No assertion is cha
 
 ## Validation
 
-Final suite results: pending.
+Complete automated suite at application commit `3ea5061` on Node 24.22.1 / Linux Chromium 156.0.8078.79:
+
+`PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test`
+
+**125 passed, 3 failed, 1 known-defect expected failure (KD-004 on immutable V17.121), 0 skipped, 0 runner errors; exit 1.** All 24 viewport cases passed within this full run. The three failures are the baseline-reproduced V17.128 layout/toolbar cases below. This is not an all-green suite and remains blocked for merge/release.
+
+`git diff --check` passed. Protected-file diff against `24860223` is empty for all `test/`, root `index.html`, package files and workflows. Final AST/source preservation review passed. Only documentation is changed after the tested application commit.
+
+Earlier exploratory runs were superseded: coordinate taps were initially obscured by the fixed toolbar, and alternate-port runs exposed hardcoded server addresses in existing tests. The final complete run used the standard repository configuration and server, without those exploratory overrides. The restart test now accepts the configured baseURL.
+
+Separate viewport-only run at application commit `3ea5061`:
+`PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium npm test -- viewport-persistence`: **24 passed**, no expected failures, unexpected outcomes, skipped cases or runner errors. This includes actual Chromium process restart.
+
+Baseline comparison used a disposable copy of untouched `test/v17-128/index.html` with the integration tests and standard Playwright configuration. Running `mobile-layout --grep 'navigation survives rotation|fixed toolbar'` reproduces all three layout/toolbar failures:
+
+- Drawn and uploaded safe-area checks: at 915×412 with simulated left/right insets of 24 px, the Plans header ends at x=901, beyond the required right boundary x=891. The strict bounds assertion remains unchanged.
+- Fixed toolbar check: after Freehand, `#fspToggleTools` is hidden and cannot be tapped. Trace records repeatedly report “element is not visible”. The test retains the requirement that collapse/restore be accessible.
+
+These are confirmed existing V17.128 limitations. They remain ordinary failures, not skips or newly designated expected failures. Subsequent assertions within these three cases are unrun after the first failure. The integration preserves V17.128 layout code byte-for-byte; no unrelated layout repair is bundled.
 
 ## Remaining limits
 
