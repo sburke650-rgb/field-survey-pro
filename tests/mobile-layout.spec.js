@@ -167,23 +167,46 @@ for(const viewport of [{width:412,height:915},{width:915,height:412}]) {
   });
 }
 
-test('measurement endpoint Cancel/Done and distance input remain accessible in short landscape',async({page})=>{
+for(const rightSide of [false,true]) {
+test('measurement endpoint Cancel/Done and distance input remain accessible in short landscape'+(rightSide?' — right-side dialog':''),async({page},testInfo)=>{
   await start(page,{width:740,height:320}); await page.locator('#editPlan').tap(); await safeArea(page,{left:24,right:24,top:12,bottom:12});
+  if(rightSide){
+    // Match CI's right-hand distance-dialog placement without changing geometry.
+    // Commit a synthetic viewport pan through the application's zoom controller.
+    await page.locator('#planCanvas').evaluate(svg=>{
+      const line=document.querySelector('[data-overlay-line]'),b=line.getBBox(),p=svg.createSVGPoint();
+      p.x=b.x+b.width/2;p.y=b.y+b.height/2;
+      const midpoint=p.matrixTransform(line.getScreenCTM()),r=svg.getBoundingClientRect();
+      svg.viewBox.baseVal.x+=(midpoint.x-300)*svg.viewBox.baseVal.width/r.width;
+      document.getElementById('zoomOut').click();
+    });
+  }
   const before=geometry(await saved(page));
   await page.locator('[data-overlay-dimension="0"]').first().dispatchEvent('click');
   await clickable(page,'#dimensionCancel'); await clickable(page,'#dimensionPositionDone');
   await page.locator('#dimensionCancel').tap(); await clickable(page,'#finishEdit'); expect(geometry(await saved(page))).toEqual(before);
   await page.locator('[data-overlay-dimension="0"]').first().dispatchEvent('click'); await page.locator('#dimensionPositionDone').tap();
+  if(rightSide)expect((await rect(page,'#modalBack .modal')).left).toBeGreaterThan(370);
   await page.locator('#oDistance').focus(); await page.evaluate(()=>mobileVisualViewport({height:210,offsetTop:15}));
   await expect.poll(async()=> (await rect(page,'#modalBack .modal')).bottom).toBeLessThanOrEqual(213);
-  await clickable(page,'#oDistance'); await page.locator('#oDistance').fill('100'); await clickable(page,'#modalOk'); await page.locator('#modalOk').tap();
-  await expect(page.locator('#modalBack')).toBeHidden();
+  await clickable(page,'#oDistance'); await page.locator('#oDistance').fill('100'); await clickable(page,'#modalOk'); await page.evaluate(()=>{
+    window.measurementDialogEvents=[];
+    for(const type of ['pointerdown','pointerup','mousedown','focusout','mouseup','click'])document.addEventListener(type,event=>{
+      const r=document.getElementById('modalOk').getBoundingClientRect();
+      window.measurementDialogEvents.push({type:event.type,target:event.target.id,keyboard:document.documentElement.className,active:document.activeElement?.id,button:{x:r.x,y:r.y,width:r.width,height:r.height}});
+    },true);
+  });
+  await page.locator('#modalOk').tap();
+  try { await expect(page.locator('#modalBack')).toBeHidden(); }
+  finally { await testInfo.attach('measurement-dialog-events',{body:JSON.stringify(await page.evaluate(()=>window.measurementDialogEvents),null,2),contentType:'application/json'}); }
   await page.evaluate(()=>mobileVisualViewport({}));
   // Explicitly saving an unchanged legacy measurement records the unchecked
   // Estimated flag as false. Its value, endpoints and all other data stay fixed.
   const expected=structuredClone(before);expected[0][0].dimensions[0].measure.estimated=false;
   expect(geometry(await saved(page))).toEqual(expected);
 });
+
+}
 
 test('Camera Details keeps input, Close and Done accessible above the keyboard',async({page,context})=>{
   await start(page,{width:740,height:320}); await page.locator('#toSurvey').tap();

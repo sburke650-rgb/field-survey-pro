@@ -2,6 +2,8 @@
 
 Branch: `integration/v17-128-viewport-persistence`.
 
+Follow-up: [CI measurement-dialog investigation](pr11-measurement-dialog-investigation.md) records the fourth failure in run 43971361542, its reproduction on untouched V17.128, and the latest 130-case verification. The original validation below is historical; the full suite remains blocked.
+
 ## Provenance and boundaries
 
 Repository baseline: `24860223f1575be60948eca3050f7fd8b025a8ea` (main, V17.128 publication).
