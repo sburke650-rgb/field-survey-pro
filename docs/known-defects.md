@@ -24,3 +24,7 @@ Expected failures assert desired behavior; they do not invert assertions or skip
 - Root and generic test entry points are older versions. No production entry point is changed here.
 
 KD-001–KD-004 are repaired in development, not in the published baseline. Other confirmed defects remain release blockers. Passing the safeguard baseline with expected failures is not V17.122 release acceptance.
+
+## V17.128 investigation — KD-005
+
+KD-005: In short landscape with the simulated keyboard visible, tapping measurement Done can blur the distance input and move a right-positioned dialog before compatibility mouseup/click. Done then receives no click and `#modalBack` remains visible. The right-side regression reproduces on both the integration and untouched V17.128. It remains an ordinary failing test, preserving CI's blocker. No application fix is included. See [PR #11 measurement investigation](pr11-measurement-dialog-investigation.md) for CI evidence, matching event traces and baseline comparison. Physical Android/iPhone acceptance remains unrun.
