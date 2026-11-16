@@ -3,7 +3,7 @@ const { readFileSync } = require('node:fs');
 const vm = require('node:vm');
 const { seed, saved, point, drag, cameraMode, deleteMeasurement, fixture, TARGET } = require('./helpers/app');
 
-test('V17.121 starts without script or cable initialization errors', async ({ page }) => {
+test('V17.129 integration starts without script or cable initialization errors', async ({ page }) => {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
   await page.goto(TARGET);
@@ -12,7 +12,7 @@ test('V17.121 starts without script or cable initialization errors', async ({ pa
   expect(errors).toEqual([]);
   expect(await page.evaluate(() => window.fspCableError || null)).toBeNull();
   expect(await page.evaluate(() => typeof window.fspCableEnter)).toBe('function');
-  await expect(page).toHaveTitle(/V17\.121/);
+  await expect(page).toHaveTitle(/V17\.129/);
 });
 
 test('create named survey and autosave to IndexedDB and mirror', async ({ page }) => {
