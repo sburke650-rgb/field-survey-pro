@@ -63,8 +63,8 @@ for (const viewport of [{width:412,height:915},{width:915,height:412},{width:740
 }
 test('uploaded More, Measure, Area and Undo are reachable without expanding a hidden control', async ({ page }) => {
   await start(page,{width:360,height:640}); await page.locator('#editPlan').tap();
-  for(const id of ['measureWall','areaTool','undo','moreDrawing']) await clickable(page,'#'+id);
-  const before = await page.locator('#moreDrawing').textContent(); await page.locator('#moreDrawing').tap(); await expect(page.locator('#moreDrawing')).not.toHaveText(before);
+  for(const id of ['measureWall','areaTool','undo','fspEditMore']) await clickable(page,'#'+id);
+  await page.locator('#fspEditMore').tap(); await expect(page.locator('#fspEditMore')).toHaveAttribute('aria-expanded','true'); await clickable(page,'#showDims'); await clickable(page,'#clear');
 });
 test('Cable Routes toolbar cannot cover survey Done on a short landscape phone', async ({ page }) => {
   await start(page,{width:740,height:320}); await page.locator('#toSurvey').tap();
@@ -121,19 +121,14 @@ test('new empty Draw Plan keeps Back and Done actionable without making changes'
   await page.locator('#editPlan').tap(); await page.locator('#plans header [data-go="home"]').tap(); await expect(page.locator('#home')).toBeVisible();
 });
 
-test('toolbar touch scrolling, collapse, restore and dragging leave navigation unobstructed',async({page,context})=>{
+test('V17.128 fixed toolbar collapse, More and Freehand options preserve geometry and navigation',async({page})=>{
   await start(page,{width:360,height:640}); await page.locator('#editPlan').tap(); const before=geometry(await saved(page));
-  const b=await rect(page,'#planTools'),cdp=await context.newCDPSession(page),y=b.top+b.height/2;
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:b.right-15,y,id:1}]});
-  for(let x=b.right-40;x>b.left+40;x-=30)await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y,id:1}]});
-  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-  expect(await page.locator('#planTools').evaluate(el=>el.scrollLeft)).toBeGreaterThan(0);
-  await page.locator('#planTools').evaluate(el=>new Promise(resolve=>{let previous=el.scrollLeft,stable=0;function frame(){const next=el.scrollLeft;stable=next===previous?stable+1:0;previous=next;if(stable>=8)resolve();else requestAnimationFrame(frame)}frame()}));
-  await page.locator('#fspToggleTools').tap(); await expect(page.locator('#planTools')).toHaveClass(/fsp-collapsed/);
+  await expect(page.locator('#fspDragTools')).toBeHidden();
+  await page.locator('#free').tap(); await clickable(page,'#drawColor'); await expect(page.locator('#autoWall')).toBeVisible();
+  await page.locator('#fspToggleTools').tap(); await expect(page.locator('#planTools')).toHaveClass(/fsp-approved-collapsed/);
   await clickable(page,'#finishEdit'); await page.locator('#fspToggleTools').tap();
-  await page.locator('#areaTool').tap(); await page.locator('#modalOk').tap();
-  await page.locator('#fspDragTools').scrollIntoViewIfNeeded(); const h=await page.locator('#fspDragTools').boundingBox();
-  await drag(page,{x:h.x+h.width/2,y:h.y+h.height/2},{x:2,y:2});
+  await page.locator('#fspEditMore').tap(); await clickable(page,'#showDims'); await clickable(page,'#clear');
+  await page.locator('#fspEditMore').tap(); await page.locator('#areaTool').tap(); await page.locator('#modalOk').tap();
   separate(await rect(page,'#planTools'),await rect(page,'#plans header')); separate(await rect(page,'#planTools'),await rect(page,'#drawingDoneBar'));
   await clickable(page,'#plans header [data-go="home"]'); await clickable(page,'#finishEdit');
   await page.setViewportSize({width:640,height:280}); await clickable(page,'#measureWall'); await clickable(page,'#undo');
@@ -182,7 +177,12 @@ test('measurement endpoint Cancel/Done and distance input remain accessible in s
   await page.locator('#oDistance').focus(); await page.evaluate(()=>mobileVisualViewport({height:210,offsetTop:15}));
   await expect.poll(async()=> (await rect(page,'#modalBack .modal')).bottom).toBeLessThanOrEqual(213);
   await clickable(page,'#oDistance'); await page.locator('#oDistance').fill('100'); await clickable(page,'#modalOk'); await page.locator('#modalOk').tap();
-  await page.evaluate(()=>mobileVisualViewport({})); expect(geometry(await saved(page))).toEqual(before);
+  await expect(page.locator('#modalBack')).toBeHidden();
+  await page.evaluate(()=>mobileVisualViewport({}));
+  // Explicitly saving an unchanged legacy measurement records the unchecked
+  // Estimated flag as false. Its value, endpoints and all other data stay fixed.
+  const expected=structuredClone(before);expected[0][0].dimensions[0].measure.estimated=false;
+  expect(geometry(await saved(page))).toEqual(expected);
 });
 
 test('Camera Details keeps input, Close and Done accessible above the keyboard',async({page,context})=>{

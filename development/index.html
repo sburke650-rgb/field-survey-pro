@@ -274,9 +274,10 @@ html.keyboard-visible #modalBack .modal,html.keyboard-visible #modalBack.fsp-dis
 <div id="modalBack" class="modalBack hidden"><div class="modal"><h3 id="modalTitle">Action</h3><div id="modalText" class="muted"></div><div id="modalBody"></div><div class="row"><button id="modalCancel" class="grow">Cancel</button><button id="modalOk" class="primary grow">Continue</button></div></div></div>
 <div id="cropBack" class="modalBack hidden"><div class="modal"><h3 id="cropTitle">Crop Floor Plan</h3><p id="cropInstructions" class="muted" style="margin:0">Drag a box around the area to keep, or confirm the whole plan.</p><canvas id="cropCanvas"></canvas><div id="cropActions"><button id="cropRotate">Rotate ↻</button><button id="cropReset">Reset Crop</button></div><div id="cropConfirmActions"><button id="cropCancel">Cancel</button><button id="cropApply" class="primary">Confirm Floor Plan ✓</button></div></div></div><input id="planFile" type="file" accept="image/*,.pdf,application/pdf" class="hidden"><input id="planPhoto" type="file" accept="image/*" capture="environment" class="hidden"><input id="backupFile" type="file" accept="application/json,.json" class="hidden"><input id="sitePhoto" type="file" accept="image/*" capture="environment" class="hidden">
 <script>
-(()=>{'use strict';const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?.()||Math.random().toString(36).slice(2),KEY='fsp-test-isolated-v1-plans-cameras';let data={surveys:[],active:null},survey=null,plan=null,screen='home',editing=false,tool='pan',placing=false,selected=null,detailId=null,gesture=null,modalAction=null,lastType='New',revision=0,savedRevision=0,saveQueue=Promise.resolve(),db=null;const NS='http://www.w3.org/2000/svg';function el(tag,attrs={},parent){const n=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,v);parent?.append(n);return n}function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function active(){return data.surveys.find(s=>s.id===data.active)}function show(name){if(traceArea)cancelAreaTrace();if(name==='home'&&(screen==='plans'||screen==='survey')&&plan)rememberPlanView(visibleCanvas(),true);screen=name;document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('hidden',x.id!==name));if(name==='home'){const a=active();$('continue').classList.toggle('hidden',!a);$('continue').textContent=a?'Continue Survey — '+a.name:'Continue Survey'}if(name==='list')renderList();if(name==='plans'){editing=false;zoomed=!!plan?.viewState;updatePlans();if(plan?.viewState)requestAnimationFrame(()=>requestAnimationFrame(()=>{if(screen==='plans'&&!editing)restorePlanView()}));else scheduleStablePlanFit()}if(name==='survey'){$('surveyArea').classList.remove('fsp-detail-open');placing=false;$('addCamera').classList.remove('primary','placing-existing');selected=null;closeDetail();updateSurvey();requestAnimationFrame(()=>restorePlanView())}}function setStatus(t){$('save').textContent=t;$('surveySave').textContent=t}async function initDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open('fsp-test-isolated-v1',1);req.onupgradeneeded=()=>req.result.createObjectStore('state');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}// Durable storage: write full survey snapshots to both IndexedDB and localStorage.
+(()=>{'use strict';const $=id=>document.getElementById(id),uid=()=>crypto.randomUUID?.()||Math.random().toString(36).slice(2),KEY='fsp-test-isolated-v1-plans-cameras';let data={surveys:[],active:null},survey=null,plan=null,screen='home',editing=false,tool='pan',placing=false,selected=null,detailId=null,gesture=null,modalAction=null,lastType='New',revision=0,savedRevision=0,saveQueue=Promise.resolve(),db=null;const NS='http://www.w3.org/2000/svg';function el(tag,attrs={},parent){const n=document.createElementNS(NS,tag);for(const [k,v]of Object.entries(attrs))n.setAttribute(k,v);parent?.append(n);return n}function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function active(){return data.surveys.find(s=>s.id===data.active)}function show(name){beginViewTransition();if(traceArea)cancelAreaTrace();screen=name;document.querySelectorAll('.screen').forEach(x=>x.classList.toggle('hidden',x.id!==name));if(name==='home'){const a=active();$('continue').classList.toggle('hidden',!a);$('continue').textContent=a?'Continue Survey — '+a.name:'Continue Survey'}if(name==='list')renderList();if(name==='plans'){editing=false;updatePlans();selectPlanView();schedulePlanViewRestore()}if(name==='survey'){$('surveyArea').classList.remove('fsp-detail-open');placing=false;$('addCamera').classList.remove('primary','placing-existing');selected=null;closeDetail();updateSurvey();selectPlanView();schedulePlanViewRestore()}}function setStatus(t){$('save').textContent=t;$('surveySave').textContent=t}async function initDB(){return new Promise((resolve,reject)=>{const req=indexedDB.open('fsp-test-isolated-v1',1);req.onupgradeneeded=()=>req.result.createObjectStore('state');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}// Durable storage: write full survey snapshots to both IndexedDB and localStorage.
 // On reload, reconcile wall geometry so an older/incomplete snapshot cannot erase a sketch.
 const MIRROR_KEY=KEY+'-full-mirror-v1748';
+let storageReady=false;
 function parseStored(raw){try{const x=typeof raw==='string'?JSON.parse(raw):raw;return x&&Array.isArray(x.surveys)?x:null}catch{return null}}
 // Development storage schema: optional plan-local deletion ledger, version 1.
 // IDs are never reused. Unioning explicit deletions prevents stale copies from
@@ -312,6 +313,17 @@ function mergeSaved(base,other){
   if(!dest){out.surveys.push(structuredClone(s));continue}
   for(const p of s.plans||[]){let target=dest.plans.find(x=>x.id===p.id);
    if(!target){dest.plans.push(structuredClone(p));continue}
+   const selectedAt=Math.max(validPlanView(target.viewState)?viewportTime({updatedAt:target.viewState.selectedAt},0):0,
+    validPlanView(p.viewState)?viewportTime({updatedAt:p.viewState.selectedAt},0):0);
+   // Viewport freshness is independent of geometry recovery and backend priority.
+   // Legacy states use their survey timestamp; v2 states have their own clock.
+   if(validPlanView(p.viewState)&&(!validPlanView(target.viewState)||
+      viewportTime(p.viewState,s.updated)>viewportTime(target.viewState,dest.updated))){
+    target.viewState={...structuredClone(p.viewState),updatedAt:viewportTime(p.viewState,s.updated)};
+    if(Object.hasOwn(p,'viewRotationOverride'))target.viewRotationOverride=p.viewRotationOverride;
+    else delete target.viewRotationOverride;
+   }
+   if(selectedAt&&validPlanView(target.viewState))target.viewState.selectedAt=selectedAt;
    const deleted=new Set([...measurementDeletionIds(target),...measurementDeletionIds(p)]);
    if(deleted.size)target._fspMeasurementDeletions={version:1,ids:[...deleted]};
    // Preserve drawn geometry even if another storage backend has a newer, incomplete copy.
@@ -351,16 +363,18 @@ async function read(){let idbState=null,mirror=null,legacy=null;
     pl.walls=structuredClone(backup.walls);
     recoveredWalls++;
    }
-   // Preserve a valid saved zoom/pan state across app restarts. Earlier code
-   // deleted it for every drawn plan, forcing a fresh fit on Continue Survey.
-   // Only discard malformed coordinates; keep valid user-selected views.
-   if(pl.viewState){
-    const v=pl.viewState;
-    if(![v.cx,v.cy,v.unitsPerPixel,v.rotation].every(Number.isFinite)||v.unitsPerPixel<=0)delete pl.viewState;
-   }
+   // Retain legacy and v2 views; only malformed viewport data needs an initial fit.
+   if(pl.viewState&&!validPlanView(pl.viewState))delete pl.viewState;
   }catch(e){console.warn('Wall restore failed for plan',pl.id,e)}
  }
  if(recoveredWalls)console.info('Recovered blue walls in',recoveredWalls,'plans');
+ // Restore the most recently selected floor even if IDB closed before the
+ // selection snapshot committed. Selection and pose have independent clocks.
+ let selectedAt=0;
+ for(const sv of data.surveys)for(const pl of sv.plans||[]){
+  const time=validPlanView(pl.viewState)?viewportTime({updatedAt:pl.viewState.selectedAt},0):0;
+  if(time>selectedAt){selectedAt=time;data.active=sv.id;sv.activePlan=pl.id}
+ }
  // A stale snapshot may also contain cached area results. Recompute only plans
  // whose measurements were actually removed during reconciliation.
  const priorSurvey=survey,priorPlan=plan;
@@ -369,7 +383,7 @@ async function read(){let idbState=null,mirror=null,legacy=null;
   survey=sv;plan=pl;refreshAutoArea();
  }
  survey=priorSurvey;plan=priorPlan;measurementPlansToRefresh.clear();
- show('home');
+ storageReady=true;show('home');
  // file:// downloads can be assigned separate storage origins by the browser.
  // A different HTML file location can therefore appear to lose existing surveys.
  if(location.protocol==='file:'&&!data.surveys.length){
@@ -408,8 +422,6 @@ function restorePlanWalls(){
   }
   if(saved&&Array.isArray(saved.walls)&&saved.walls.length>(plan.walls?.length||0)&&!plan.wallUndoCommitted){
    plan.walls=structuredClone(saved.walls);
-   delete plan.viewState;
-   zoomed=false;
    save();
   }
  }catch(e){console.warn('Blue wall recovery unavailable',e)}
@@ -419,16 +431,18 @@ function recoverMissingWalls(){try{const backup=JSON.parse(localStorage.getItem(
   if(b?.walls?.length>(p.walls?.length||0)&&!p.wallUndoCommitted){p.walls=structuredClone(b.walls);restored++}
  }if(restored)setTimeout(()=>alert('Recovered '+restored+' floor plan(s) from a local backup. Please check the drawings and export a backup.'),250);
  }catch(e){console.warn('Wall recovery failed',e)}}
-function save(){wallRecoverySnapshot();const n=++revision;setStatus('Saving…');const snapshot=JSON.stringify(data);
+function save(){if(!storageReady)return saveQueue;rememberPlanView(visibleCanvas(),false);wallRecoverySnapshot();const n=++revision;setStatus('Saving…');const snapshot=JSON.stringify(data);viewportDirty=false;
+ // Flush the latest mirror synchronously. Older queued IDB writes must never
+ // overwrite a newer background/pagehide mirror while the app is closing.
+ let mirrorVerified=false,mirrorError=null;
+ try{localStorage.setItem(MIRROR_KEY,snapshot);mirrorVerified=localStorage.getItem(MIRROR_KEY)===snapshot}catch(e){mirrorError=e}
  saveQueue=saveQueue.catch(()=>{}).then(async()=>{
   // Do not report Saved unless at least one permanent backend has committed.
-  let success=0,errors=[];
-  try{localStorage.setItem(MIRROR_KEY,snapshot);success++}catch(e){errors.push(e)}
+  let success=mirrorVerified?1:0,errors=mirrorError?[mirrorError]:[];
   if(db)try{await new Promise((res,rej)=>{const t=db.transaction('state','readwrite');t.objectStore('state').put(JSON.parse(snapshot),KEY);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||Error('Transaction aborted'))});success++}catch(e){errors.push(e)}
   if(!success)throw errors[0]||Error('No persistent storage available');
   // Verify the exact survey snapshot, including every drawn wall, can be read back.
-  let verified=0;
-  try{const stored=localStorage.getItem(MIRROR_KEY);if(stored===snapshot)verified++}catch(e){errors.push(e)}
+  let verified=mirrorVerified?1:0;
   if(db)try{const stored=await new Promise((res,rej)=>{const r=db.transaction('state','readonly').objectStore('state').get(KEY);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});if(JSON.stringify(stored)===snapshot)verified++}catch(e){errors.push(e)}
   if(!verified)throw Error('Saved data failed storage read-back verification');
   savedRevision=n;if(revision===n)setStatus(verified===2?'Saved ✓':'Saved (1 copy) ✓');
@@ -452,12 +466,12 @@ function fitSavedWallsView(){
   const svg=$(id),r=svg.getBoundingClientRect();if(r.width<10||r.height<10)continue;
   const aspect=r.width/r.height;let w=cw,h=ch;
   if(w/h<aspect)w=h*aspect;else h=w/aspect;
-  svg.setAttribute('viewBox',[cx-w/2,cy-h/2,w,h].join(' '));fitted=true;
+  setViewBox(svg,[cx-w/2,cy-h/2,w,h]);fitted=true;
  }
  if(fitted)zoomed=true;
  return fitted;
 }
-function open(id){data.active=id;current();show('plans');save()}function nextName(){let n=survey.nextPlanNumber||1;const used=new Set(survey.plans.map(p=>p.name));while(used.has('Plan '+n))n++;survey.nextPlanNumber=n+1;return 'Plan '+n}function makePlan(image=null){const p={id:uid(),name:nextName(),image,walls:[],cameras:[],showDimensions:true,confirmed:false,notes:'',created:Date.now()};survey.plans.push(p);survey.activePlan=p.id;plan=p;touch();show('plans');return p}function promptModal(title,html,action,ok='Continue'){$('modalBack').classList.remove('fsp-area-dialog');modalAction=action;$('modalTitle').textContent=title;$('modalText').textContent='';$('modalBody').innerHTML=html;$('modalOk').textContent=ok;$('modalBack').classList.remove('hidden')}function closeModal(){$('modalBack').classList.remove('fsp-area-dialog');clearDistanceDialog();$('modalBack').classList.add('hidden');modalAction=null;$('modalCancel').onclick=closeModal}$('modalCancel').onclick=closeModal;$('modalOk').onclick=()=>{const fn=modalAction;if(!fn){closeModal();return}fn();if(modalAction===fn)closeModal()};function confirmModal(title,msg,action){promptModal(title,'<p class="muted">'+esc(msg)+'</p>',action,'Confirm')}function selectModal(title,items){promptModal(title,'<div class="menu">'+items.map((x,i)=>'<button data-choice="'+i+'">'+esc(x.label)+'</button>').join('')+'</div>',()=>{},'Close');$('modalBody').querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{const fn=items[+b.dataset.choice].action;closeModal();fn()})}function nameSurvey(){promptModal('New Survey','<label class="muted">Survey name (optional)</label><input id="newName" placeholder="Untitled Survey">',()=>{const name=$('newName').value.trim()||'Untitled Survey';const s={id:uid(),name,plans:[],activePlan:null,nextPlanNumber:1,updated:Date.now(),sitePhotos:[],notes:''};data.surveys.push(s);data.active=s.id;current();touch();show('plans')},'Create Survey')}$('newSurvey').onclick=nameSurvey;$('continue').onclick=()=>open(data.active);$('allSurveys').onclick=()=>show('list');document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.closest('#plans')&&traceArea)cancelAreaTrace();else show(b.dataset.go)});$('search').oninput=renderList;function renderList(){const q=$('search').value.toLowerCase();$('surveyRows').innerHTML=data.surveys.filter(s=>s.name.toLowerCase().includes(q)).sort((a,b)=>b.updated-a.updated).map(s=>'<div class="card row"><button class="grow" data-open="'+s.id+'">'+esc(s.name)+' <span class="muted">('+s.plans.length+' plans)</span></button><button data-options="'+s.id+'">⋯</button></div>').join('')||'<p class="muted">No surveys yet.</p>';$('surveyRows').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>open(b.dataset.open));$('surveyRows').querySelectorAll('[data-options]').forEach(b=>b.onclick=()=>{const s=data.surveys.find(x=>x.id===b.dataset.options);selectModal(s.name,[{label:'Rename Survey',action:()=>promptModal('Rename Survey','<input id="renameSurvey" value="'+esc(s.name)+'">',()=>{const v=$('renameSurvey').value.trim();if(v){s.name=v;touch();renderList()}},'Rename')},{label:'Delete Survey',action:()=>confirmModal('Delete Survey','Delete '+s.name+' and all plans and cameras? This cannot be undone.',()=>{data.surveys=data.surveys.filter(x=>x.id!==s.id);if(data.active===s.id)data.active=data.surveys[0]?.id||null;current();save();renderList()})}])})}function selectors(){for(const id of ['planSelect','surveyPlanSelect']){const s=$(id);s.innerHTML=survey.plans.length?survey.plans.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join(''):'<option>No plans added</option>';s.disabled=!survey.plans.length;if(plan)s.value=plan.id}}function switchPlan(id){if(traceArea)cancelAreaTrace();$('surveyArea').classList.remove('fsp-detail-open');survey.activePlan=id;current();selected=null;closeDetail();touch();if(screen==='plans')updatePlans();else updateSurvey()}$('planSelect').onchange=e=>switchPlan(e.target.value);$('surveyPlanSelect').onchange=e=>switchPlan(e.target.value);function updatePlans(){current();$('plansTitle').textContent=survey?.name||'Plans';selectors();$('editPlan').disabled=!plan;$('toSurvey').disabled=!plan||!plan.confirmed;$('planMore').disabled=!plan;$('planTools').classList.toggle('hidden',!editing);$('fitPlan').classList.add('hidden');$('zoomTools').classList.toggle('hidden',!plan);$('drawingDoneBar').classList.toggle('hidden',!editing);$('planBottom').classList.toggle('hidden',editing);$('planArea').classList.toggle('empty',!plan);$('planArea').classList.toggle('hidden',!plan);$('planSelect').classList.toggle('empty',!plan);$('planSelect').parentElement.classList.toggle('hidden',!plan);$('planMore').classList.toggle('hidden',!plan);$('editPlan').classList.toggle('hidden',!plan);$('toSurvey').classList.toggle('hidden',!plan||!plan.confirmed);$('planBottom').classList.toggle('only-add',!plan);$('showDims').textContent=plan?.showDimensions===false?'Show Dimensions':'Hide Dimensions';$('editPlan').classList.toggle('hidden',editing||!plan);$('planHint').textContent=!plan?'No floor plans yet. Tap + Add Floor Plan below.':editing?(plan?.walls.some(w=>w.measure)?'Long-press a wall to add or edit measurements.':(plan?.image?'Select Measure and drag along a wall.':'Tip: Long-press any wall to add measurements.')):(plan?.confirmed?'Floor plan confirmed. Edit anytime.':'Draft drawing — tap Edit Plan, then Done to confirm.');renderScene('planScene',false);if(editing){setTool(tool);updateEditingToolbar()}requestAnimationFrame(()=>fitPlanView())}function updateEditingToolbar(){ $('undo').classList.remove('primary','activeTool');$('undo').style.background='#244f78';$('undo').style.color='white';const uploaded=!!plan?.image;for(const id of ['autoWall','clear','showDims'])$(id).classList.toggle('hidden',uploaded&&!advancedDrawing);for(const id of ['line','free'])$(id).classList.remove('hidden');$('moreDrawing').classList.toggle('hidden',!uploaded);$('moreDrawing').textContent=advancedDrawing?'Less ▴':'More ▾';$('panTool').classList.toggle('hidden',!uploaded);syncAreaControls()}let advancedDrawing=false;$('moreDrawing').onclick=()=>{advancedDrawing=!advancedDrawing;updateEditingToolbar()};function updateSurvey(){current();$('surveyTitle').textContent='Add Camera';selectors();$('camCount').textContent=(plan?.cameras.length||0)+' cameras';renderScene('surveyScene',true)}
+function open(id){data.active=id;current();show('plans');save()}function nextName(){let n=survey.nextPlanNumber||1;const used=new Set(survey.plans.map(p=>p.name));while(used.has('Plan '+n))n++;survey.nextPlanNumber=n+1;return 'Plan '+n}function makePlan(image=null){const p={id:uid(),name:nextName(),image,walls:[],cameras:[],showDimensions:true,confirmed:false,notes:'',created:Date.now()};survey.plans.push(p);survey.activePlan=p.id;plan=p;touch();show('plans');return p}function promptModal(title,html,action,ok='Continue'){$('modalBack').classList.remove('fsp-area-dialog');modalAction=action;$('modalTitle').textContent=title;$('modalText').textContent='';$('modalBody').innerHTML=html;$('modalOk').textContent=ok;$('modalBack').classList.remove('hidden')}function closeModal(){$('modalBack').classList.remove('fsp-area-dialog');clearDistanceDialog();$('modalBack').classList.add('hidden');modalAction=null;$('modalCancel').onclick=closeModal}$('modalCancel').onclick=closeModal;$('modalOk').onclick=()=>{const fn=modalAction;if(!fn){closeModal();return}fn();if(modalAction===fn)closeModal()};function confirmModal(title,msg,action){promptModal(title,'<p class="muted">'+esc(msg)+'</p>',action,'Confirm')}function selectModal(title,items){promptModal(title,'<div class="menu">'+items.map((x,i)=>'<button data-choice="'+i+'">'+esc(x.label)+'</button>').join('')+'</div>',()=>{},'Close');$('modalBody').querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{const fn=items[+b.dataset.choice].action;closeModal();fn()})}function nameSurvey(){promptModal('New Survey','<label class="muted">Survey name (optional)</label><input id="newName" placeholder="Untitled Survey">',()=>{const name=$('newName').value.trim()||'Untitled Survey';const s={id:uid(),name,plans:[],activePlan:null,nextPlanNumber:1,updated:Date.now(),sitePhotos:[],notes:''};data.surveys.push(s);data.active=s.id;current();touch();show('plans')},'Create Survey')}$('newSurvey').onclick=nameSurvey;$('continue').onclick=()=>open(data.active);$('allSurveys').onclick=()=>show('list');document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{if(b.closest('#plans')&&traceArea)cancelAreaTrace();else show(b.dataset.go)});$('search').oninput=renderList;function renderList(){const q=$('search').value.toLowerCase();$('surveyRows').innerHTML=data.surveys.filter(s=>s.name.toLowerCase().includes(q)).sort((a,b)=>b.updated-a.updated).map(s=>'<div class="card row"><button class="grow" data-open="'+s.id+'">'+esc(s.name)+' <span class="muted">('+s.plans.length+' plans)</span></button><button data-options="'+s.id+'">⋯</button></div>').join('')||'<p class="muted">No surveys yet.</p>';$('surveyRows').querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>open(b.dataset.open));$('surveyRows').querySelectorAll('[data-options]').forEach(b=>b.onclick=()=>{const s=data.surveys.find(x=>x.id===b.dataset.options);selectModal(s.name,[{label:'Rename Survey',action:()=>promptModal('Rename Survey','<input id="renameSurvey" value="'+esc(s.name)+'">',()=>{const v=$('renameSurvey').value.trim();if(v){s.name=v;touch();renderList()}},'Rename')},{label:'Delete Survey',action:()=>confirmModal('Delete Survey','Delete '+s.name+' and all plans and cameras? This cannot be undone.',()=>{data.surveys=data.surveys.filter(x=>x.id!==s.id);if(data.active===s.id)data.active=data.surveys[0]?.id||null;current();save();renderList()})}])})}function selectors(){for(const id of ['planSelect','surveyPlanSelect']){const s=$(id);s.innerHTML=survey.plans.length?survey.plans.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join(''):'<option>No plans added</option>';s.disabled=!survey.plans.length;if(plan)s.value=plan.id}}function switchPlan(id){beginViewTransition();if(traceArea)cancelAreaTrace();$('surveyArea').classList.remove('fsp-detail-open');survey.activePlan=id;current();selected=null;closeDetail();touch();if(screen==='plans')updatePlans();else updateSurvey();selectPlanView();schedulePlanViewRestore()}$('planSelect').onchange=e=>switchPlan(e.target.value);$('surveyPlanSelect').onchange=e=>switchPlan(e.target.value);function updatePlans(){current();$('plansTitle').textContent=survey?.name||'Plans';selectors();$('editPlan').disabled=!plan;$('toSurvey').disabled=!plan||!plan.confirmed;$('planMore').disabled=!plan;$('planTools').classList.toggle('hidden',!editing);$('fitPlan').classList.add('hidden');$('zoomTools').classList.toggle('hidden',!plan);$('drawingDoneBar').classList.toggle('hidden',!editing);$('planBottom').classList.toggle('hidden',editing);$('planArea').classList.toggle('empty',!plan);$('planArea').classList.toggle('hidden',!plan);$('planSelect').classList.toggle('empty',!plan);$('planSelect').parentElement.classList.toggle('hidden',!plan);$('planMore').classList.toggle('hidden',!plan);$('editPlan').classList.toggle('hidden',!plan);$('toSurvey').classList.toggle('hidden',!plan||!plan.confirmed);$('planBottom').classList.toggle('only-add',!plan);$('showDims').textContent=plan?.showDimensions===false?'Show Dimensions':'Hide Dimensions';$('editPlan').classList.toggle('hidden',editing||!plan);$('planHint').textContent=!plan?'No floor plans yet. Tap + Add Floor Plan below.':editing?(plan?.walls.some(w=>w.measure)?'Long-press a wall to add or edit measurements.':(plan?.image?'Select Measure and drag along a wall.':'Tip: Long-press any wall to add measurements.')):(plan?.confirmed?'Floor plan confirmed. Edit anytime.':'Draft drawing — tap Edit Plan, then Done to confirm.');renderScene('planScene',false);if(editing){setTool(tool);updateEditingToolbar()}schedulePlanViewRestore()}function updateEditingToolbar(){ $('undo').classList.remove('primary','activeTool');$('undo').style.background='#244f78';$('undo').style.color='white';const uploaded=!!plan?.image;for(const id of ['autoWall','clear','showDims'])$(id).classList.toggle('hidden',uploaded&&!advancedDrawing);for(const id of ['line','free'])$(id).classList.remove('hidden');$('moreDrawing').classList.toggle('hidden',!uploaded);$('moreDrawing').textContent=advancedDrawing?'Less ▴':'More ▾';$('panTool').classList.toggle('hidden',!uploaded);syncAreaControls()}let advancedDrawing=false;$('moreDrawing').onclick=()=>{advancedDrawing=!advancedDrawing;updateEditingToolbar()};function updateSurvey(){current();$('surveyTitle').textContent='Add Camera';selectors();$('camCount').textContent=(plan?.cameras.length||0)+' cameras';renderScene('surveyScene',true)}
 // V17.29: Camera markers remain interactive in the normal Plans view after Done/reopening.
 $('planCanvas').addEventListener('pointerdown',e=>{
  if(editing||!plan)return;
@@ -468,26 +482,24 @@ $('planCanvas').addEventListener('pointerdown',e=>{
  e.stopImmediatePropagation();e.preventDefault();
  openSharedView('survey');
  selected=id;renderScene('surveyScene',true);
-});let drawNewPlanId=null;function addPlanFlow(replace=false){selectModal(replace?'Replace Plan':'Add Plan',[{label:'Upload Plan (image or PDF)',action:()=>{uploadMode=replace?'replace':'add';$('planFile').click()}},{label:'Take Photo of Plan',action:()=>{uploadMode=replace?'replace':'add';$('planPhoto').click()}},{label:'Draw Plan',action:()=>{if(replace)replacePlan(null);else {makePlan();drawNewPlanId=plan.id}editing=true;advancedDrawing=false;setTool('pan');advancedDrawing=!!plan?.image;zoomed=false;updatePlans()}}])}let uploadMode='add';$('addPlan').onclick=()=>addPlanFlow();$('planMore').onclick=()=>{if(!plan)return;selectModal(plan.name,[{label:'Rename Plan',action:()=>promptModal('Rename Plan','<input id="renamePlan" value="'+esc(plan.name)+'">',()=>{const v=$('renamePlan').value.trim();if(v){plan.name=v;touch();updatePlans()}},'Done')},{label:'Replace Plan',action:()=>addPlanFlow(true)},{label:'Delete Plan',action:()=>confirmModal('Delete '+plan.name,'Delete this plan and all its cameras and drawing? Other plans keep their names.',()=>{survey.plans=survey.plans.filter(p=>p.id!==plan.id);survey.activePlan=survey.plans[0]?.id||null;current();touch();updatePlans()})}])};function replacePlan(image){const p=plan;if(p.cameras.length||p.walls.length){selectModal('Replace '+p.name,[{label:'Keep cameras and drawing',action:()=>{p.image=image;p.confirmed=true;touch();updatePlans()}},{label:'Keep cameras, clear drawing',action:()=>{p.image=image;p.walls=[];p.confirmed=false;touch();updatePlans()}},{label:'Remove cameras and drawing',action:()=>confirmModal('Remove existing work?','All cameras and drawn walls on this plan will be deleted.',()=>{p.image=image;p.walls=[];p.cameras=[];p.confirmed=false;touch();updatePlans()})}])}else{p.image=image;p.confirmed=true;touch();updatePlans()}}$('editPlan').onclick=()=>{drawNewPlanId=null;
- // Keep the same visible plan coordinates and scale on entry to Edit Plan.
- rememberPlanView($('planCanvas'),true);
- editing=true;advancedDrawing=false;setTool('pan');advancedDrawing=!!plan?.image;
- zoomed=true;updatePlans();
- requestAnimationFrame(()=>requestAnimationFrame(()=>{if(screen==='plans'&&editing&&plan)restorePlanView()}));
-};
-function leaveDrawing(back=false){if(traceArea){cancelAreaTrace();return}const p=plan;if(!p)return;const finish=()=>{touch();editing=false;drawNewPlanId=null;zoomed=false;updatePlans();if(plan&&!plan.image)scheduleStablePlanFit();if(back&&newId===p.id)addPlanFlow()};const newId=drawNewPlanId;
+});let drawNewPlanId=null;function addPlanFlow(replace=false){selectModal(replace?'Replace Plan':'Add Plan',[{label:'Upload Plan (image or PDF)',action:()=>{uploadMode=replace?'replace':'add';$('planFile').click()}},{label:'Take Photo of Plan',action:()=>{uploadMode=replace?'replace':'add';$('planPhoto').click()}},{label:'Draw Plan',action:()=>{if(replace)replacePlan(null);else {makePlan();drawNewPlanId=plan.id}editing=true;advancedDrawing=false;setTool('pan');advancedDrawing=!!plan?.image;zoomed=false;updatePlans()}}])}let uploadMode='add';$('addPlan').onclick=()=>addPlanFlow();$('planMore').onclick=()=>{if(!plan)return;selectModal(plan.name,[{label:'Rename Plan',action:()=>promptModal('Rename Plan','<input id="renamePlan" value="'+esc(plan.name)+'">',()=>{const v=$('renamePlan').value.trim();if(v){plan.name=v;touch();updatePlans()}},'Done')},{label:'Replace Plan',action:()=>addPlanFlow(true)},{label:'Delete Plan',action:()=>confirmModal('Delete '+plan.name,'Delete this plan and all its cameras and drawing? Other plans keep their names.',()=>{survey.plans=survey.plans.filter(p=>p.id!==plan.id);survey.activePlan=survey.plans[0]?.id||null;current();touch();updatePlans()})}])};function replacePlan(image){const p=plan;if(p.cameras.length||p.walls.length){selectModal('Replace '+p.name,[{label:'Keep cameras and drawing',action:()=>{p.image=image;p.confirmed=true;touch();updatePlans()}},{label:'Keep cameras, clear drawing',action:()=>{p.image=image;p.walls=[];p.confirmed=false;touch();updatePlans()}},{label:'Remove cameras and drawing',action:()=>confirmModal('Remove existing work?','All cameras and drawn walls on this plan will be deleted.',()=>{p.image=image;p.walls=[];p.cameras=[];p.confirmed=false;touch();updatePlans()})}])}else{p.image=image;p.confirmed=true;touch();updatePlans()}}$('editPlan').onclick=()=>{beginViewTransition();drawNewPlanId=null;editing=true;advancedDrawing=false;setTool('pan');advancedDrawing=!!plan?.image;zoomed=false;updatePlans();schedulePlanViewRestore()};
+function leaveDrawing(back=false){if(traceArea){cancelAreaTrace();return}const p=plan;if(!p)return;const finish=()=>{beginViewTransition();touch();editing=false;drawNewPlanId=null;zoomed=false;updatePlans();if(plan&&!plan.image)schedulePlanViewRestore();if(back&&newId===p.id)addPlanFlow()};const newId=drawNewPlanId;
 if(back&&newId===p.id){if(p.walls.length===0){survey.plans=survey.plans.filter(x=>x.id!==p.id);survey.activePlan=survey.plans.at(-1)?.id||null;current();touch();finish()}else selectModal('Leave Drawing',[{label:'Keep sketch as a draft',action:finish},{label:'Discard sketch and choose another plan',action:()=>{survey.plans=survey.plans.filter(x=>x.id!==p.id);survey.activePlan=survey.plans.at(-1)?.id||null;current();touch();finish()}}]);}
 else finish()}
 $('backDraw').onclick=()=>leaveDrawing(true);
 async function completePlanEdit(){
  hideMeasureHelp();if(!plan)return;
- // Preserve the editor's actual view before the layout changes on Done.
- // The old zoomed=false + delayed fit recentered the sketch differently in Plans.
- rememberPlanView($('planCanvas'),false);
- // The viewport must be included in the durable snapshot, not only held in memory.
- plan.confirmed=true;wallRecoverySnapshot();setStatus('Saving…');await save();if(revision!==savedRevision)return;
- editing=false;drawNewPlanId=null;zoomed=true;updatePlans();
- requestAnimationFrame(()=>requestAnimationFrame(()=>{if(screen==='plans'&&!editing&&plan)restorePlanView()}));
+ const editedPlan=plan,transition=viewportSession;
+ rememberPlanView($('planCanvas'),false);plan.confirmed=true;
+ let pending=save();
+ while(true){
+  await pending;
+  if(plan!==editedPlan||screen!=='plans'||!editing||transition!==viewportSession)return;
+  if(pending===saveQueue)break;
+  pending=saveQueue;
+ }
+ if(plan!==editedPlan||screen!=='plans'||!editing||transition!==viewportSession||revision!==savedRevision)return;
+ beginViewTransition();editing=false;drawNewPlanId=null;updatePlans();
 }
 $('finishEdit').onclick=()=>{if(!plan)return;if(traceArea){finishAreaTrace();return}
  // V17.80: Done finishes the edit without requiring measurements.
@@ -1100,9 +1112,13 @@ function pt(e,svg){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;/* P
 // Capture the drawing transform once per stroke; preview and committed wall use identical plan coordinates.
 function strokePoint(e,g){if(!g?.inverseMatrix)return pt(e,$('planCanvas'));const p=$('planCanvas').createSVGPoint();p.x=e.clientX;p.y=e.clientY;const q=p.matrixTransform(g.inverseMatrix);return Number.isFinite(q.x)&&Number.isFinite(q.y)?{x:q.x,y:q.y}:null}
 function linePath(points){return points.map((p,i)=>(i?'L':'M')+p.x+' '+p.y).join(' ')}let zoomed=false;function getViewBox(svg){return svg.getAttribute('viewBox').split(/[,\s]+/).map(Number)}
-function setViewBox(svg,b){svg.setAttribute('viewBox',b.join(' '));zoomed=true}
+function setViewBox(svg,b){
+ if(!plan||!b.every(Number.isFinite)||b[2]<=0||b[3]<=0)return;
+ svg.setAttribute('viewBox',b.join(' '));zoomed=true;
+ bindViewport(svg);rememberPlanView(svg,false);
+}
 function zoomPlan(factor){const svg=visibleCanvas(),b=getViewBox(svg),cx=b[0]+b[2]/2,cy=b[1]+b[3]/2;setViewBox(svg,[cx-b[2]*factor/2,cy-b[3]*factor/2,b[2]*factor,b[3]*factor])}
-$('zoomIn').onclick=()=>{zoomPlan(.75);rememberPlanView()};$('zoomOut').onclick=()=>{zoomPlan(1.33);rememberPlanView()};$('fitPlan').onclick=()=>{zoomed=false;fitPlanView()};
+$('zoomIn').onclick=()=>{zoomPlan(.75);rememberPlanView()};$('zoomOut').onclick=()=>{zoomPlan(1.33);rememberPlanView()};$('fitPlan').onclick=()=>{fitPlanView(true);rememberPlanView()};
 $('planCanvas').addEventListener('wheel',e=>{if(!plan)return;e.preventDefault();zoomPlan(e.deltaY>0?1.15:.87);rememberPlanView()},{passive:false});
 // V17.24: single navigation controller, screen-to-SVG coordinates account for
 // SVG preserveAspectRatio letterboxing and 90-degree scene rotation.
@@ -1162,7 +1178,7 @@ for(const eventName of ['pointerup','pointercancel'])navSvg.addEventListener(eve
  pointers.delete(e.pointerId);
  if(navPan?.id===e.pointerId)navPan=null;
  if(pinch&&pointers.size<2){pinch=null;suppressTouchUntil=Date.now()+350;gesture=null;$('strokePreview').replaceChildren()}
- if(pointers.size===0&&plan&&(navPan===null||!pinch))rememberPlanView(navSvg)
+ if(pointers.size===0&&plan&&!['pending-draw','draw','overlay-measure'].includes(gesture?.kind)){rememberPlanView(navSvg);refreshPlanOrientation()}
 },{capture:true});
 // Rotate the *rendered view*, never the saved geometry.
 function planBounds(){
@@ -1189,123 +1205,142 @@ let orientationIsLandscape=false;
 // Manual view-only rotation override: null = follow device, 0/90 = chosen view.
 let planRotationOverride=null;
 function detectedLandscape(){
- const r=$('planArea').getBoundingClientRect();
- return window.matchMedia('(orientation: landscape)').matches ||
-        window.innerWidth>window.innerHeight ||
-        (r.width>r.height*1.3 && window.innerWidth>600);
+ return window.matchMedia('(orientation: landscape)').matches;
 }
-function planRotationDegrees(){const override=plan?.viewRotationOverride??planRotationOverride;return override===null?(detectedLandscape()?90:0):override;}
+function planRotationDegrees(){const override=plan?plan.viewRotationOverride??null:planRotationOverride;return override===null?(detectedLandscape()?90:0):override;}
 
 function rotateVisiblePlan90(){
  if(!plan)return;
- const next=(planRotationDegrees()+90)%360;
- plan.viewRotationOverride=next;
- planRotationOverride=next;
- // Do not restore a view box that was fitted for a different rotation.
- delete plan.viewState;
- zoomed=false;
- applyPlanOrientation();
- fitPlanView(true);
- rememberPlanView(visibleCanvas());
+ rememberPlanView(visibleCanvas(),false);
+ plan.viewRotationOverride=(planRotationDegrees()+90)%360;
+ restorePlanView();rememberPlanView();
 }
 function enableAutomaticPlanRotation(){
  if(!plan)return;
+ rememberPlanView(visibleCanvas(),false);
  plan.viewRotationOverride=null;
- planRotationOverride=null;
- delete plan.viewState;
- zoomed=false;
- applyPlanOrientation();
- fitPlanView(true);
- rememberPlanView(visibleCanvas());
+ restorePlanView();rememberPlanView();
 }
 $('rotatePlanView').onclick=rotateVisiblePlan90;
 $('rotateSurveyView').onclick=rotateVisiblePlan90;
 function planLandscape(){return detectedLandscape();}
 function applyPlanOrientation(){
  if(!plan)return;
- const b=planBounds(),cx=b.x+b.w/2,cy=b.y+b.h/2;
+ const pivot=viewportPivot(),cx=pivot.x,cy=pivot.y;
  const degrees=planRotationDegrees();
  orientationIsLandscape=(degrees%180)!==0;
  const transform=degrees?`rotate(${degrees} ${cx} ${cy})`:'';
  for(const id of ['planScene','strokePreview','surveyScene'])$(id).setAttribute('transform',transform);
 }
-// V17.24: shared per-plan camera/plan viewport. Persist only when a gesture finishes.
+// Viewport schema v2 adds a client-screen origin, stable rotation pivot and a
+// per-view timestamp. cx/cy/unitsPerPixel/rotation remain compatible with v1.
+// Geometry, layout and drawing coordinates are never changed by this controller.
+function validPlanView(v){
+ return !!v&&[v.cx,v.cy,v.unitsPerPixel,v.rotation].every(Number.isFinite)&&v.unitsPerPixel>0&&
+  (v.version===undefined||v.version===1||v.version===2)&&
+  (v.version!==2||([v.originX,v.originY,v.pivotX,v.pivotY,v.updatedAt].every(Number.isFinite)&&v.updatedAt>=0));
+}
+function viewportTime(v,fallback){const time=Number.isFinite(v?.updatedAt)?v.updatedAt:Number(fallback);return Number.isFinite(time)&&time>=0?time:0}
+const canvasViewports=new WeakMap(),planPivots=new WeakMap();
+let viewportTransition=0,viewportSession=0,planFitFrame=0,viewportDirty=false,cancelSurveyViewGesture=()=>{};
+function selectPlanView(){
+ if(!validPlanView(plan?.viewState))return;
+ let time=Date.now();
+ for(const sv of data.surveys)for(const pl of sv.plans||[])time=Math.max(time,viewportTime({updatedAt:pl.viewState?.selectedAt},0)+1);
+ plan.viewState.selectedAt=time;viewportDirty=true;
+}
+function beginViewTransition(){
+ viewportSession++;viewportTransition++;cancelAnimationFrame(planFitFrame);
+ rememberPlanView(visibleCanvas(),false);if(viewportDirty)save();
+ // Navigation must not carry an old plan's active pointers into a new plan.
+ pointers.clear();navPan=null;pinch=null;gesture=null;cancelSurveyViewGesture();
+ $('strokePreview').replaceChildren();
+}
 function visibleCanvas(){return screen==='survey'?$('surveyCanvas'):$('planCanvas')}
+function viewportPivot(){
+ const v=plan?.viewState;
+ if(validPlanView(v)&&v.version===2)return {x:v.pivotX,y:v.pivotY};
+ if(!planPivots.has(plan)){const b=planBounds();planPivots.set(plan,{x:b.x+b.w/2,y:b.y+b.h/2})}
+ return planPivots.get(plan);
+}
+function bindViewport(svg){
+ const r=svg.getBoundingClientRect();
+ canvasViewports.set(svg,{plan,left:r.left,top:r.top,width:r.width,height:r.height});
+}
 function rememberPlanView(svg=visibleCanvas(),persist=true){
- if(!plan||!svg||svg.getBoundingClientRect().width<10)return;
- const b=getViewBox(svg),r=svg.getBoundingClientRect();
- if(!b.every(Number.isFinite)||b[2]<=0||b[3]<=0)return;
- const next={cx:b[0]+b[2]/2,cy:b[1]+b[3]/2,unitsPerPixel:Math.max(b[2]/r.width,b[3]/r.height),rotation:planRotationDegrees()};
- plan.viewState=next;
+ const bound=svg&&canvasViewports.get(svg);
+ if(!plan||bound?.plan!==plan||!['plans','survey'].includes(screen)||svg!==visibleCanvas())return;
+ const r=svg.getBoundingClientRect();if(r.width<10||r.height<10)return;
+ // A layout change must restore the stored transform before it can be captured.
+ if(bound.left!==r.left||bound.top!==r.top||bound.width!==r.width||bound.height!==r.height){restorePlanView();return}
+ const b=getViewBox(svg);if(!b.every(Number.isFinite)||b[2]<=0||b[3]<=0)return;
+ const scale=Math.max(b[2]/r.width,b[3]/r.height),pivot=viewportPivot();
+ const next={version:2,cx:b[0]+b[2]/2,cy:b[1]+b[3]/2,unitsPerPixel:scale,rotation:planRotationDegrees(),
+  originX:b[0]+b[2]/2-(r.left+r.width/2)*scale,
+  originY:b[1]+b[3]/2-(r.top+r.height/2)*scale,pivotX:pivot.x,pivotY:pivot.y};
+ const old=plan.viewState;
+ const changed=!validPlanView(old)||Object.entries(next).some(([key,value])=>!Number.isFinite(old[key])||Math.abs(old[key]-value)>1e-7);
+ if(changed){plan.viewState={...old,...next,updatedAt:Math.max(Date.now(),viewportTime(old,0)+1)};viewportDirty=true}
  if(persist)touch();
+ return changed;
 }
 function restorePlanView(){
- if(!plan)return;
- applyPlanOrientation();
+ if(!plan||!['plans','survey'].includes(screen))return;
+ const svg=visibleCanvas(),r=svg.getBoundingClientRect();if(r.width<10||r.height<10)return;
  const v=plan.viewState;
- if(!v||v.rotation!==planRotationDegrees()){zoomed=false;fitPlanView(true);return}
- const svg=visibleCanvas(),r=svg.getBoundingClientRect();
- if(r.width<10||r.height<10)return;
- const scale=Math.max(.0001,Number(v.unitsPerPixel)||1);
- const w=r.width*scale,h=r.height*scale;
- svg.setAttribute('viewBox',[v.cx-w/2,v.cy-h/2,w,h].join(' '));
- zoomed=true;
+ if(!validPlanView(v)){fitPlanView(true);return}
+ applyPlanOrientation();
+ const scale=v.unitsPerPixel,w=r.width*scale,h=r.height*scale;
+ const x=v.version===2?v.originX+r.left*scale:v.cx-w/2;
+ const y=v.version===2?v.originY+r.top*scale:v.cy-h/2;
+ svg.setAttribute('viewBox',[x,y,w,h].join(' '));zoomed=true;bindViewport(svg);
+ // Rotation changes update metadata without refitting or changing the zoom.
+ return rememberPlanView(svg,false);
 }
-function openSharedView(name){
- if(screen==='plans'||screen==='survey')rememberPlanView(visibleCanvas(),true);
- show(name);
- requestAnimationFrame(()=>restorePlanView());
-}
-// V17.59: refit only after the plan screen finishes changing between viewing and editing.
-let planFitFrame=0;
-function scheduleStablePlanFit(){
+function openSharedView(name){rememberPlanView(visibleCanvas(),false);show(name);save()}
+// Scope delayed restoration to the selected plan, screen and editing transition.
+function schedulePlanViewRestore(){
+ const expectedPlan=plan,expectedScreen=screen,expectedEditing=editing,token=++viewportTransition;
  cancelAnimationFrame(planFitFrame);
- planFitFrame=requestAnimationFrame(()=>{planFitFrame=requestAnimationFrame(()=>{
-  if(screen!=='plans'||!plan||gesture||pinch||navPan)return;
-  if(plan.viewState&&plan.viewState.rotation===planRotationDegrees()){restorePlanView();return}
-  zoomed=false;fitPlanView(true);
- })});
+ if(!viewportGestureActive())restorePlanView();
+ planFitFrame=requestAnimationFrame(()=>{
+  if(token!==viewportTransition||plan!==expectedPlan||screen!==expectedScreen||editing!==expectedEditing)return;
+  if(viewportGestureActive())return;
+  restorePlanView();if(viewportDirty)save();
+ });
 }
 function fitPlanView(force=false){
- if(!plan)return;
- if(!force&&gesture&&['pending-draw','draw','overlay-measure'].includes(gesture.kind))return;
+ if(!plan||!['plans','survey'].includes(screen))return;
+ if(!force){restorePlanView();return}
  applyPlanOrientation();
- if(zoomed&&!force)return;
- const b=planBounds(),cx=b.x+b.w/2,cy=b.y+b.h/2;
+ const b=planBounds(),pivot=viewportPivot(),angle=planRotationDegrees()*Math.PI/180;
+ // Fit the rotated bounds around the same stable pivot used by every layer.
+ const dx=b.x+b.w/2-pivot.x,dy=b.y+b.h/2-pivot.y;
+ const cx=pivot.x+dx*Math.cos(angle)-dy*Math.sin(angle),cy=pivot.y+dx*Math.sin(angle)+dy*Math.cos(angle);
  const cw=orientationIsLandscape?b.h:b.w,ch=orientationIsLandscape?b.w:b.h;
- for(const id of ['planCanvas','surveyCanvas']){
-  const svg=$(id),r=svg.getBoundingClientRect();
-  if(r.width<10||r.height<10)continue;
-  const aspect=r.width/r.height;
-  let w=cw*1.06,h=ch*1.06;
-  if(w/h<aspect)w=h*aspect;else h=w/aspect;
-  svg.setAttribute('viewBox',[cx-w/2,cy-h/2,w,h].join(' '));
- }
+ const svg=visibleCanvas(),r=svg.getBoundingClientRect();if(r.width<10||r.height<10)return;
+ const scale=Math.max(cw*1.06/r.width,ch*1.06/r.height),w=r.width*scale,h=r.height*scale;
+ svg.setAttribute('viewBox',[cx-w/2,cy-h/2,w,h].join(' '));zoomed=true;bindViewport(svg);
+ rememberPlanView(svg,false);
 }
-let orientationFrame=0;
-let lastDetectedLandscape=detectedLandscape();
+function viewportGestureActive(){return !!(gesture||pinch||navPan||pointers.size||surveyNavigationActive)}
+let surveyNavigationActive=false;
 function refreshPlanOrientation(){
- // Browser chrome may resize the SVG while the finger is down; never reset the drawing viewport mid-stroke.
- if(editing&&gesture&&['pending-draw','draw'].includes(gesture.kind))return;
- // Revert to device-following when the device actually changes orientation.
- const now=detectedLandscape();
- const deviceTurned=now!==lastDetectedLandscape;
- // A manual rotation stays selected until Automatic Rotation is chosen.
- lastDetectedLandscape=now;
- // Do not discard saved geometry or alter the active editing tool.
- gesture=null;navPan=null;pinch=null;pointers.clear();
- $('strokePreview').replaceChildren();
- zoomed=!!plan?.viewState;
- cancelAnimationFrame(orientationFrame);
- orientationFrame=requestAnimationFrame(()=>{if(!plan)return;if(deviceTurned){zoomed=false;fitPlanView(true);rememberPlanView(visibleCanvas(),false)}else if(plan.viewState&&plan.viewState.rotation===planRotationDegrees())restorePlanView();else{zoomed=false;fitPlanView(true)}});
+ if(!plan||!['plans','survey'].includes(screen)||viewportGestureActive())return;
+ restorePlanView();schedulePlanViewRestore();
 }
 window.addEventListener('resize',refreshPlanOrientation);
-window.addEventListener('orientationchange',()=>{
- refreshPlanOrientation();
- setTimeout(refreshPlanOrientation,120);
- setTimeout(refreshPlanOrientation,350);
-});
+window.addEventListener('orientationchange',refreshPlanOrientation);
 window.matchMedia('(orientation: landscape)').addEventListener?.('change',refreshPlanOrientation);
+// Observe actual canvas layout, including fullscreen transitions and browser chrome.
+const viewportResizeObserver=new ResizeObserver(refreshPlanOrientation);
+viewportResizeObserver.observe($('planCanvas'));viewportResizeObserver.observe($('surveyCanvas'));
+window.addEventListener('fsp-viewport-change',refreshPlanOrientation);
+// A no-movement press can return early from its tool's release handler. Retry
+// deferred layout restoration after all handlers have finished, even on cancel.
+for(const eventName of ['pointerup','pointercancel'])document.addEventListener(eventName,()=>{
+ requestAnimationFrame(refreshPlanOrientation);
+},true);
 function drawReadableMeasureLabel(root,a,b,m,attrs={}){
  const midX=(a.x+b.x)/2,midY=(a.y+b.y)/2,angle=planRotationDegrees(),text=measureText(m);
  const estimatedWidth=Math.max(46,text.length*12+18);
@@ -1317,7 +1352,7 @@ function drawReadableMeasureLabel(root,a,b,m,attrs={}){
  const t=el('text',{x:midX,y:midY+centerY+7,fill:'#92400e','font-size':20,'font-weight':'bold','text-anchor':'middle',style:'cursor:pointer',...attrs},g);
  t.textContent=text;
 }
-function renderScene(target,isSurvey){const root=$(target);root.replaceChildren();if(!plan)return;fitPlanView();if(plan.image)el('image',{href:plan.image,x:0,y:0,width:1000,height:700,preserveAspectRatio:'xMidYMid meet'},root);for(let wi=0;wi<plan.walls.length;wi++){const w=plan.walls[wi];el('path',{d:linePath(w.points),class:'wall',stroke:drawingColors[w.color]||drawingColors.blue,'data-wall':wi},root);if(!isSurvey)el('path',{d:linePath(w.points),fill:'none',stroke:'transparent','stroke-width':30,'stroke-linecap':'round','stroke-linejoin':'round','data-wall-hit':wi},root);if(!isSurvey&&editing&&w.measure&&plan.showDimensions!==false){const a=w.points[0],b=w.points.at(-1);drawReadableMeasureLabel(root,a,b,w.measure,{'data-dimension':wi})}}if(!isSurvey&&editing)for(let di=0;di<(plan.dimensions||[]).length;di++){
+function renderScene(target,isSurvey){const root=$(target);root.replaceChildren();if(!plan)return;applyPlanOrientation();if(canvasViewports.get(visibleCanvas())?.plan!==plan)restorePlanView();if(plan.image)el('image',{href:plan.image,x:0,y:0,width:1000,height:700,preserveAspectRatio:'xMidYMid meet'},root);for(let wi=0;wi<plan.walls.length;wi++){const w=plan.walls[wi];el('path',{d:linePath(w.points),class:'wall',stroke:drawingColors[w.color]||drawingColors.blue,'data-wall':wi},root);if(!isSurvey)el('path',{d:linePath(w.points),fill:'none',stroke:'transparent','stroke-width':30,'stroke-linecap':'round','stroke-linejoin':'round','data-wall-hit':wi},root);if(!isSurvey&&editing&&w.measure&&plan.showDimensions!==false){const a=w.points[0],b=w.points.at(-1);drawReadableMeasureLabel(root,a,b,w.measure,{'data-dimension':wi})}}if(!isSurvey&&editing)for(let di=0;di<(plan.dimensions||[]).length;di++){
  const d=plan.dimensions[di],a=d.a,b=d.b;
  el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'#d97706','stroke-width':2.5,'stroke-dasharray':'7 4','vector-effect':'non-scaling-stroke','data-overlay-line':d.id},root);
  if(!isSurvey)el('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'transparent','stroke-width':26,'stroke-linecap':'round','pointer-events':'stroke','data-overlay-dimension':di,style:'cursor:pointer'},root);
@@ -1426,7 +1461,8 @@ function bindDrawing(){
   }
   if(e.type!=='pointercancel'&&g.points.length>1&&Math.hypot(g.points.at(-1).x-g.start.x,g.points.at(-1).y-g.start.y)>5){zoomed=true;const coords=g.points.map(p=>({x:Number(p.x),y:Number(p.y)}));if(coords.every(p=>Number.isFinite(p.x)&&Number.isFinite(p.y))){const w={id:uid(),points:coords,color:drawingColor};plan.walls.push(w);refreshAutoArea();savePlanWalls();plan.actionHistory??=[];plan.actionHistory.push({kind:'wall',id:w.id});delete plan.undoSnapshot;touch();promptForIrregularSketch()}else{setStatus('Invalid wall coordinates');alert('Wall was not saved because its coordinates were invalid. Please draw it again.')}}
   renderScene('planScene',false);
-  if(e.type!=='pointercancel'&&plan)rememberPlanView(svg,false);
+  if(e.type!=='pointercancel'&&plan)rememberPlanView(svg);
+  refreshPlanOrientation();
  }
  svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
 }bindDrawing();
@@ -1466,10 +1502,11 @@ function bindSurvey(){const svg=$('surveyCanvas');svg.addEventListener('pointerd
 // Shared pan/pinch on Camera Survey. Camera placement and marker drags retain priority.
 (function bindSurveyNavigation(){
  const svg=$('surveyCanvas'),touches=new Map();let pan=null,pinchState=null,changed=false;
+ cancelSurveyViewGesture=()=>{touches.clear();pan=null;pinchState=null;changed=false;surveyNavigationActive=false};
  function scenePoint(x,y){const p=svg.createSVGPoint();p.x=x;p.y=y;return p.matrixTransform(svg.getScreenCTM().inverse())}
  svg.addEventListener('pointerdown',e=>{
   if(!plan||placing||gesture?.kind==='rotate'||gesture?.kind==='move'||e.target.closest('[data-cam],[data-handle],[data-area-label]'))return;
-  e.preventDefault();touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  e.preventDefault();surveyNavigationActive=true;touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
   try{svg.setPointerCapture(e.pointerId)}catch{}
   if(touches.size===1){pan={id:e.pointerId,start:{x:e.clientX,y:e.clientY},box:getViewBox(svg)};pinchState=null}
   else if(touches.size===2){const t=[...touches.values()],mid={x:(t[0].x+t[1].x)/2,y:(t[0].y+t[1].y)/2};pinchState={distance:Math.max(1,Math.hypot(t[0].x-t[1].x,t[0].y-t[1].y)),mid,anchor:scenePoint(mid.x,mid.y),box:getViewBox(svg)};pan=null}
@@ -1490,7 +1527,7 @@ function bindSurvey(){const svg=$('surveyCanvas');svg.addEventListener('pointerd
    setViewBox(svg,[b[0]-(e.clientX-pan.start.x)/scale,b[1]-(e.clientY-pan.start.y)/scale,b[2],b[3]]);changed=true;
   }
  },{capture:true});
- function finish(e){if(!touches.has(e.pointerId))return;touches.delete(e.pointerId);if(touches.size<2)pinchState=null;if(touches.size===0){pan=null;if(changed){rememberPlanView(svg);changed=false}}}
+ function finish(e){if(!touches.has(e.pointerId))return;touches.delete(e.pointerId);if(touches.size<2)pinchState=null;if(touches.size===0){surveyNavigationActive=false;pan=null;if(changed){rememberPlanView(svg);changed=false}refreshPlanOrientation()}}
  svg.addEventListener('pointerup',finish,{capture:true});svg.addEventListener('pointercancel',finish,{capture:true});
 })();
 function detailViewportBounds(){
@@ -1651,7 +1688,7 @@ async function imageData(file){return new Promise((res,rej)=>{const r=new FileRe
 })}
 async function onPlanFile(e){const f=e.target.files[0];e.target.value='';if(!f)return;try{setStatus('Importing…');const raw=f.type==='application/pdf'||/\.pdf$/i.test(f.name)?await pdfData(f):await imageData(f);const image=await prepareCrop(raw);if(!image){setStatus('Import canceled');return}if(uploadMode==='replace')replacePlan(image);else makePlan(image);if(plan){const tmp=new Image();tmp.src=image;await tmp.decode();plan.imageWidth=tmp.naturalWidth;plan.imageHeight=tmp.naturalHeight;plan.confirmed=true;touch()}editing=false;drawNewPlanId=null;advancedDrawing=false;tool='pan';zoomed=false;updatePlans();fitPlanView();await saveQueue;if(revision===savedRevision)setStatus('Saved ✓')}catch(err){setStatus('Import failed');alert(err.message)}}
 $('planFile').onchange=onPlanFile;$('planPhoto').onchange=onPlanFile;
-function exportData(){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='FieldSurveyPro-V17-Backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}$('exportBackup').onclick=exportData;$('importBackup').onclick=()=>$('backupFile').click();$('backupFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.surveys))throw Error('Not a valid backup');confirmModal('Import Backup','Replace all V17 test surveys with this backup?',()=>{data=d;current();save();renderList()})}catch(err){alert(err.message)}};window.addEventListener('pagehide',()=>{try{localStorage.setItem(MIRROR_KEY,JSON.stringify(data));wallRecoverySnapshot()}catch(e){console.warn('Final snapshot failed',e)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){try{localStorage.setItem(MIRROR_KEY,JSON.stringify(data));wallRecoverySnapshot()}catch(e){console.warn('Background snapshot failed',e)}}});window.addEventListener('beforeunload',e=>{if(revision!==savedRevision){e.preventDefault();e.returnValue=''}});// V17.53 storage diagnostics. Read-only: does not modify survey data.
+function exportData(){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='FieldSurveyPro-V17-Backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}$('exportBackup').onclick=exportData;$('importBackup').onclick=()=>$('backupFile').click();$('backupFile').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.surveys))throw Error('Not a valid backup');confirmModal('Import Backup','Replace all V17 test surveys with this backup?',()=>{data=d;current();save();renderList()})}catch(err){alert(err.message)}};window.addEventListener('pagehide',()=>{try{if(storageReady)save()}catch(e){console.warn('Final snapshot failed',e)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){try{if(storageReady)save()}catch(e){console.warn('Background snapshot failed',e)}}});window.addEventListener('beforeunload',e=>{if(revision!==savedRevision){e.preventDefault();e.returnValue=''}});// V17.53 storage diagnostics. Read-only: does not modify survey data.
 let diagnosticStartup=null;
 function diagnosticCounts(snapshot,id){
  const sv=snapshot?.surveys?.find(x=>x.id===id);
