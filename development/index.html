@@ -324,12 +324,15 @@ function mergeSaved(base,other){
     validPlanView(p.viewState)?viewportTime({updatedAt:p.viewState.selectedAt},0):0);
    // Viewport freshness is independent of geometry recovery and backend priority.
    // Legacy states use their survey timestamp; v2 states have their own clock.
-   if(validPlanView(p.viewState)&&(!validPlanView(target.viewState)||
-      viewportTime(p.viewState,s.updated)>viewportTime(target.viewState,dest.updated))){
+   const replaceView=validPlanView(p.viewState)&&(!validPlanView(target.viewState)||
+      viewportTime(p.viewState,s.updated)>viewportTime(target.viewState,dest.updated));
+   const orientationViews=mergeOrientationViews(target,p,replaceView);
+   if(replaceView){
     target.viewState={...structuredClone(p.viewState),updatedAt:viewportTime(p.viewState,s.updated)};
     if(Object.hasOwn(p,'viewRotationOverride'))target.viewRotationOverride=p.viewRotationOverride;
     else delete target.viewRotationOverride;
    }
+   if(orientationViews)target.orientationViews=orientationViews;
    if(selectedAt&&validPlanView(target.viewState))target.viewState.selectedAt=selectedAt;
    const deleted=new Set([...measurementDeletionIds(target),...measurementDeletionIds(p)]);
    if(deleted.size)target._fspMeasurementDeletions={version:1,ids:[...deleted]};
@@ -371,6 +374,7 @@ async function read(){let idbState=null,mirror=null,legacy=null;
     recoveredWalls++;
    }
    // Retain legacy and v2 views; only malformed viewport data needs an initial fit.
+   recoverOrientationView(pl);
    if(pl.viewState&&!validPlanView(pl.viewState))delete pl.viewState;
   }catch(e){console.warn('Wall restore failed for plan',pl.id,e)}
  }
@@ -1121,8 +1125,9 @@ function strokePoint(e,g){if(!g?.inverseMatrix)return pt(e,$('planCanvas'));cons
 function linePath(points){return points.map((p,i)=>(i?'L':'M')+p.x+' '+p.y).join(' ')}let zoomed=false;function getViewBox(svg){return svg.getAttribute('viewBox').split(/[,\s]+/).map(Number)}
 function setViewBox(svg,b){
  if(!plan||!b.every(Number.isFinite)||b[2]<=0||b[3]<=0)return;
+ orientationAnchor=null;
  svg.setAttribute('viewBox',b.join(' '));zoomed=true;
- bindViewport(svg);rememberPlanView(svg,false);
+ bindViewport(svg,true);rememberPlanView(svg,false);
 }
 function zoomPlan(factor){const svg=visibleCanvas(),b=getViewBox(svg),cx=b[0]+b[2]/2,cy=b[1]+b[3]/2;setViewBox(svg,[cx-b[2]*factor/2,cy-b[3]*factor/2,b[2]*factor,b[3]*factor])}
 $('zoomIn').onclick=()=>{zoomPlan(.75);rememberPlanView()};$('zoomOut').onclick=()=>{zoomPlan(1.33);rememberPlanView()};$('fitPlan').onclick=()=>{fitPlanView(true);rememberPlanView()};
@@ -1248,7 +1253,50 @@ function validPlanView(v){
   (v.version!==2||([v.originX,v.originY,v.pivotX,v.pivotY,v.updatedAt].every(Number.isFinite)&&v.updatedAt>=0));
 }
 function viewportTime(v,fallback){const time=Number.isFinite(v?.updatedAt)?v.updatedAt:Number(fallback);return Number.isFinite(time)&&time>=0?time:0}
+// Keep the existing v2 active view for Edit/Done and old backup readers. The
+// versioned sidecar retains each device orientation independently; its records
+// use the same rotated-SVG coordinates, scale, pivot and per-view clock as v2.
+function orientationKey(){return detectedLandscape()?'landscape':'portrait'}
+function orientationViewsFor(p){
+ const views=p?.orientationViews;
+ if(views?.version===1&&['portrait','landscape'].includes(views.active))return views;
+ // Old saves have no reliable device-orientation metadata. Protect their view
+ // as portrait, including the phone-confirmed scale; never fit on migration.
+ return validPlanView(p?.viewState)?{version:1,active:'portrait',portrait:p.viewState}:null;
+}
+function recoverOrientationView(p){
+ if(validPlanView(p?.viewState))return;
+ const views=orientationViewsFor(p);
+ const candidate=[views?.[views?.active],views?.portrait,views?.landscape].find(validPlanView);
+ if(candidate)p.viewState=structuredClone(candidate);
+}
+function mergeOrientationViews(a,b,preferOther){
+ const av=orientationViewsFor(a),bv=orientationViewsFor(b);
+ if(!av&&!bv)return null;
+ const winner=(preferOther?bv:av)||bv||av;
+ const out={...av,...bv,...winner,version:1};
+ for(const key of ['portrait','landscape']){
+  const x=av?.[key],y=bv?.[key];
+  const best=validPlanView(y)&&(!validPlanView(x)||viewportTime(y,0)>viewportTime(x,0))?y:x;
+  if(validPlanView(best))out[key]=structuredClone(best);else delete out[key];
+ }
+ return out;
+}
+function rotatedViewportCenter(v,degrees){
+ const pivot=viewportPivot(),prior=v.version===2?{x:v.pivotX,y:v.pivotY}:pivot;
+ const undo=-v.rotation*Math.PI/180,angle=degrees*Math.PI/180;
+ const dx=v.cx-prior.x,dy=v.cy-prior.y;
+ // Unrotate around the saved record's pivot before applying the active pivot.
+ // Reconciled backups may predate the currently persisted stable pivot.
+ const x=prior.x+dx*Math.cos(undo)-dy*Math.sin(undo)-pivot.x;
+ const y=prior.y+dx*Math.sin(undo)+dy*Math.cos(undo)-pivot.y;
+ return {x:pivot.x+x*Math.cos(angle)-y*Math.sin(angle),y:pivot.y+x*Math.sin(angle)+y*Math.cos(angle)};
+}
 const canvasViewports=new WeakMap(),planPivots=new WeakMap();
+// Retain the transition's center through every intermediate Android resize.
+// Explicit navigation or a screen/Edit transition ends this anchor; ordinary
+// Edit/Done restoration continues using the existing absolute client origin.
+let orientationAnchor=null;
 let viewportTransition=0,viewportSession=0,planFitFrame=0,viewportDirty=false,cancelSurveyViewGesture=()=>{};
 function selectPlanView(){
  if(!validPlanView(plan?.viewState))return;
@@ -1259,6 +1307,7 @@ function selectPlanView(){
 function beginViewTransition(){
  viewportSession++;viewportTransition++;cancelAnimationFrame(planFitFrame);
  rememberPlanView(visibleCanvas(),false);if(viewportDirty)save();
+ orientationAnchor=null;
  // Navigation must not carry an old plan's active pointers into a new plan.
  pointers.clear();navPan=null;pinch=null;gesture=null;cancelSurveyViewGesture();
  $('strokePreview').replaceChildren();
@@ -1270,36 +1319,55 @@ function viewportPivot(){
  if(!planPivots.has(plan)){const b=planBounds();planPivots.set(plan,{x:b.x+b.w/2,y:b.y+b.h/2})}
  return planPivots.get(plan);
 }
-function bindViewport(svg){
- const r=svg.getBoundingClientRect();
- canvasViewports.set(svg,{plan,left:r.left,top:r.top,width:r.width,height:r.height});
+function bindViewport(svg,retainOrientation=false){
+ const r=svg.getBoundingClientRect(),prior=retainOrientation?canvasViewports.get(svg):null;
+ canvasViewports.set(svg,{plan,left:r.left,top:r.top,width:r.width,height:r.height,orientation:prior?.plan===plan?prior.orientation:orientationKey(),rotation:prior?.plan===plan?prior.rotation:planRotationDegrees()});
 }
 function rememberPlanView(svg=visibleCanvas(),persist=true){
  const bound=svg&&canvasViewports.get(svg);
  if(!plan||bound?.plan!==plan||!['plans','survey'].includes(screen)||svg!==visibleCanvas())return;
  const r=svg.getBoundingClientRect();if(r.width<10||r.height<10)return;
  // A layout change must restore the stored transform before it can be captured.
- if(bound.left!==r.left||bound.top!==r.top||bound.width!==r.width||bound.height!==r.height){restorePlanView();return}
+ if(bound.orientation!==orientationKey()||bound.rotation!==planRotationDegrees()||bound.left!==r.left||bound.top!==r.top||bound.width!==r.width||bound.height!==r.height){if(!viewportGestureActive())restorePlanView();return}
  const b=getViewBox(svg);if(!b.every(Number.isFinite)||b[2]<=0||b[3]<=0)return;
  const scale=Math.max(b[2]/r.width,b[3]/r.height),pivot=viewportPivot();
  const next={version:2,cx:b[0]+b[2]/2,cy:b[1]+b[3]/2,unitsPerPixel:scale,rotation:planRotationDegrees(),
   originX:b[0]+b[2]/2-(r.left+r.width/2)*scale,
   originY:b[1]+b[3]/2-(r.top+r.height/2)*scale,pivotX:pivot.x,pivotY:pivot.y};
- const old=plan.viewState;
+ const old=plan.viewState,priorViews=orientationViewsFor(plan);
  const changed=!validPlanView(old)||Object.entries(next).some(([key,value])=>!Number.isFinite(old[key])||Math.abs(old[key]-value)>1e-7);
- if(changed){plan.viewState={...old,...next,updatedAt:Math.max(Date.now(),viewportTime(old,0)+1)};viewportDirty=true}
+ if(changed){plan.viewState={...old,...next,updatedAt:Math.max(Date.now(),viewportTime(old,0)+1,viewportTime(priorViews?.[bound.orientation],0)+1)};viewportDirty=true}
+ const views=priorViews||{version:1,active:bound.orientation};
+ const slot=views[bound.orientation];
+ const slotChanged=views.active!==bound.orientation||!validPlanView(slot)||
+  Object.entries(next).some(([key,value])=>!Number.isFinite(slot[key])||Math.abs(slot[key]-value)>1e-7);
+ if(changed||slotChanged||plan.orientationViews?.version!==1){
+  plan.orientationViews={...views,active:bound.orientation,[bound.orientation]:{...slot,...plan.viewState}};
+  viewportDirty=true;
+ }
  if(persist)touch();
- return changed;
+ return changed||slotChanged;
 }
 function restorePlanView(){
  if(!plan||!['plans','survey'].includes(screen))return;
  const svg=visibleCanvas(),r=svg.getBoundingClientRect();if(r.width<10||r.height<10)return;
+ recoverOrientationView(plan);
  const v=plan.viewState;
  if(!validPlanView(v)){fitPlanView(true);return}
+ const key=orientationKey(),views=orientationViewsFor(plan),degrees=planRotationDegrees();
+ const crossing=views.active!==key;
+ const newerSlot=validPlanView(views[key])&&viewportTime(views[key],0)>viewportTime(v,0);
+ const target=(crossing||newerSlot)&&validPlanView(views[key])?views[key]:v;
+ // Preserve the outgoing record before rememberPlanView updates the active v2.
+ if(!plan.orientationViews)plan.orientationViews=structuredClone(views);
+ if(crossing||newerSlot||v.rotation!==degrees){
+  orientationAnchor={plan,key,degrees,...rotatedViewportCenter(target,degrees),scale:target.unitsPerPixel};
+ }
  applyPlanOrientation();
- const scale=v.unitsPerPixel,w=r.width*scale,h=r.height*scale;
- const x=v.version===2?v.originX+r.left*scale:v.cx-w/2;
- const y=v.version===2?v.originY+r.top*scale:v.cy-h/2;
+ const anchor=orientationAnchor?.plan===plan&&orientationAnchor.key===key&&orientationAnchor.degrees===degrees?orientationAnchor:null;
+ const scale=anchor?anchor.scale:v.unitsPerPixel,w=r.width*scale,h=r.height*scale;
+ const x=anchor?anchor.x-w/2:v.version===2?v.originX+r.left*scale:v.cx-w/2;
+ const y=anchor?anchor.y-h/2:v.version===2?v.originY+r.top*scale:v.cy-h/2;
  svg.setAttribute('viewBox',[x,y,w,h].join(' '));zoomed=true;bindViewport(svg);
  // Rotation changes update metadata without refitting or changing the zoom.
  return rememberPlanView(svg,false);
@@ -1319,6 +1387,7 @@ function schedulePlanViewRestore(){
 function fitPlanView(force=false){
  if(!plan||!['plans','survey'].includes(screen))return;
  if(!force){restorePlanView();return}
+ orientationAnchor=null;
  applyPlanOrientation();
  const b=planBounds(),pivot=viewportPivot(),angle=planRotationDegrees()*Math.PI/180;
  // Fit the rotated bounds around the same stable pivot used by every layer.

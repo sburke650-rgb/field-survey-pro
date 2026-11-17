@@ -33,6 +33,7 @@ function unrelated(state) {
     delete s.updated;
     for (const p of s.plans) {
       delete p.viewState;
+      delete p.orientationViews;
       // Existing Done behavior refreshes derived area IDs; compare their content.
       for (const a of p.areas || []) if (a.kind === 'auto-drawn') delete a.id;
     }
@@ -79,9 +80,14 @@ test('viewport per-plan zoom/pan survives switching and shared camera view', asy
 test('viewport manual rotation retains zoom through resizing and duplicate orientation events', async ({ page }) => {
   await page.setViewportSize({ width: 412, height: 915 }); await seed(page); await settle(page);
   await page.locator('#zoomIn').click(); await pan(page); const before = await view(page);
-  await page.setViewportSize({ width: 915, height: 412 }); sameView(await view(page), before);
+  const center = await page.locator('#planCanvas').evaluate(svg=>{const r=svg.getBoundingClientRect();const q=new DOMPoint(r.left+r.width/2,r.top+r.height/2).matrixTransform(svg.querySelector('g').getScreenCTM().inverse());return {x:q.x,y:q.y}});
+  await page.setViewportSize({ width: 915, height: 412 });
+  await settle(page);
+  const centered=await page.locator('#planCanvas').evaluate(svg=>{const r=svg.getBoundingClientRect();const q=new DOMPoint(r.left+r.width/2,r.top+r.height/2).matrixTransform(svg.querySelector('g').getScreenCTM().inverse());return {x:q.x,y:q.y}});
+  expect(Math.abs(centered.x-center.x)*before.scale).toBeLessThan(.1);expect(Math.abs(centered.y-center.y)*before.scale).toBeLessThan(.1);
+  const landscapeView=await view(page);
   await page.evaluate(() => { window.dispatchEvent(new Event('orientationchange')); window.dispatchEvent(new Event('resize')); });
-  await page.waitForTimeout(400); sameView(await view(page), before);
+  await page.waitForTimeout(400); sameView(await view(page), landscapeView);
   await page.locator('#rotatePlanView').click(); const rotated = await view(page);
   expect(rotated.scale).toBeCloseTo(before.scale, 5);
   expect(rotated.rotation).not.toBeCloseTo(before.rotation, 3);

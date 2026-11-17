@@ -9,10 +9,25 @@ async function pose(page){return page.locator('#planScene').evaluate(scene=>{con
 function samePose(a,b){expect(a.scale).toBeCloseTo(b.scale,6);a.points.forEach((p,i)=>{expect(Math.abs(p.x-b.points[i].x)).toBeLessThan(.1);expect(Math.abs(p.y-b.points[i].y)).toBeLessThan(.1)})}
 function geometry(state){return state.surveys.map(s=>s.plans.map(p=>Object.fromEntries(['id','image','walls','dimensions','areas','cameras','fspRacks','fspRoutes'].map(k=>[k,p[k]]))))}
 
-test('compact cleanup keeps every application script identical except removed confirmed-plan wording',()=>{
-  const original=fs.readFileSync('test/v17-129/index.html','utf8'),current=fs.readFileSync('development/index.html','utf8');
+test('orientation repair preserves all scripts outside viewport state and reconciliation',()=>{
+  const original=fs.readFileSync('test/v17-130/index.html','utf8'),current=fs.readFileSync('development/index.html','utf8');
   const scripts=s=>[...s.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
-  expect(scripts(current)).toEqual(scripts(original.replace("'Floor plan confirmed. Edit anytime.'","''")));
+  const normalize=script=>{
+    for(const [start,end] of [
+      ['   const selectedAt=Math.max(', '   const deleted=new Set('],
+      ['function setViewBox(', 'function zoomPlan('],
+      ['// Viewport schema v2 adds', 'function openSharedView('],
+    ]){
+      const a=script.indexOf(start),b=script.indexOf(end,a);
+      expect(a).toBeGreaterThan(-1);expect(b).toBeGreaterThan(a);
+      script=script.slice(0,a)+'/* scoped viewport repair */'+script.slice(b);
+    }
+    return script.replace('   recoverOrientationView(pl);\n','').replace(' orientationAnchor=null;\n','');
+  };
+  const before=scripts(original),after=scripts(current);
+  expect(current.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'SCRIPT')).toEqual(original.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'SCRIPT'));
+  expect(after.slice(1)).toEqual(before.slice(1));
+  expect(normalize(after[0])).toEqual(normalize(before[0]));
   expect(current).not.toContain('Floor plan confirmed. Edit anytime.');
 });
 
@@ -44,12 +59,20 @@ for(const viewport of [{width:412,height:915},{width:740,height:320}]){
   try{
    const before=await original.newPage();await seed(before,{target:baseline});await settle(before);await before.locator('#zoomIn').click();await settle(before);
    const expected=await pose(before),state=await saved(before),beforeCanvas=await rect(before.locator('#planCanvas'));
-   const page=await updated.newPage();await seed(page,{state});await settle(page);samePose(await pose(page),expected);
+   const page=await updated.newPage();await seed(page,{state});await settle(page);
+   if(viewport.width<viewport.height)samePose(await pose(page),expected);
+   else {
+    expect((await pose(page)).scale).toBeCloseTo(expected.scale,6);
+    const stored=state.surveys[0].plans[0].viewState;
+    const center=await page.locator('#planCanvas').evaluate(svg=>{const b=svg.viewBox.baseVal;return {x:b.x+b.width/2,y:b.y+b.height/2}});
+    expect(center.x).toBeCloseTo(stored.cx,3);expect(center.y).toBeCloseTo(stored.cy,3);
+   }
+   const migrated=await pose(page);
    const afterCanvas=await rect(page.locator('#planCanvas'));expect(afterCanvas.height).toBeGreaterThan(beforeCanvas.height);
    const data=geometry(await saved(page));expect(data).toEqual(geometry(state));
-   await page.locator('#editPlan').click();await settle(page);samePose(await pose(page),expected);
-   await page.locator('#finishEdit').click();await settle(page);samePose(await pose(page),expected);
-   await page.reload();await page.locator('#continue').click();await settle(page);samePose(await pose(page),expected);
+   await page.locator('#editPlan').click();await settle(page);samePose(await pose(page),migrated);
+   await page.locator('#finishEdit').click();await settle(page);samePose(await pose(page),migrated);
+   await page.reload();await page.locator('#continue').click();await settle(page);samePose(await pose(page),migrated);
   }finally{await original.close();await updated.close()}
  });
 }
