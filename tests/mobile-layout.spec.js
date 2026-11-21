@@ -213,7 +213,7 @@ test('Camera Details keeps input, Close and Done accessible above the keyboard',
   await page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
   const before=geometry(await saved(page)),camera=await point(page,350,350),cdp=await context.newCDPSession(page);
   await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:camera.x,y:camera.y,id:1}]});
-  await expect(page.locator('#detail')).toBeVisible(); await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]}); await expect(page.locator('#detail')).toBeVisible();
   await page.locator('#detailNotes').focus(); await page.evaluate(()=>mobileVisualViewport({height:210,offsetTop:18}));
   await expect.poll(async()=> (await rect(page,'#detail')).bottom).toBeLessThanOrEqual(228);
   await clickable(page,'#detailNotes'); await page.locator('#detailNotes').fill('Synthetic mobile keyboard note');

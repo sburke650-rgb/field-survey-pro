@@ -67,7 +67,7 @@ for(const size of [portrait,landscape])test(`camera single-finger manipulation a
   const page=await context.newPage(),pageErrors=[];page.on('pageerror',e=>pageErrors.push(e.message));await seed(page,{state:stateWithAngle()});await page.locator('#rotatePlanView').click();await cameraMode(page);
   const cdp=await context.newCDPSession(page),touch=(type,pts)=>cdp.send('Input.dispatchTouchEvent',{type,touchPoints:pts.map(([x,y],id)=>({x,y,id}))});
   const before=await workArea(page,'surveyCanvas'),from=await point(page,350,350),to=await point(page,400,380);
-  await touch('touchStart',[[from.x,from.y]]);for(let i=1;i<=15;i++)await touch('touchMove',[[from.x+(to.x-from.x)*i/15,from.y+(to.y-from.y)*i/15]]);await touch('touchEnd',[]);
+  await page.locator('#moveCameraMode').click();await touch('touchStart',[[from.x,from.y]]);await expect(page.locator('[data-camera-armed]')).toHaveCount(1);for(let i=1;i<=15;i++)await touch('touchMove',[[from.x+(to.x-from.x)*i/15,from.y+(to.y-from.y)*i/15]]);await touch('touchEnd',[]);
   sameArea(await workArea(page,'surveyCanvas'),before);let model=(await saved(page)).surveys[0].plans[0];expect(model.cameras[0].x).toBeCloseTo(400,1);expect(model.cameras[0].y).toBeCloseTo(380,1);expect(model.fspRoutes[0].points[0]).toEqual({x:model.cameras[0].x,y:model.cameras[0].y});
   const geometry=structuredClone(model),r=await page.locator('#surveyCanvas').boundingBox(),x=r.x+r.width*.5,y=r.y+r.height*.2;
   await touch('touchStart',[[x-24,y],[x+24,y]]);for(let i=1;i<=10;i++)await touch('touchMove',[[x-24+3*i,y+2*i],[x+24+3*i,y+2*i]]);await touch('touchEnd',[]);
@@ -103,11 +103,4 @@ test('a new plan starts unrotated even when created in landscape',async({page})=
  await page.setViewportSize(portrait);sameArea(await workArea(page),before);
 });
 
-test('layout-only source boundary protects manual rotation, gestures, storage and geometry',()=>{
- const {readFileSync}=require('node:fs'),{createHash}=require('node:crypto');let s=readFileSync('development/index.html','utf8');
- for(const [start,end] of [['function planRotationDegrees()','function rotateVisiblePlan90()'],['function rememberPlanView(','function restorePlanView('],['function restorePlanView(','function openSharedView(']]){
-  const a=s.indexOf(start),b=s.indexOf(end,a);expect(a).toBeGreaterThan(-1);expect(b).toBeGreaterThan(a);s=s.slice(0,a)+'SCOPED_LAYOUT_POLICY'+s.slice(b);
- }
- s=s.replace(/^\/\/ Manual view-only[^\n]*\n/m,'');
- expect(createHash('sha256').update(s).digest('hex')).toBe('59afe457a4c2b7d349cfc13eca039e9ff8d7024c1aa3b74d7ad767f4326bb789');
-});
+test('PR15 source boundary freezes viewport, rotation, transforms, storage and geometry',()=>{require('./helpers/camera-source-boundary').verifyCameraBoundary()});
