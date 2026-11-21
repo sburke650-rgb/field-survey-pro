@@ -187,8 +187,13 @@ test('Back to Sketch from the area guide does not implicitly activate Line', asy
 test('Sketch Only preserves an explicitly selected Freehand tool instead of switching to Line', async ({ page }) => {
   await seed(page); await page.locator('#addPlan').click(); await page.getByRole('button', { name: 'Draw Plan', exact: true }).click();
   await page.locator('#free').click();
-  const outline = [[100, 100], [900, 100], [900, 300], [500, 300], [500, 600], [100, 600]];
-  for (let i = 0; i < outline.length; i++) await stroke(page, [outline[i], outline[(i + 1) % outline.length]]);
+  // Keep the six-sided L clear of the floating toolbar at the new default 0°.
+  const outline = [[250, 150], [750, 150], [750, 300], [500, 300], [500, 500], [250, 500]];
+  for (let i = 0; i < outline.length; i++) {
+    const start = await screenPoint(page, ...outline[i]);
+    expect(await page.locator('#planCanvas').evaluate((svg,p)=>svg.contains(document.elementFromPoint(p.x,p.y)),start)).toBe(true);
+    await stroke(page, [outline[i], outline[(i + 1) % outline.length]]);
+  }
   await expect(page.locator('#modalTitle')).toHaveText('Irregular Building Shape Detected');
   await page.getByRole('button', { name: 'Sketch Only — Continue', exact: true }).click();
   await expect(page.locator('#free')).toHaveClass(/\bprimary\b/); await expect(page.locator('#line')).not.toHaveClass(/\bprimary\b/);
