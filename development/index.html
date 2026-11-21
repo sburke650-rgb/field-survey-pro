@@ -277,7 +277,7 @@ html.keyboard-visible #modalBack .modal,html.keyboard-visible #modalBack.fsp-dis
 <section id="home" class="screen"><header><strong>Field Survey Pro <span class="small">V17.130 TEST</span></strong></header><div class="content"><div class="stack"><button id="continue" class="primary hidden">Continue Survey</button><button id="newSurvey" class="primary">+ New Survey</button><button id="allSurveys">All Surveys</button><div class="card muted">V17 test: Plans and camera placement. This version uses separate test storage; your older V16 surveys are not changed. Export a backup before relying on phone storage.</div></div></div></section>
 <section id="list" class="screen hidden"><header><button data-go="home">← Home</button><strong>All Surveys</strong></header><div class="content"><div class="stack"><input id="search" placeholder="Search surveys"><div id="surveyRows" class="menu"></div><button id="importBackup">Import V17 Backup</button><button id="exportBackup">Export V17 Backup</button></div></div></section>
 <section id="plans" class="screen hidden"><header><button data-go="home">← Back</button><strong id="plansTitle">Plans</strong><span id="save">Saved ✓</span></header><div class="topbar"><select id="planSelect" aria-label="Plan"></select><button id="planMore">⋯</button><button id="fitPlan" class="hidden" title="Reset view">Fit</button></div><div id="planArea"><button id="rotatePlanView" class="fsp-rotate" type="button" title="Rotate floor plan 90 degrees" aria-label="Rotate floor plan 90 degrees">↻ 90°</button><div id="zoomTools"><button id="zoomOut">−</button><button id="zoomIn">+</button></div><svg id="planCanvas" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><g id="planScene"></g><g id="strokePreview" pointer-events="none"></g></svg><div class="hint" id="planHint">Add a plan to begin</div></div><div id="dimensionPositionBar" class="hidden"><span class="tip">Drag either endpoint to adjust</span><button id="dimensionCancel">Cancel</button><button id="dimensionPositionDone" class="primary">Done ✓</button></div><div id="planTools" class="hidden"><button id="backDraw">← Back</button><button id="panTool">Select / Pan</button><button id="line">Line</button><button id="free">Freehand</button><button id="drawColor" type="button" title="Drawing color">🔵 Color</button><button id="autoWall">Auto Wall</button><button id="measureWall">Measure</button><button id="measureHelpButton" type="button" title="Measurement instructions">? Help</button><button id="areaTool" type="button" class="hidden" aria-hidden="true" tabindex="-1">Calculate Area</button><button id="moreDrawing" class="hidden">More ▾</button><button id="showDims">Hide Dimensions</button><button id="undo">Undo Wall</button><button id="clear">Clear Drawing</button></div><div id="drawingDoneBar" class="hidden"><button id="finishEdit" class="primary">Done ✓</button></div><div id="planBottom"><button id="addPlan">+ Add Floor Plan</button><button id="editPlan">Edit Plan</button><button id="toSurvey" class="primary">+ Add Camera</button></div></section>
-<section id="survey" class="screen hidden"><header><button id="backPlans">← Plans</button><strong id="surveyTitle">Add Camera</strong><span id="surveySave" class="small" style="color:#a4e7c3">Saved ✓</span></header><div class="topbar"><select id="surveyPlanSelect" aria-label="Plan"></select><span id="camCount" class="small">0 cameras</span></div><div id="surveyArea"><button id="surveyDone" type="button" class="primary">Done ✓</button><button id="rotateSurveyView" class="fsp-rotate" type="button" title="Rotate floor plan 90 degrees" aria-label="Rotate floor plan 90 degrees">↻ 90°</button><svg id="surveyCanvas" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><g id="surveyScene"></g></svg><div class="hint" id="surveyHint">+ Camera to place a camera</div><div id="floatTools"><div id="dragTools">⠿ Move</div><button id="addCamera">+ Camera</button><button id="takePhoto" class="hidden" aria-hidden="true" tabindex="-1">Take Photo</button><button id="surveyMore">More</button><button id="minTools">‹</button></div><button id="restoreTools" class="hidden">› Tools</button><div id="detail" class="hidden"><div class="row" id="detailDrag" title="Hold and drag to move camera details"><span aria-hidden="true" style="font-size:18px;color:#b9d4eb;touch-action:none;cursor:grab;padding:5px 8px">⠿</span><strong id="detailTitle" class="grow">Camera</strong><button id="closeDetail">✕</button></div><label>Camera number</label><input id="detailNumber" type="text" inputmode="numeric" pattern="[0-9]+" autocomplete="off"><label>New / Existing</label><div id="detailType" class="row" role="group" aria-label="New or Existing camera"><button type="button" data-camera-type="New" class="grow">New</button><button type="button" data-camera-type="Existing" class="grow">Existing</button></div><label>Description / Location (optional)</label><textarea id="detailNotes" placeholder="Mounting location, notes…"></textarea><div class="row" style="margin-top:10px"><button id="deleteCamera" class="danger grow">Delete Camera</button><button id="doneDetail" class="primary grow">Done</button></div></div></div></section>
+<section id="survey" class="screen hidden"><header><button id="backPlans">← Plans</button><strong id="surveyTitle">Add Camera</strong><span id="surveySave" class="small" style="color:#a4e7c3">Saved ✓</span></header><div class="topbar"><select id="surveyPlanSelect" aria-label="Plan"></select><span id="camCount" class="small">0 cameras</span></div><div id="surveyArea"><button id="surveyDone" type="button" class="primary">Done ✓</button><button id="rotateSurveyView" class="fsp-rotate" type="button" title="Rotate floor plan 90 degrees" aria-label="Rotate floor plan 90 degrees">↻ 90°</button><svg id="surveyCanvas" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet"><g id="surveyScene"></g></svg><div class="hint" id="surveyHint">+ Camera to place a camera</div><div id="floatTools"><div id="dragTools">⠿ Move</div><div id="cameraActions" style="display:flex;gap:5px"><button id="addCamera">+ Camera</button><button id="moveCameraMode" type="button" aria-pressed="false">Move Camera</button></div><button id="takePhoto" class="hidden" aria-hidden="true" tabindex="-1">Take Photo</button><button id="surveyMore">More</button><button id="minTools">‹</button></div><button id="restoreTools" class="hidden">› Tools</button><div id="detail" class="hidden"><div class="row" id="detailDrag" title="Hold and drag to move camera details"><span aria-hidden="true" style="font-size:18px;color:#b9d4eb;touch-action:none;cursor:grab;padding:5px 8px">⠿</span><strong id="detailTitle" class="grow">Camera</strong><button id="closeDetail">✕</button></div><label>Camera number</label><input id="detailNumber" type="text" inputmode="numeric" pattern="[0-9]+" autocomplete="off"><label>New / Existing</label><div id="detailType" class="row" role="group" aria-label="New or Existing camera"><button type="button" data-camera-type="New" class="grow">New</button><button type="button" data-camera-type="Existing" class="grow">Existing</button></div><label>Description / Location (optional)</label><textarea id="detailNotes" placeholder="Mounting location, notes…"></textarea><div class="row" style="margin-top:10px"><button id="deleteCamera" class="danger grow">Delete Camera</button><button id="doneDetail" class="primary grow">Done</button></div></div></div></section>
 <div id="modalBack" class="modalBack hidden"><div class="modal"><h3 id="modalTitle">Action</h3><div id="modalText" class="muted"></div><div id="modalBody"></div><div class="row"><button id="modalCancel" class="grow">Cancel</button><button id="modalOk" class="primary grow">Continue</button></div></div></div>
 <div id="cropBack" class="modalBack hidden"><div class="modal"><h3 id="cropTitle">Crop Floor Plan</h3><p id="cropInstructions" class="muted" style="margin:0">Drag a box around the area to keep, or confirm the whole plan.</p><canvas id="cropCanvas"></canvas><div id="cropActions"><button id="cropRotate">Rotate ↻</button><button id="cropReset">Reset Crop</button></div><div id="cropConfirmActions"><button id="cropCancel">Cancel</button><button id="cropApply" class="primary">Confirm Floor Plan ✓</button></div></div></div><input id="planFile" type="file" accept="image/*,.pdf,application/pdf" class="hidden"><input id="planPhoto" type="file" accept="image/*" capture="environment" class="hidden"><input id="backupFile" type="file" accept="application/json,.json" class="hidden"><input id="sitePhoto" type="file" accept="image/*" capture="environment" class="hidden">
 <script>
@@ -1454,7 +1454,7 @@ function renderScene(target,isSurvey){const root=$(target);root.replaceChildren(
   drawReadableMeasureLabel(root,a,b,d.measure,{'data-overlay-dimension':di});
  }
 }
-renderAreas(root);if(!isSurvey && editing){if(traceArea)renderAreaTrace();if(dimensionStage)redrawDimensionStage();return;}for(const c of plan.cameras){const g=el('g',{class:'pin','data-cam':c.id,},root),color=c.type==='Existing'?'#2676c8':'#e88320',angle=(c.angle||0)*Math.PI/180;const x2=c.x+100*Math.cos(angle),y2=c.y+100*Math.sin(angle);if(selected===c.id){const a1=angle-.43,a2=angle+.43;el('path',{class:'cone',d:`M${c.x} ${c.y} L${c.x+155*Math.cos(a1)} ${c.y+155*Math.sin(a1)} A155 155 0 0 1 ${c.x+155*Math.cos(a2)} ${c.y+155*Math.sin(a2)} Z`},g);el('line',{x1:c.x,y1:c.y,x2,y2,stroke:color,'stroke-width':3},g)}el('circle',{cx:c.x,cy:c.y,r:23,fill:'transparent',stroke:'none'},g);el('circle',{cx:c.x,cy:c.y,r:13,fill:color},g);const t=el('text',{x:c.x,y:c.y+1,'font-size':12},g);t.textContent=c.num;if(selected===c.id){el('circle',{cx:x2,cy:y2,r:36,fill:'transparent','pointer-events':'all','data-handle':c.id},g);el('circle',{cx:x2,cy:y2,r:12,class:'handle','pointer-events':'none'},g)}}}
+renderAreas(root);if(!isSurvey && editing){if(traceArea)renderAreaTrace();if(dimensionStage)redrawDimensionStage();return;}for(const originalCamera of plan.cameras){const c=cameraForDisplay(originalCamera);const g=el('g',{class:'pin','data-cam':c.id,},root),color=c.type==='Existing'?'#2676c8':'#e88320',angle=(c.angle||0)*Math.PI/180;const x2=c.x+100*Math.cos(angle),y2=c.y+100*Math.sin(angle);if(cameraDraft?.camera===originalCamera)el('circle',{cx:c.x,cy:c.y,r:27,fill:'none',stroke:'#22c55e','stroke-width':4,'vector-effect':'non-scaling-stroke','pointer-events':'none','data-camera-armed':c.id},g);if(selected===c.id){const a1=angle-.43,a2=angle+.43;el('path',{class:'cone',d:`M${c.x} ${c.y} L${c.x+155*Math.cos(a1)} ${c.y+155*Math.sin(a1)} A155 155 0 0 1 ${c.x+155*Math.cos(a2)} ${c.y+155*Math.sin(a2)} Z`},g);el('line',{x1:c.x,y1:c.y,x2,y2,stroke:color,'stroke-width':3},g)}el('circle',{cx:c.x,cy:c.y,r:23,fill:'transparent',stroke:'none'},g);el('circle',{cx:c.x,cy:c.y,r:13,fill:color},g);const t=el('text',{x:c.x,y:c.y+1,'font-size':12},g);t.textContent=c.num;if(selected===c.id){el('circle',{cx:x2,cy:y2,r:36,fill:'transparent','pointer-events':'all','data-handle':c.id},g);el('circle',{cx:x2,cy:y2,r:12,class:'handle','pointer-events':'none'},g)}}}
 function bindDrawing(){
  const svg=$('planCanvas');let wallPress=null,ignoreClick=false;
  function snapCorner(p){
@@ -1560,6 +1560,8 @@ function bindDrawing(){
  svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end);
 }bindDrawing();
 function nextCamNum(){const nums=new Set(survey.plans.flatMap(p=>p.cameras.map(c=>String(c.num))));let i=1;while(nums.has(String(i)))i++;return i}function activateCamera(type='New'){
+ setCameraInteractionMode('pan');
+ cancelSurveyPlacement();
  lastType=type;placing=true;selected=null;
  $('addCamera').classList.toggle('primary',type==='New');
  $('addCamera').classList.toggle('placing-existing',type==='Existing');
@@ -1590,23 +1592,72 @@ let longTimer=null;// Camera-mode area label drag: keep green label movable with
  function finish(e){if(!drag||drag.id!==e.pointerId)return;e.preventDefault();e.stopImmediatePropagation();const moved=drag.moved;drag=null;if(moved)touch()}
  svg.addEventListener('pointerup',finish,true);svg.addEventListener('pointercancel',finish,true);
 })();
-function bindSurvey(){const svg=$('surveyCanvas');svg.addEventListener('pointerdown',e=>{if(!plan)return;const p=pt(e,svg),handle=e.target.closest('[data-handle]'),pin=e.target.closest('[data-cam]');if(placing){if(pin||handle)return;const num=String(nextCamNum());
- plan.cameras.push({id:uid(),num,type:lastType,x:p.x,y:p.y,angle:0,notes:''});placing=false;$('addCamera').classList.remove('primary','placing-existing');selected=null;$('surveyHint').textContent='Camera '+num+' placed. Tap to select, long-press for details.';touch();updateSurvey();return}if(e.target.closest('[data-area-label]'))return;if(pin){const c=plan.cameras.find(c=>c.id===pin.dataset.cam);if(!c)return;selected=c.id;gesture={kind:handle?'rotate':'move',id:e.pointerId,c,from:p,orig:{x:c.x,y:c.y,angle:c.angle},moved:false,long:false,transform:$('surveyScene').getScreenCTM()?.inverse()};svg.setPointerCapture(e.pointerId);if(!handle)longTimer=setTimeout(()=>{if(gesture&&!gesture.moved){gesture.long=true;openDetail(c.id)}},550);renderScene('surveyScene',true)}else{selected=null;closeDetail();renderScene('surveyScene',true)}});svg.addEventListener('pointermove',e=>{const g=gesture;if(!g||g.id!==e.pointerId)return;const p=g.transform?(()=>{const q=svg.createSVGPoint();q.x=e.clientX;q.y=e.clientY;const v=q.matrixTransform(g.transform);return {x:v.x,y:v.y}})():pt(e,svg);if(!p)return;if(Math.hypot(p.x-g.from.x,p.y-g.from.y)>10){g.moved=true;clearTimeout(longTimer)}if(g.long)return;if(g.kind==='rotate'){const desired=Math.atan2(p.y-g.c.y,p.x-g.c.x)*180/Math.PI;const delta=((desired-g.c.angle+540)%360)-180;g.c.angle+=Math.max(-5,Math.min(5,delta*.22));}else if(g.moved){g.c.x=g.orig.x+p.x-g.from.x;g.c.y=g.orig.y+p.y-g.from.y}renderScene('surveyScene',true)});function end(e){if(!gesture||gesture.id!==e.pointerId)return;clearTimeout(longTimer);const g=gesture;gesture=null;if(e.type==='pointercancel'){Object.assign(g.c,g.orig)}else if(g.moved&&!g.long)touch();renderScene('surveyScene',true)}svg.addEventListener('pointerup',end);svg.addEventListener('pointercancel',end)}bindSurvey();
-// Shared pan/pinch on Camera Survey. Camera placement and marker drags retain priority.
-(function bindSurveyNavigation(){
- const svg=$('surveyCanvas'),touches=new Map();let pan=null,pinchState=null,changed=false;
- cancelSurveyViewGesture=()=>{touches.clear();pan=null;pinchState=null;changed=false;surveyNavigationActive=false};
+// Camera interaction state is transient: never part of a survey or backup.
+let cameraInteractionMode='pan',cameraDraft=null,cancelCameraInteraction=()=>{},cancelSurveyPlacement=()=>{},surveyToolOwnsPointer=()=>false;
+function cameraForDisplay(c){return cameraDraft?.plan===plan&&cameraDraft.camera===c?{...c,...cameraDraft.c}:c}
+function routeForDisplay(r){
+ if(cameraDraft?.plan!==plan||r.cameraId!==cameraDraft.camera.id||!r.points?.length)return r;
+ return {...r,points:[{...r.points[0],x:cameraDraft.c.x,y:cameraDraft.c.y},...r.points.slice(1)]};
+}
+function setCameraInteractionMode(mode){
+ cancelCameraInteraction();cameraInteractionMode=mode;
+ $('moveCameraMode').setAttribute('aria-pressed',String(mode==='move'));
+ $('moveCameraMode').classList.toggle('primary',mode==='move');
+ fitCameraToolbar();
+}
+function bindSurvey(){
+ const svg=$('surveyCanvas'),touches=new Map(),blocked=new Set();
+ const HOLD=550,SLOP=8;let press=null,timer=null,pan=null,pinchState=null,changed=false,multi=false;
+ function layout(){const r=svg.getBoundingClientRect();return [r.left,r.top,r.width,r.height,planRotationDegrees(),orientationKey()].join('|')}
  function scenePoint(x,y){const p=svg.createSVGPoint();p.x=x;p.y=y;return p.matrixTransform(svg.getScreenCTM().inverse())}
- svg.addEventListener('pointerdown',e=>{
-  if(!plan||placing||gesture?.kind==='rotate'||gesture?.kind==='move'||e.target.closest('[data-cam],[data-handle],[data-area-label]'))return;
-  e.preventDefault();surveyNavigationActive=true;touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  try{svg.setPointerCapture(e.pointerId)}catch{}
-  if(touches.size===1){pan={id:e.pointerId,start:{x:e.clientX,y:e.clientY},box:getViewBox(svg)};pinchState=null}
-  else if(touches.size===2){const t=[...touches.values()],mid={x:(t[0].x+t[1].x)/2,y:(t[0].y+t[1].y)/2};pinchState={distance:Math.max(1,Math.hypot(t[0].x-t[1].x,t[0].y-t[1].y)),mid,anchor:scenePoint(mid.x,mid.y),box:getViewBox(svg)};pan=null}
- },{capture:true});
- svg.addEventListener('pointermove',e=>{
-  if(!touches.has(e.pointerId))return;
-  touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ function clearHold(){clearTimeout(timer);timer=null}
+ function discardDraft(){clearHold();press=null;cameraDraft=null}
+ function redraw(){if(plan&&screen==='survey')renderScene('surveyScene',true)}
+ function cancel(){
+  const ids=[...touches.keys()],hadDraft=!!cameraDraft,saveView=changed;
+  ids.forEach(id=>blocked.add(id));discardDraft();touches.clear();pan=null;pinchState=null;changed=false;multi=false;surveyNavigationActive=false;
+  for(const id of ids)try{if(svg.hasPointerCapture(id))svg.releasePointerCapture(id)}catch{}
+  if(hadDraft)redraw();if(saveView&&plan&&screen==='survey')rememberPlanView(svg);
+ }
+ cancelCameraInteraction=cancel;
+ cancelSurveyViewGesture=()=>{setCameraInteractionMode('pan');cancelSurveyPlacement()};
+ function beginPair(){
+  const t=[...touches.values()],mid={x:(t[0].x+t[1].x)/2,y:(t[0].y+t[1].y)/2};pinchState={distance:Math.max(1,Math.hypot(t[0].x-t[1].x,t[0].y-t[1].y)),mid,anchor:scenePoint(mid.x,mid.y),box:getViewBox(svg)};pan=null;
+ }
+ function beginCameraGesture(p,kind){
+  if(press!==p||p.plan!==plan||touches.size!==1||multi||!plan.cameras.includes(p.camera))return;
+  if(p.layout!==layout()){cancel();requestAnimationFrame(refreshPlanOrientation);return}
+  clearHold();const current=touches.get(p.id),from=pt({clientX:current.x,clientY:current.y},svg),transform=$('surveyScene').getScreenCTM()?.inverse();if(!from||!transform){cancel();return}
+  p.kind=kind;pan=null;selected=p.camera.id;
+  cameraDraft={plan,camera:p.camera,kind,id:p.id,layout:p.layout,from,transform,client:{...current},orig:{x:p.camera.x,y:p.camera.y,angle:p.camera.angle},c:{x:p.camera.x,y:p.camera.y,angle:p.camera.angle||0},moved:false};redraw();
+ }
+ function updateDraft(e){
+  const g=cameraDraft;if(!g||g.id!==e.pointerId)return;
+  if(Math.hypot(e.clientX-g.client.x,e.clientY-g.client.y)>SLOP){g.moved=true;clearHold()}
+  if(!g.moved)return;
+  const q=svg.createSVGPoint();q.x=e.clientX;q.y=e.clientY;const v=q.matrixTransform(g.transform),p={x:v.x,y:v.y};
+  if(!Number.isFinite(p.x)||!Number.isFinite(p.y))return;
+  if(g.kind==='rotate'){
+   const desired=Math.atan2(p.y-g.c.y,p.x-g.c.x)*180/Math.PI;
+   const delta=((desired-g.c.angle+540)%360)-180;
+   g.c.angle+=Math.max(-5,Math.min(5,delta*.22));
+  }else{g.c.x=g.orig.x+p.x-g.from.x;g.c.y=g.orig.y+p.y-g.from.y}
+  redraw();
+ }
+ function commit(g){
+  if(!g?.moved||g.plan!==plan||screen!=='survey'||!plan.cameras.includes(g.camera))return;
+  if(g.kind==='rotate'){
+   if(!Number.isFinite(g.c.angle)||Math.abs(g.c.angle-(g.orig.angle||0))<1e-7)return;
+   g.camera.angle=g.c.angle;
+  }else{
+   if(!Number.isFinite(g.c.x)||!Number.isFinite(g.c.y)||(g.c.x===g.orig.x&&g.c.y===g.orig.y))return;
+   g.camera.x=g.c.x;g.camera.y=g.c.y;
+   // Commit connected endpoints with the camera, before the single autosave.
+   for(const route of plan.fspRoutes||[])if(route.cameraId===g.camera.id&&route.points?.length)route.points[0]={...route.points[0],x:g.c.x,y:g.c.y};
+  }
+  touch();
+ }
+ function navigationMove(e){
   const r=svg.getBoundingClientRect();
   if(touches.size===2&&pinchState){
    const t=[...touches.values()],mid={x:(t[0].x+t[1].x)/2,y:(t[0].y+t[1].y)/2};
@@ -1619,10 +1670,96 @@ function bindSurvey(){const svg=$('surveyCanvas');svg.addEventListener('pointerd
    const b=pan.box,scale=Math.min(r.width/b[2],r.height/b[3]);
    setViewBox(svg,[b[0]-(e.clientX-pan.start.x)/scale,b[1]-(e.clientY-pan.start.y)/scale,b[2],b[3]]);changed=true;
   }
+ }
+ function move(e){
+  if(!touches.has(e.pointerId))return;
+  if((press&&press.layout!==layout())||(cameraDraft&&cameraDraft.layout!==layout())){cancel();requestAnimationFrame(refreshPlanOrientation);return}
+  touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(cameraDraft){updateDraft(e);return}
+  if(press){
+   if(Math.hypot(e.clientX-press.start.x,e.clientY-press.start.y)<=SLOP)return;
+   clearHold();press=null;
+  }
+  navigationMove(e);
+ }
+ svg.addEventListener('pointerdown',e=>{
+  if(!plan||screen!=='survey'||(e.pointerType==='mouse'&&e.button!==0)||blocked.size||surveyToolOwnsPointer()||e.target.closest('[data-area-label],[data-fsp-rack],[data-fsp-shared],[data-fsp-length]'))return;
+  const handle=e.target.closest('[data-handle]'),pin=e.target.closest('[data-cam]');
+  if(handle&&touches.size===0)setCameraInteractionMode('pan');
+  if(placing){
+   if(pin||handle||e.isPrimary===false)return;const p=pt(e,svg);if(!p)return;
+   e.preventDefault();e.stopImmediatePropagation();blocked.add(e.pointerId);
+   const num=String(nextCamNum());plan.cameras.push({id:uid(),num,type:lastType,x:p.x,y:p.y,angle:0,notes:''});
+   placing=false;$('addCamera').classList.remove('primary','placing-existing');selected=null;
+   $('surveyHint').textContent='Camera '+num+' placed. Tap to select; hold for Details. Use Move Camera to reposition.';touch();updateSurvey();return;
+  }
+  e.preventDefault();e.stopImmediatePropagation();surveyNavigationActive=true;touches.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  try{svg.setPointerCapture(e.pointerId)}catch{}
+  if(touches.size>=2){
+   const hadDraft=!!cameraDraft;discardDraft();multi=true;pan=null;pinchState=null;if(hadDraft)redraw();if(touches.size===2)beginPair();return;
+  }
+  pan=cameraInteractionMode==='pan'?{id:e.pointerId,start:{x:e.clientX,y:e.clientY},box:getViewBox(svg)}:null;pinchState=null;
+  if(pin&&!multi){
+   const camera=plan.cameras.find(c=>c.id===pin.dataset.cam);if(!camera)return;
+   press={id:e.pointerId,plan,camera,start:{x:e.clientX,y:e.clientY},time:performance.now(),layout:layout(),kind:'tap'};
+   const p=press;
+   if(handle)beginCameraGesture(p,'rotate');
+   else{
+    if(cameraInteractionMode==='move')beginCameraGesture(p,'move');
+    timer=setTimeout(()=>{
+     if(press!==p||touches.size!==1||multi||p.plan!==plan||!plan.cameras.includes(p.camera)||cameraDraft?.moved)return;
+     setCameraInteractionMode('pan');selected=p.camera.id;redraw();openDetail(p.camera.id);
+    },HOLD);
+   }
+  }
  },{capture:true});
- function finish(e){if(!touches.has(e.pointerId))return;touches.delete(e.pointerId);if(touches.size<2)pinchState=null;if(touches.size===0){surveyNavigationActive=false;pan=null;if(changed){rememberPlanView(svg);changed=false}refreshPlanOrientation()}}
+ svg.addEventListener('pointermove',e=>{if(!touches.has(e.pointerId))return;e.preventDefault();e.stopImmediatePropagation();move(e)},{capture:true});
+ function finish(e){
+  if(!touches.has(e.pointerId))return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(e.type==='pointercancel'){cancel();requestAnimationFrame(refreshPlanOrientation);return}
+  move(e);const g=cameraDraft,p=press;
+  const tap=p&&p.id===e.pointerId&&!g?.moved&&p.kind!=='rotate'&&!multi&&p.plan===plan&&plan.cameras.includes(p.camera)&&performance.now()-p.time<HOLD;
+  discardDraft();touches.delete(e.pointerId);if(touches.size<2)pinchState=null;
+  if(touches.size===2)beginPair();
+  if(touches.size===0){surveyNavigationActive=false;pan=null;multi=false;if(changed){rememberPlanView(svg);changed=false}}
+  commit(g);if(g)redraw();
+  if(tap){selected=p.camera.id;redraw()}
+  if(touches.size===0)refreshPlanOrientation();
+ }
  svg.addEventListener('pointerup',finish,{capture:true});svg.addEventListener('pointercancel',finish,{capture:true});
-})();
+ svg.addEventListener('lostpointercapture',e=>{if(touches.has(e.pointerId)){cancel();requestAnimationFrame(refreshPlanOrientation)}});
+ svg.addEventListener('contextmenu',e=>{if(press||cameraDraft)e.preventDefault()});
+ // Observe second contacts before equipment/label handlers can consume them.
+ document.addEventListener('pointerdown',e=>{
+  if(e.isPrimary&&touches.size===0)blocked.clear();
+  const control=e.target.closest('button,select,input,textarea,#dragTools,[data-area-label],[data-fsp-rack],[data-fsp-shared],[data-fsp-length]');
+  if(screen==='survey'&&control&&control.id!=='moveCameraMode')setCameraInteractionMode('pan');
+  if(blocked.size){blocked.add(e.pointerId);return}
+  if(touches.size&&(!svg.contains(e.target)||e.target.closest('[data-area-label],[data-fsp-rack],[data-fsp-shared],[data-fsp-length]'))){cancel();blocked.add(e.pointerId)}
+ },true);
+ for(const eventName of ['pointerup','pointercancel'])document.addEventListener(eventName,e=>{
+  blocked.delete(e.pointerId);if(touches.has(e.pointerId)&&!svg.contains(e.target))cancel();
+ },true);
+ document.addEventListener('click',e=>{const control=e.target.closest('button,select,input,textarea');if(screen==='survey'&&control&&control.id!=='moveCameraMode')setCameraInteractionMode('pan')},true);
+ function cancelForLayoutChange(){
+  // UI notifications can arrive after Details closes without changing the canvas.
+  if(!((press&&press.layout!==layout())||(cameraDraft&&cameraDraft.layout!==layout())))return;
+  cancel();requestAnimationFrame(refreshPlanOrientation);
+ }
+ for(const name of ['resize','orientationchange','fsp-viewport-change'])window.addEventListener(name,cancelForLayoutChange);
+ const cameraResizeObserver=new ResizeObserver(()=>{if((press&&press.layout!==layout())||(cameraDraft&&cameraDraft.layout!==layout()))cancelForLayoutChange()});
+ cameraResizeObserver.observe(svg);
+ window.addEventListener('blur',()=>setCameraInteractionMode('pan'));
+ window.addEventListener('pagehide',()=>setCameraInteractionMode('pan'));
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)setCameraInteractionMode('pan')});
+ $('moveCameraMode').onclick=()=>{
+  const next=cameraInteractionMode==='move'?'pan':'move';setCameraInteractionMode(next);
+  placing=false;$('addCamera').classList.remove('primary','placing-existing');cancelSurveyPlacement();closeDetail();
+  $('surveyHint').textContent=next==='move'?'Move Camera: drag any camera. Empty space is locked; use two fingers to navigate.':'Pan: drag to navigate. Tap to select; hold a camera for Details.';
+ };
+ setCameraInteractionMode('pan');
+}bindSurvey();
 function detailViewportBounds(){
  const area=$('surveyArea').getBoundingClientRect(),v=window.visualViewport;
  const x=v?.offsetLeft||0,y=v?.offsetTop||0;
@@ -1821,6 +1958,8 @@ try{
 /* V17.111 isolated cable routing prototype. Plan-local data, no change to measurement logic. */
 (function(){
 let cableMode=false, cableVisible=false, placingRack=false, drawing=null, candidate=null;
+surveyToolOwnsPointer=()=>cableMode||!!placingRack;
+cancelSurveyPlacement=()=>{placingRack=false};
 const cableViewKey=()=> 'fsp-cable-view:'+(survey?.id||'')+':'+(plan?.id||'');
 function saveCableView(){try{if(plan)localStorage.setItem(cableViewKey(),cableVisible?'1':'0')}catch(e){}}
 function restoreCableView(){try{if(plan){const v=localStorage.getItem(cableViewKey());cableVisible=v===null?(plan.fspRoutes?.length>0):v==='1'}}catch(e){}}
@@ -1953,11 +2092,11 @@ function sharedCableList(ids){
 function drawExtras(root,isSurvey){
  if(!plan||(!isSurvey&&editing))return;
  // Keep each saved cable home-run start anchored to its camera after camera drags.
- for(const route of routes()){
+ if(!cameraDraft)for(const route of routes()){
   const cam=plan.cameras.find(c=>c.id===route.cameraId);
   if(cam&&route.points?.length)route.points[0]={...route.points[0],x:cam.x,y:cam.y};
  }
- const routesNow=routes(),show=cableMode||cableVisible;
+ const routesNow=routes().map(routeForDisplay),show=cableMode||cableVisible;
  syncRackNames();
  if(show){
   for(const r of routesNow)appendPath(root,r.points,'#0d9488',3.5);
@@ -2035,13 +2174,13 @@ function menu(){
  selectModal('More',[{label:'Existing Camera',action:()=>activateCamera('Existing')},{label:'Cable Routes',action:()=>enter()},{label:'Cable Lengths',action:()=>cableSummary()},{label:'Add MDF/IDF',action:()=>chooseRack()},{label:cableVisible?'Hide Cable Routes':'Show Cable Routes',action:()=>{cableVisible=!cableVisible;saveCableView();refresh()}},{label:'Take Site Photo',action:()=>$('sitePhoto').click()},{label:'Floor / Area Notes',action:()=>{if(!plan)return;promptModal('Notes — '+plan.name,'<textarea id="floorNotes" rows="7">'+esc(plan.notes||'')+'</textarea>',()=>{plan.notes=$('floorNotes').value;touch()},'Done')}},{label:'Edit Plan',action:()=>openSharedView('plans')},{label:'Export Backup',action:exportData}])
 }
 window.fspCableEnter=enter;window.fspRackAdd=chooseRack;window.fspCableToggle=()=>{cableVisible=!cableVisible;saveCableView();refresh()};$('surveyMore').onclick=menu;
-function enter(){if(!plan)return;cableMode=true;placingRack=false;placing=false;selected=null;closeDetail();$('surveyArea').classList.add('fsp-cabling');bar.classList.remove('hidden');$('floatTools').classList.add('hidden');$('surveyHint').textContent='Draw from a camera to its MDF/IDF, or touch an existing route to connect';refresh();try{if(localStorage.getItem(CABLE_HELP_KEY)!=='1')cableHelp()}catch(e){cableHelp()}}
+function enter(){if(!plan)return;setCameraInteractionMode('pan');cableMode=true;placingRack=false;placing=false;selected=null;closeDetail();$('surveyArea').classList.add('fsp-cabling');bar.classList.remove('hidden');$('floatTools').classList.add('hidden');$('surveyHint').textContent='Draw from a camera to its MDF/IDF, or touch an existing route to connect';refresh();try{if(localStorage.getItem(CABLE_HELP_KEY)!=='1')cableHelp()}catch(e){cableHelp()}}
 function leave(){cableMode=false;placingRack=false;drawing=null;candidate=null;cableVisible=true;saveCableView();$('surveyArea').classList.remove('fsp-cabling');bar.classList.add('hidden');$('floatTools').classList.remove('hidden');$('surveyHint').textContent='Tap + Camera to place a camera';refresh()}
 $('fspCableDone').onclick=leave;
 $('fspRack').onclick=chooseRack;
 $('fspUndo').onclick=()=>{if(drawing){drawing=null;refresh();return}if(!routes().length)return;confirmModal('Undo cable route','Remove the last cable route?',()=>{routes().pop();touch();refresh()})};
 function chooseRack(){if(!plan)return;selectModal('Add equipment marker',[{label:'MDF',action:()=>startRack('MDF')},{label:'IDF',action:()=>startRack('IDF')}])}
-function startRack(type){if(screen!=='survey')show('survey');placingRack=type;placing=false;selected=null;closeDetail();$('surveyHint').textContent='Tap floor plan to place '+type}
+function startRack(type){setCameraInteractionMode('pan');if(screen!=='survey')show('survey');placingRack=type;placing=false;selected=null;closeDetail();$('surveyHint').textContent='Tap floor plan to place '+type}
 function straighten(points){
  // Cable samples represent the technician's pathway, not a shape to infer.
  // Only identical consecutive coordinates are redundant: no distance/angle

@@ -43,6 +43,10 @@ async function cameraMode(page) {
   // Wait for shared-view restoration before starting a pointer gesture.
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
 }
+async function dragCamera(page, from, to) {
+  if (await page.locator('#moveCameraMode').getAttribute('aria-pressed') !== 'true') await page.locator('#moveCameraMode').click();
+  await drag(page, from, to);
+}
 async function deleteMeasurement(page) {
   await page.locator('#editPlan').click();
   await page.locator('[data-overlay-dimension="0"]').first().dispatchEvent('click');
@@ -50,4 +54,4 @@ async function deleteMeasurement(page) {
   await expect(page.locator('#modalTitle')).toHaveText('Distance on Plan');
   await page.getByRole('button', { name: 'Delete Measurement', exact: true }).click();
 }
-module.exports = { seed, saved, point, drag, cameraMode, deleteMeasurement, fixture, KEY, TARGET };
+module.exports = { seed, saved, point, drag, cameraMode, dragCamera, deleteMeasurement, fixture, KEY, TARGET };

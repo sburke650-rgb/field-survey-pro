@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const { readFileSync } = require('node:fs');
 const vm = require('node:vm');
-const { seed, saved, point, drag, cameraMode } = require('./helpers/app');
+const { seed, saved, dragCamera, point, drag, cameraMode } = require('./helpers/app');
 const fixture = require('./fixtures/cable-routes.json');
 
 function shippedGeometry() {
@@ -129,7 +129,7 @@ for (const type of ['MDF', 'IDF']) {
 test('camera movement preserves shared tails, names, manual footage and other route data', async ({ page }) => {
   await seed(page, { state: fixture }); await cameraMode(page);
   const before = (await saved(page)).surveys[0].plans[0];
-  await drag(page, await point(page, 350, 350), await point(page, 400, 380));
+  await dragCamera(page, await point(page, 350, 350), await point(page, 400, 380));
   const after = (await saved(page)).surveys[0].plans[0];
   expect(after.fspRoutes[0].points.slice(1)).toEqual(before.fspRoutes[0].points.slice(1));
   expect({ ...after.fspRoutes[0], points: [] }).toEqual({ ...before.fspRoutes[0], points: [] });

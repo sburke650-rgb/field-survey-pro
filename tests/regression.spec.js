@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const { readFileSync } = require('node:fs');
 const vm = require('node:vm');
-const { seed, saved, point, drag, cameraMode, deleteMeasurement, fixture, TARGET } = require('./helpers/app');
+const { seed, saved, dragCamera, point, drag, cameraMode, deleteMeasurement, fixture, TARGET } = require('./helpers/app');
 
 test('V17.130 repair integration starts without script or cable initialization errors', async ({ page }) => {
   const errors = [];
@@ -90,7 +90,7 @@ test('camera placement allocates number across plans and persists', async ({ pag
 test('camera drag moves only camera and anchors connected route start', async ({ page }) => {
   await seed(page); await cameraMode(page);
   const before = await saved(page); const box = await page.locator('#surveyCanvas').getAttribute('viewBox');
-  await drag(page, await point(page, 350, 350), await point(page, 400, 380));
+  await dragCamera(page, await point(page, 350, 350), await point(page, 400, 380));
   const data = await saved(page); const plan = data.surveys[0].plans[0];
   expect(plan.cameras[0].x).toBeCloseTo(400, 0);
   expect(plan.cameras[0].y).toBeCloseTo(380, 0);
@@ -159,7 +159,7 @@ for (const entry of ['Draw', 'Edit']) {
 
 test('offline camera changes retain geometry after network returns and reload', async ({ page, context }) => {
   await seed(page); await cameraMode(page); await context.setOffline(true);
-  await drag(page, await point(page, 350, 350), await point(page, 400, 380));
+  await dragCamera(page, await point(page, 350, 350), await point(page, 400, 380));
   const before = await saved(page);
   await context.setOffline(false); await page.reload(); await page.locator('#continue').click();
   const after = await saved(page);
