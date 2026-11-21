@@ -16,6 +16,7 @@ test('orientation repair preserves all scripts outside viewport state and reconc
     for(const [start,end] of [
       ['   const selectedAt=Math.max(', '   const deleted=new Set('],
       ['function setViewBox(', 'function zoomPlan('],
+      ['function rotateVisiblePlan90(', 'function enableAutomaticPlanRotation('],
       ['// Viewport schema v2 adds', 'function openSharedView('],
     ]){
       const a=script.indexOf(start),b=script.indexOf(end,a);

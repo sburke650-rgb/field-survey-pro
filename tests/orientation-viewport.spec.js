@@ -1,5 +1,6 @@
 const { test, expect, chromium } = require('@playwright/test');
 const { seed, saved, fixture, drag, KEY, TARGET, cameraMode } = require('./helpers/app');
+const { contentPose, sameContentCenter } = require('./helpers/rendered-plan');
 const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
@@ -38,10 +39,11 @@ for (const canvas of ['planCanvas', 'surveyCanvas']) for (const zoom of [0, 2, 5
     for (let i = 0; i < zoom; i++) await page.locator('#zoomIn').click();
     await pan(page);
     if (canvas === 'surveyCanvas') { await cameraMode(page); await pan(page, canvas, -43, 25); }
+    const framing = await contentPose(page, canvas);
     const start = await pose(page, canvas), geometry = (await saved(page)).surveys[0].plans[0];
     for (let i = 0; i < 4; i++) {
       await page.locator(canvas === 'planCanvas' ? '#rotatePlanView' : '#rotateSurveyView').click();
-      sameCenter(await pose(page, canvas), start);
+      sameContentCenter(await contentPose(page, canvas), framing);
     }
     expect((await pose(page, canvas)).angle).toBeCloseTo(start.angle, 5);
     const after = (await saved(page)).surveys[0].plans[0];
@@ -263,15 +265,18 @@ for (const imageWidth of [1400, 500]) test(`uploaded ${imageWidth}px plan retain
   model.image = 'data:image/svg+xml;base64,' + Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${imageWidth}" height="700"><rect width="100%" height="100%" fill="white"/></svg>`).toString('base64');
   model.imageWidth = imageWidth; model.imageHeight = 700;
   await seed(page, { state }); await page.locator('#zoomIn').click(); await pan(page); const start = await pose(page);
-  for (let i=0;i<4;i++) { await page.locator('#rotatePlanView').click(); sameCenter(await pose(page), start); }
+  const framing=await contentPose(page);
+  for (let i=0;i<4;i++) { await page.locator('#rotatePlanView').click(); sameContentCenter(await contentPose(page), framing); }
   await page.setViewportSize(landscape); sameCenter(await pose(page), start);
   await page.setViewportSize(portrait); sameCenter(await pose(page), start);
   expect((await saved(page)).surveys[0].plans[0].image).toBe(model.image);
 });
 test('manual override changes reproject the opposite saved orientation without losing its center or scale', async ({ page }) => {
-  const { p, l } = await orientationPair(page);
+  const { p, l } = await orientationPair(page);let landscapeView=l;
   for(let i=0;i<4;i++) {
-    await page.setViewportSize(landscape); await page.locator('#rotatePlanView').click(); sameCenter(await pose(page), l);
+    await page.setViewportSize(landscape);sameCenter(await pose(page),landscapeView);
+    const framing=await contentPose(page);await page.locator('#rotatePlanView').click();sameContentCenter(await contentPose(page),framing);
+    landscapeView=await pose(page);
     await page.setViewportSize(portrait); sameCenter(await pose(page), p);
   }
 });
