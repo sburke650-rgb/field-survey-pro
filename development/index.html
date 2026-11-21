@@ -1223,9 +1223,24 @@ function planRotationDegrees(){const override=plan?plan.viewRotationOverride??nu
 
 function rotateVisiblePlan90(){
  if(!plan)return;
- rememberPlanView(visibleCanvas(),false);
- plan.viewRotationOverride=(planRotationDegrees()+90)%360;
- restorePlanView();rememberPlanView();
+ const svg=visibleCanvas();rememberPlanView(svg,false);
+ // Use full image/wall bounds, excluding cameras, routes and labels. Never
+ // derive an anchor from the clipped viewport or move the saved scene pivot.
+ const bounds=[savedWallBounds(),plan.image?planBounds():null].filter(Boolean);
+ if(!bounds.length)bounds.push(planBounds());
+ const cx=(Math.min(...bounds.map(b=>b.x))+Math.max(...bounds.map(b=>b.x+b.w)))/2;
+ const cy=(Math.min(...bounds.map(b=>b.y))+Math.max(...bounds.map(b=>b.y+b.h)))/2;
+ const pivot=viewportPivot(),degrees=planRotationDegrees(),angle=degrees*Math.PI/180;
+ const dx=cx-pivot.x,dy=cy-pivot.y;
+ const x=dx*Math.cos(angle)-dy*Math.sin(angle),y=dx*Math.sin(angle)+dy*Math.cos(angle);
+ const box=getViewBox(svg);
+ plan.viewRotationOverride=(degrees+90)%360;
+ applyPlanOrientation();bindViewport(svg);
+ // A quarter-turn moves the anchor's pivot-relative vector (x,y) to (-y,x).
+ // Translate the viewBox by that same delta: its screen position and scale stay
+ // fixed. Automatic orientation still uses its existing canvas-point anchor.
+ setViewBox(svg,[box[0]-y-x,box[1]+x-y,box[2],box[3]]);
+ rememberPlanView(svg);
 }
 function enableAutomaticPlanRotation(){
  if(!plan)return;
