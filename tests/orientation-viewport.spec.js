@@ -50,18 +50,18 @@ for (const canvas of ['planCanvas', 'surveyCanvas']) for (const zoom of [0, 2, 5
     for (const key of ['walls','cameras','dimensions','fspRoutes','fspRacks']) expect(after[key]).toEqual(geometry[key]);
   });
 }
-test('automatic orientation preserves center and independent portrait/landscape pan and zoom', async ({ page }) => {
+test('layout-only orientation carries the latest center, angle and zoom across both frames', async ({ page }) => {
   await page.setViewportSize(portrait); await seed(page, { state: automaticState() });
   await page.locator('#zoomIn').click(); await pan(page); const p = await pose(page);
   await page.setViewportSize(landscape); sameCenter(await pose(page), p);
-  expect(Math.abs((await pose(page)).angle - p.angle)).toBeCloseTo(Math.PI / 2, 5);
+  expect(Math.abs((await pose(page)).angle - p.angle)).toBeCloseTo(0, 5);
   await page.locator('#zoomOut').click(); await pan(page, 'planCanvas', -71, 29); const l = await pose(page);
   for (let i = 0; i < 3; i++) {
-    await page.setViewportSize(portrait); sameCenter(await pose(page), p);
+    await page.setViewportSize(portrait); sameCenter(await pose(page), l);
     await page.setViewportSize(landscape); sameCenter(await pose(page), l);
   }
   await saved(page); await page.reload(); await page.locator('#continue').click(); sameCenter(await pose(page), l);
-  await page.setViewportSize(portrait); sameCenter(await pose(page), p);
+  await page.setViewportSize(portrait); sameCenter(await pose(page), l);
 });
 async function screenPose(page, id = 'planCanvas') {
   return page.locator('#' + id).evaluate(svg => {
@@ -70,12 +70,12 @@ async function screenPose(page, id = 'planCanvas') {
   });
 }
 function sameScreen(a, b) { a.forEach((n, i) => expect(Math.abs(n - b[i])).toBeLessThan(i < 4 ? 1e-5 : .1)); }
-test('independent views survive Edit/Done, camera screen and plan transitions without changing screen anchors', async ({ page }) => {
+test('carried views preserve Edit/Done, camera screen and plan-transition anchors', async ({ page }) => {
   await page.setViewportSize(portrait); await seed(page, { state: automaticState() });
   await pan(page); const p = await pose(page);
   await page.setViewportSize(landscape); await page.locator('#zoomOut').click(); await pan(page); const l = await pose(page);
   for (const size of [portrait, landscape]) {
-    await page.setViewportSize(size); const expected = size === portrait ? p : l;
+    await page.setViewportSize(size); const expected = l;
     sameCenter(await pose(page), expected); const screen = await screenPose(page);
     await page.locator('#editPlan').click(); await settle(page); sameScreen(await screenPose(page), screen);
     await page.locator('#finishEdit').click(); await settle(page); sameScreen(await screenPose(page), screen);
@@ -95,7 +95,7 @@ test('late orientation sizes and duplicate events retain one center until explic
   }
   await pan(page); const moved = await pose(page);
   expect(Math.abs(moved.x - before.x) + Math.abs(moved.y - before.y)).toBeGreaterThan(1);
-  await page.setViewportSize(portrait); sameCenter(await pose(page), before);
+  await page.setViewportSize(portrait); sameCenter(await pose(page), moved);
   await page.setViewportSize(landscape); sameCenter(await pose(page), moved);
 });
 for (const version of [1, 2]) test(`legacy v${version} portrait migration preserves zoom, screen anchor and unknown fields`, async ({ browser, baseURL }) => {
@@ -112,11 +112,11 @@ for (const version of [1, 2]) test(`legacy v${version} portrait migration preser
     expect(migrated.orientationViews.version).toBe(1);
     expect(migrated.orientationViews.portrait.unitsPerPixel).toBe(v.unitsPerPixel);
     expect(migrated.orientationViews.portrait.futureField).toEqual(v.futureField);
-    await page.setViewportSize(landscape); await page.locator('#zoomOut').click(); await pan(page);
-    await page.setViewportSize(portrait); sameScreen(await screenPose(page), expected);
+    await page.setViewportSize(landscape); await page.locator('#zoomOut').click(); await pan(page);const latest=await pose(page);
+    await page.setViewportSize(portrait); sameCenter(await pose(page), latest);
   } finally { await old.close(); await repaired.close(); }
 });
-for (const reopenedSize of [portrait, landscape]) test(`independent orientation views survive actual browser restart into ${reopenedSize.width}`, async ({ baseURL }) => {
+for (const reopenedSize of [portrait, landscape]) test(`latest orientation view survives actual browser restart into ${reopenedSize.width}`, async ({ baseURL }) => {
   const profile = await fs.mkdtemp(path.join(os.tmpdir(), 'fsp-orientations-'));
   const options = { baseURL, headless: true, viewport: portrait, executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH };
   let context;
@@ -129,8 +129,8 @@ for (const reopenedSize of [portrait, landscape]) test(`independent orientation 
     await context.close(); context = null;
     context = await chromium.launchPersistentContext(profile, { ...options, viewport: reopenedSize });
     page = await context.newPage(); await page.goto(TARGET); await page.locator('#continue').click();
-    sameCenter(await pose(page), reopenedSize === portrait ? p : l);
-    await page.setViewportSize(portrait); sameCenter(await pose(page), p);
+    sameCenter(await pose(page), l);
+    await page.setViewportSize(portrait); sameCenter(await pose(page), l);
     await page.setViewportSize(landscape); sameCenter(await pose(page), l);
     const after = (await saved(page)).surveys[0].plans[0];
     for (const k of ['walls','cameras','dimensions','fspRacks','fspRoutes']) expect(after[k]).toEqual(data.surveys[0].plans[0][k]);
@@ -164,7 +164,8 @@ async function orientationPair(page) {
   await page.locator('#zoomIn').click(); await pan(page); const p = await pose(page);
   await page.setViewportSize(landscape); await page.locator('#zoomOut').click(); await pan(page, 'planCanvas', -55, 20); const l = await pose(page);
   await page.setViewportSize(portrait); await settle(page);
-  return { p, l, state: await saved(page) };
+  // Both frames now carry the latest pose; retain initial portrait only as audit data.
+  return { p: await pose(page), l, initialPortrait: p, state: await saved(page) };
 }
 async function reopenCopies(page, browser, copies) {
   await page.evaluate(async ({ copies, key }) => {
@@ -191,7 +192,10 @@ for (const backend of ['mirror', 'idb', 'legacy']) test(`reconcile independently
   try {
     const reopened = await context.newPage(); await reopened.goto(TARGET); await reopened.locator('#continue').click();
     sameCenter(await pose(reopened), p);
-    await reopened.setViewportSize(landscape); sameCenter(await pose(reopened), l);
+    const recovered=(await saved(reopened)).surveys[0].plans[0];
+    expect(recovered.orientationViews.landscape.cx).toBeCloseTo(bp.orientationViews.landscape.cx,5);
+    expect(recovered.orientationViews.landscape.unitsPerPixel).toBe(bp.orientationViews.landscape.unitsPerPixel);
+    await reopened.setViewportSize(landscape); sameCenter(await pose(reopened), p);
     const merged = (await saved(reopened)).surveys[0].plans[0];
     expect(merged.walls).toEqual(ap.walls); expect(merged.fspRoutes).toEqual(ap.fspRoutes);
   } finally { await context.close(); }
@@ -204,17 +208,17 @@ for (const broken of ['active view', 'landscape record']) test(`malformed ${brok
   try {
     const reopened = await context.newPage(); await reopened.goto(TARGET); await reopened.locator('#continue').click();
     sameCenter(await pose(reopened), p);
-    await reopened.setViewportSize(landscape); sameCenter(await pose(reopened), broken === 'active view' ? l : p);
+    await reopened.setViewportSize(landscape); sameCenter(await pose(reopened), p);
     await reopened.setViewportSize(portrait); sameCenter(await pose(reopened), p);
   } finally { await context.close(); }
 });
-test('orientation views export/import and offline edits retain both positions and geometry', async ({ page, context }) => {
+test('carried orientation views export/import and offline edits retain latest pose and geometry', async ({ page, context }) => {
   const { p, l, state } = await orientationPair(page);
   await context.setOffline(true);
   await page.setViewportSize(landscape); sameCenter(await pose(page), l);
   await cameraMode(page); await pan(page, 'surveyCanvas', 29, 17); const offline = await pose(page, 'surveyCanvas');
-  await page.locator('#surveyDone').click(); await settle(page);
-  await page.setViewportSize(portrait); sameCenter(await pose(page), p);
+  await page.locator('#surveyDone').click(); await settle(page);const latest=await pose(page);
+  await page.setViewportSize(portrait); sameCenter(await pose(page), latest);
   await context.setOffline(false);
   await page.locator('#plans header [data-go="home"]').click(); await page.locator('#allSurveys').click();
   const download = page.waitForEvent('download'); await page.locator('#exportBackup').click();
@@ -223,7 +227,7 @@ test('orientation views export/import and offline edits retain both positions an
   expect(exported.surveys[0].plans[0].orientationViews.version).toBe(1);
   await page.locator('#backupFile').setInputFiles({ name: 'synthetic-orientations.json', mimeType: 'application/json', buffer });
   await page.locator('#modalOk').click(); await page.locator('[data-open="survey-1"]').click();
-  sameCenter(await pose(page), p);
+  sameCenter(await pose(page), latest);
   await page.setViewportSize(landscape);
   // Camera screen and Plans share client anchoring; compare the saved plan-space center from the exported record.
   const v = exported.surveys[0].plans[0].orientationViews.landscape;
@@ -237,7 +241,7 @@ test('orientation views export/import and offline edits retain both positions an
   const after = (await saved(page)).surveys[0].plans[0];
   for (const k of ['walls','cameras','dimensions','fspRacks','fspRoutes']) expect(after[k]).toEqual(state.surveys[0].plans[0][k]);
 });
-test('touch pinch has independent scales in both orientations and interrupted navigation restores safely', async ({ browser, baseURL }) => {
+test('touch pinch carries the current scale through orientation and interruption', async ({ browser, baseURL }) => {
   const context = await browser.newContext({ baseURL, viewport: portrait, isMobile: true, hasTouch: true });
   try {
     const page = await context.newPage(), pageErrors = []; page.on('pageerror', e => pageErrors.push(e.message));
@@ -255,7 +259,7 @@ test('touch pinch has independent scales in both orientations and interrupted na
     await pinch(); const l = await pose(page); expect(l.scale).toBeGreaterThan(p.scale*1.5);
     const r = await page.locator('#planCanvas').boundingBox();
     await touch('touchStart', [[r.x+r.width*.4,r.y+r.height*.4]]);
-    await page.setViewportSize(portrait); await touch('touchCancel', []); sameCenter(await pose(page), p);
+    await page.setViewportSize(portrait); await touch('touchCancel', []); sameCenter(await pose(page), l);
     await page.setViewportSize(landscape); sameCenter(await pose(page), l);
     expect(pageErrors).toEqual([]);
   } finally { await context.close(); }
@@ -271,13 +275,13 @@ for (const imageWidth of [1400, 500]) test(`uploaded ${imageWidth}px plan retain
   await page.setViewportSize(portrait); sameCenter(await pose(page), start);
   expect((await saved(page)).surveys[0].plans[0].image).toBe(model.image);
 });
-test('manual override changes reproject the opposite saved orientation without losing its center or scale', async ({ page }) => {
-  const { p, l } = await orientationPair(page);let landscapeView=l;
+test('manual rotation and the current pose carry across layout changes without an angle conflict', async ({ page }) => {
+  const { l } = await orientationPair(page);let landscapeView=l;
   for(let i=0;i<4;i++) {
     await page.setViewportSize(landscape);sameCenter(await pose(page),landscapeView);
     const framing=await contentPose(page);await page.locator('#rotatePlanView').click();sameContentCenter(await contentPose(page),framing);
     landscapeView=await pose(page);
-    await page.setViewportSize(portrait); sameCenter(await pose(page), p);
+    await page.setViewportSize(portrait); sameCenter(await pose(page), landscapeView);
   }
 });
 test('explicit Fit ends a pending orientation anchor and remains stable on later resize events', async ({ page }) => {
@@ -305,7 +309,7 @@ test('editing a future-dated orientation record advances its own clock before re
     } finally { await recovered.close(); }
   } finally { await context.close(); }
 });
-test('reconciled records with an older pivot still restore the same original-plan center', async ({ page, browser }) => {
+test('an older destination pivot cannot replace the active pivot or work area', async ({ page, browser }) => {
   const { l, state } = await orientationPair(page), v = state.surveys[0].plans[0].orientationViews.landscape;
   const oldX = v.cx, oldY = v.cy, angle = v.rotation*Math.PI/180;
   v.pivotX = 110; v.pivotY = 210;
@@ -315,6 +319,8 @@ test('reconciled records with an older pivot still restore the same original-pla
   const context = await reopenCopies(page, browser, { mirror: state });
   try {
     const reopened = await context.newPage(); await reopened.goto(TARGET); await reopened.locator('#continue').click();
+    const current=(await saved(reopened)).surveys[0].plans[0].viewState;
     await reopened.setViewportSize(landscape); sameCenter(await pose(reopened), l);
+    const carried=(await saved(reopened)).surveys[0].plans[0].viewState;expect(carried.pivotX).toBe(current.pivotX);expect(carried.pivotY).toBe(current.pivotY);
   } finally { await context.close(); }
 });

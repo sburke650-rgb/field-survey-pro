@@ -1214,12 +1214,12 @@ function planBounds(){
 // V17.24: one orientation controller for every floor-plan layer.
 // All coordinates remain in original plan space; only the view is rotated.
 let orientationIsLandscape=false;
-// Manual view-only rotation override: null = follow device, 0/90 = chosen view.
+// Manual view-only angle: null retains the saved angle; new plans start at 0.
 let planRotationOverride=null;
 function detectedLandscape(){
  return window.matchMedia('(orientation: landscape)').matches;
 }
-function planRotationDegrees(){const override=plan?plan.viewRotationOverride??null:planRotationOverride;return override===null?(detectedLandscape()?90:0):override;}
+function planRotationDegrees(){const override=plan?plan.viewRotationOverride??null:planRotationOverride;return override===null?(validPlanView(plan?.viewState)?plan.viewState.rotation:0):override;}
 
 function rotateVisiblePlan90(){
  if(!plan)return;
@@ -1350,7 +1350,7 @@ function rememberPlanView(svg=visibleCanvas(),persist=true){
   originX:b[0]+b[2]/2-(r.left+r.width/2)*scale,
   originY:b[1]+b[3]/2-(r.top+r.height/2)*scale,pivotX:pivot.x,pivotY:pivot.y};
  const old=plan.viewState,priorViews=orientationViewsFor(plan);
- const changed=!validPlanView(old)||Object.entries(next).some(([key,value])=>!Number.isFinite(old[key])||Math.abs(old[key]-value)>1e-7);
+ const changed=!validPlanView(old)||priorViews?.active!==bound.orientation||Object.entries(next).some(([key,value])=>!Number.isFinite(old[key])||Math.abs(old[key]-value)>1e-7);
  if(changed){plan.viewState={...old,...next,updatedAt:Math.max(Date.now(),viewportTime(old,0)+1,viewportTime(priorViews?.[bound.orientation],0)+1)};viewportDirty=true}
  const views=priorViews||{version:1,active:bound.orientation};
  const slot=views[bound.orientation];
@@ -1371,8 +1371,10 @@ function restorePlanView(){
  if(!validPlanView(v)){fitPlanView(true);return}
  const key=orientationKey(),views=orientationViewsFor(plan),degrees=planRotationDegrees();
  const crossing=views.active!==key;
- const newerSlot=validPlanView(views[key])&&viewportTime(views[key],0)>viewportTime(v,0);
- const target=(crossing||newerSlot)&&validPlanView(views[key])?views[key]:v;
+ // A device turn carries the current pose, never an old destination view.
+ // Keep both records for compatibility/recovery, without switching work areas.
+ const newerSlot=!crossing&&validPlanView(views[key])&&viewportTime(views[key],0)>viewportTime(v,0);
+ const target=newerSlot?views[key]:v;
  // Preserve the outgoing record before rememberPlanView updates the active v2.
  if(!plan.orientationViews)plan.orientationViews=structuredClone(views);
  if(crossing||newerSlot||v.rotation!==degrees){

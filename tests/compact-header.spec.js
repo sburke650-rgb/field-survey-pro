@@ -16,6 +16,7 @@ test('orientation repair preserves all scripts outside viewport state and reconc
     for(const [start,end] of [
       ['   const selectedAt=Math.max(', '   const deleted=new Set('],
       ['function setViewBox(', 'function zoomPlan('],
+      ['function planRotationDegrees(', 'function rotateVisiblePlan90('],
       ['function rotateVisiblePlan90(', 'function enableAutomaticPlanRotation('],
       ['// Viewport schema v2 adds', 'function openSharedView('],
     ]){
@@ -23,7 +24,7 @@ test('orientation repair preserves all scripts outside viewport state and reconc
       expect(a).toBeGreaterThan(-1);expect(b).toBeGreaterThan(a);
       script=script.slice(0,a)+'/* scoped viewport repair */'+script.slice(b);
     }
-    return script.replace('   recoverOrientationView(pl);\n','').replace(' orientationAnchor=null;\n','');
+    return script.replace(/^\/\/ Manual view-only[^\n]*\n/m,'').replace('   recoverOrientationView(pl);\n','').replace(' orientationAnchor=null;\n','');
   };
   const before=scripts(original),after=scripts(current);
   expect(current.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'SCRIPT')).toEqual(original.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g,'SCRIPT'));

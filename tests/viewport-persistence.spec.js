@@ -141,6 +141,8 @@ for (const rotation of [0, 90]) {
     await seed(page); await settle(page);
     const previousPlans = (await saved(page)).surveys[0].plans;
     await page.locator('#addPlan').click(); await page.getByRole('button', { name: 'Draw Plan', exact: true }).click(); await settle(page);
+    // Device landscape changes layout only; use the manual button for this angle fixture.
+    if(rotation)await page.locator('#rotatePlanView').click();
     const before = await drawScreenRectangle(page);
     const data = await saved(page), sv = data.surveys[0], p = sv.plans.find(p => p.id === sv.activePlan);
     expect(p.walls).toHaveLength(4); expect(p.viewState.rotation).toBe(rotation);
@@ -156,13 +158,13 @@ for (const rotation of [0, 90]) {
   });
 }
 
-test('viewport automatic rotation and per-plan overrides retain scale and geometry', async ({ page }) => {
+test('viewport layout changes retain angle, scale, selection and geometry', async ({ page }) => {
   await page.setViewportSize({ width: 412, height: 915 });
   const state = structuredClone(fixture); state.surveys[0].plans[0].viewRotationOverride = null;
   await seed(page, { state }); await settle(page); await page.locator('#zoomIn').click(); await pan(page);
   const before = await view(page);
   await page.setViewportSize({ width: 915, height: 412 }); const turned = await view(page);
-  expect(turned.scale).toBeCloseTo(before.scale, 5); expect(Math.abs(turned.rotation - before.rotation)).toBeCloseTo(Math.PI / 2, 5);
+  expect(turned.scale).toBeCloseTo(before.scale, 5); expect(turned.rotation).toBeCloseTo(before.rotation, 5);
   await page.evaluate(() => window.dispatchEvent(new Event('orientationchange'))); sameView(await view(page), turned);
   await page.reload(); await page.locator('#continue').click(); sameView(await view(page), turned);
   await page.locator('#planSelect').selectOption('plan-2'); await settle(page);

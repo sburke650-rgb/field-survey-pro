@@ -33,11 +33,11 @@ test('fresh Draw → Done → four manual turns preserve rendered content framin
   await page.reload();await page.locator('#continue').click();sameFraming(await contentPose(page),start);
 });
 
-test('manual-only source boundary preserves every other application byte',()=>{
+test('PR14 manual rotation handler remains byte-identical',()=>{
  const {readFileSync}=require('node:fs'),{createHash}=require('node:crypto');
  const html=readFileSync('development/index.html','utf8'),a=html.indexOf('function rotateVisiblePlan90(){'),b=html.indexOf('function enableAutomaticPlanRotation()',a);
  expect(a).toBeGreaterThan(-1);expect(b).toBeGreaterThan(a);
- expect(createHash('sha256').update(html.slice(0,a)+'MANUAL_HANDLER'+html.slice(b)).digest('hex')).toBe('cee153485049f877edb17b5a4bdb97966f7edbd431094d2941132df170cb00f4');
+ expect(createHash('sha256').update(html.slice(a,b)).digest('hex')).toBe('bed6318f38b37e0c6af30baff6fc1553b84b551082e37efd161af5587933253b');
 });
 for(const viewport of [{width:412,height:915},{width:915,height:412}])for(const zoom of [-1,0,2])for(const pan of [false,true]){
  test(`Draw Done manual framing ${viewport.width} zoom ${zoom} pan ${pan}`,async({page})=>{
