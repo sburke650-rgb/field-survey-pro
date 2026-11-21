@@ -149,6 +149,20 @@ for (const uploaded of [false, true]) {
       await page.locator('#plans header [data-go="home"]').tap();
       await expect(page.locator('#planCanvas')).toHaveAttribute('data-active-tool', 'pan');
       await page.setViewportSize({ width: 844, height: 390 });
+      // Orientation now preserves zoom rather than implicitly fitting. Explicitly
+      // fit this fixed-coordinate tracing fixture; keep every trace assertion.
+      await page.locator('#fitPlan').evaluate(button => button.click());
+      // V17.128 overlays a fixed toolbar on the canvas. Place the full polygon
+      // above that toolbar so coordinate taps exercise drawing rather than UI.
+      await page.locator('#planCanvas').evaluate(svg=>{
+        const b=svg.getAttribute('viewBox').split(/\s+/).map(Number),r=svg.getBoundingClientRect();
+        const scale=Math.max(b[2]/r.width,b[3]/r.height)*2;
+        const cx=b[0]+b[2]/2,cy=b[1]+b[3]/2;
+        svg.setAttribute('viewBox',[cx-r.width*scale/2,cy-(170-r.top)*scale,r.width*scale,r.height*scale].join(' '));
+        // Commit fixture transform through the normal zoom controller.
+        document.getElementById('zoomOut').click();
+      });
+      await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
       await beginTrace(page, true);
       for (const v of lShape) await tapCorner(page, ...v, true);
       await expect(page.locator('#planScene circle[data-trace-preview]')).toHaveCount(6);
