@@ -1,5 +1,5 @@
 const { test, expect, chromium } = require('@playwright/test');
-const { seed, saved, fixture, drag, point, cameraMode, TARGET, KEY } = require('./helpers/app');
+const { seed, saved, dragCamera, fixture, drag, point, cameraMode, TARGET, KEY } = require('./helpers/app');
 const { contentPose, sameContentCenter, sameFraming, settle } = require('./helpers/rendered-plan');
 const errors = new WeakMap();
 test.beforeEach(async ({page})=>{const list=[];errors.set(page,list);page.on('pageerror',e=>list.push(e.message))});
@@ -89,7 +89,7 @@ for(const angle of [0,90,180,270])test(`interaction and reload alignment after m
  await seed(page,{state});await page.locator('#zoomOut').click();await page.locator('#zoomOut').click();
  const framing=await contentPose(page);await page.locator('#rotatePlanView').click();sameContentCenter(await contentPose(page),framing);
  await cameraMode(page);const canvas=await contentPose(page,'surveyCanvas');
- await drag(page,await point(page,350,350),await point(page,400,380));let p=(await saved(page)).surveys[0].plans[0];
+ await dragCamera(page,await point(page,350,350),await point(page,400,380));let p=(await saved(page)).surveys[0].plans[0];
  expect(p.cameras[0].x).toBeCloseTo(400,1);expect(p.cameras[0].y).toBeCloseTo(380,1);sameFraming(await contentPose(page,'surveyCanvas'),canvas);
  expect(p.fspRoutes[0].points[0]).toEqual({x:p.cameras[0].x,y:p.cameras[0].y});
  const bends=structuredClone(p.fspRoutes[0].points.slice(1,-1));

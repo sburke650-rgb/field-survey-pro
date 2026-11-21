@@ -10,7 +10,8 @@ function samePose(a,b){expect(a.scale).toBeCloseTo(b.scale,6);a.points.forEach((
 function geometry(state){return state.surveys.map(s=>s.plans.map(p=>Object.fromEntries(['id','image','walls','dimensions','areas','cameras','fspRacks','fspRoutes'].map(k=>[k,p[k]]))))}
 
 test('orientation repair preserves all scripts outside viewport state and reconciliation',()=>{
-  const original=fs.readFileSync('test/v17-130/index.html','utf8'),current=fs.readFileSync('development/index.html','utf8');
+  const {normalizeCameraChanges}=require('./helpers/camera-source-boundary');
+  const original=normalizeCameraChanges(fs.readFileSync('test/v17-130/index.html','utf8')),current=normalizeCameraChanges(fs.readFileSync('development/index.html','utf8'));
   const scripts=s=>[...s.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
   const normalize=script=>{
     for(const [start,end] of [

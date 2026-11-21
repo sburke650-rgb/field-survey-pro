@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const { readFileSync } = require('node:fs');
 const vm = require('node:vm');
-const { seed, saved, point, drag, cameraMode, deleteMeasurement, fixture, TARGET } = require('./helpers/app');
+const { seed, saved, dragCamera, point, drag, cameraMode, deleteMeasurement, fixture, TARGET } = require('./helpers/app');
 
 test('V17.130 repair integration starts without script or cable initialization errors', async ({ page }) => {
   const errors = [];
@@ -90,7 +90,7 @@ test('camera placement allocates number across plans and persists', async ({ pag
 test('camera drag moves only camera and anchors connected route start', async ({ page }) => {
   await seed(page); await cameraMode(page);
   const before = await saved(page); const box = await page.locator('#surveyCanvas').getAttribute('viewBox');
-  await drag(page, await point(page, 350, 350), await point(page, 400, 380));
+  await dragCamera(page, await point(page, 350, 350), await point(page, 400, 380));
   const data = await saved(page); const plan = data.surveys[0].plans[0];
   expect(plan.cameras[0].x).toBeCloseTo(400, 0);
   expect(plan.cameras[0].y).toBeCloseTo(380, 0);
@@ -101,7 +101,8 @@ test('camera drag moves only camera and anchors connected route start', async ({
 
 test('cone adjustment persists angle without moving camera or viewport', async ({ page }) => {
   await seed(page); await cameraMode(page);
-  const camera = await point(page, 350, 350); await page.mouse.click(camera.x, camera.y);
+  await page.locator('#moveCameraMode').click();
+  const camera = await point(page, 350, 350); await page.mouse.click(camera.x, camera.y); await page.locator('#closeDetail').click();
   const handle = await page.locator('[data-handle="cam-1"]').boundingBox();
   const box = await page.locator('#surveyCanvas').getAttribute('viewBox');
   await drag(page, { x: handle.x + handle.width / 2, y: handle.y + handle.height / 2 }, { x: handle.x + handle.width / 2 - 30, y: handle.y + handle.height / 2 + 50 });
@@ -138,8 +139,8 @@ test('KD-001 cable simplification preserves a sampled right-angle bend', async (
 
 test('KD-002 Camera Details drag changes rendered panel position', async ({ page }) => {
   await seed(page); await cameraMode(page);
-  const c = await point(page, 350, 350); await page.mouse.move(c.x, c.y); await page.mouse.down();
-  await expect(page.locator('#detail')).toBeVisible(); await page.mouse.up();
+  const c = await point(page, 350, 350); await page.mouse.click(c.x, c.y);
+  await expect(page.locator('#detail')).toBeVisible();
   await expect(page.locator('#detailType')).toContainText('Existing');
   const before = await page.locator('#detail').boundingBox(); const handle = await page.locator('#detailDrag').boundingBox();
   await drag(page, { x: handle.x + 20, y: handle.y + 10 }, { x: handle.x + (before.x > 550 ? -100 : 100), y: handle.y + (before.y > 425 ? -90 : 90) });
@@ -159,7 +160,7 @@ for (const entry of ['Draw', 'Edit']) {
 
 test('offline camera changes retain geometry after network returns and reload', async ({ page, context }) => {
   await seed(page); await cameraMode(page); await context.setOffline(true);
-  await drag(page, await point(page, 350, 350), await point(page, 400, 380));
+  await dragCamera(page, await point(page, 350, 350), await point(page, 400, 380));
   const before = await saved(page);
   await context.setOffline(false); await page.reload(); await page.locator('#continue').click();
   const after = await saved(page);

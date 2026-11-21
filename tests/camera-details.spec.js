@@ -3,8 +3,8 @@ const { seed, saved, point, drag, cameraMode } = require('./helpers/app');
 
 async function openDetails(page) {
   const camera = await point(page, 350, 350);
-  await page.mouse.move(camera.x, camera.y); await page.mouse.down();
-  await expect(page.locator('#detail')).toBeVisible(); await page.mouse.up();
+  await page.mouse.click(camera.x, camera.y);
+  await expect(page.locator('#detail')).toBeVisible();
 }
 async function headerPoint(page) {
   await page.locator('#detail').evaluate(panel => { panel.scrollTop = 0; });
@@ -128,7 +128,7 @@ for (const [layout, viewport] of [['portrait', { width: 390, height: 844 }], ['l
       const page = await context.newPage(); await seed(page, { target: 'http://127.0.0.1:8765/development/' }); await cameraMode(page);
       const session = await context.newCDPSession(page), c = await point(page, 350, 350);
       await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: c.x, y: c.y, id: 0 }] });
-      await expect(page.locator('#detail')).toBeVisible(); await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] }); await expect(page.locator('#detail')).toBeVisible();
       const before = await page.locator('#detail').boundingBox(), view = await page.locator('#surveyCanvas').getAttribute('viewBox'), data = await saved(page);
       const h = await headerPoint(page), target = { x: h.x + (before.x > viewport.width / 2 ? -100 : 100), y: h.y + (before.y > viewport.height / 2 ? -80 : 80) };
       await touchDrag(session, page, h, target);

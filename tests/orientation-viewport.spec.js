@@ -1,5 +1,5 @@
 const { test, expect, chromium } = require('@playwright/test');
-const { seed, saved, fixture, drag, KEY, TARGET, cameraMode } = require('./helpers/app');
+const { seed, saved, dragCamera, fixture, drag, KEY, TARGET, cameraMode } = require('./helpers/app');
 const { contentPose, sameContentCenter } = require('./helpers/rendered-plan');
 const fs = require('node:fs/promises');
 const os = require('node:os');
@@ -144,7 +144,7 @@ for (const angle of [0, 90, 180, 270]) test(`camera and drawing coordinates alig
     const q = new DOMPoint(p.x, p.y).matrixTransform(svg.querySelector('g').getScreenCTM()); return { x: q.x, y: q.y };
   }, { x, y });
   const before = await screenPose(page, 'surveyCanvas');
-  await drag(page, await point('surveyCanvas', 350, 350), await point('surveyCanvas', 400, 380));
+  await dragCamera(page, await point('surveyCanvas', 350, 350), await point('surveyCanvas', 400, 380));
   let p = (await saved(page)).surveys[0].plans[0];
   expect(p.cameras[0].x).toBeCloseTo(400, 1); expect(p.cameras[0].y).toBeCloseTo(380, 1);
   sameScreen(await screenPose(page, 'surveyCanvas'), before);
