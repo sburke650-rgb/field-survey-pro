@@ -152,6 +152,10 @@ for (const uploaded of [false, true]) {
       // Orientation now preserves zoom rather than implicitly fitting. Explicitly
       // fit this fixed-coordinate tracing fixture; keep every trace assertion.
       await page.locator('#fitPlan').evaluate(button => button.click());
+      // Complete the Area menu transition before committing this fixture view;
+      // otherwise its delayed layout restoration can put corners under tools.
+      await beginTrace(page, true);
+      await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
       // V17.128 overlays a fixed toolbar on the canvas. Place the full polygon
       // above that toolbar so coordinate taps exercise drawing rather than UI.
       await page.locator('#planCanvas').evaluate(svg=>{
@@ -163,8 +167,11 @@ for (const uploaded of [false, true]) {
         document.getElementById('zoomOut').click();
       });
       await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
-      await beginTrace(page, true);
-      for (const v of lShape) await tapCorner(page, ...v, true);
+      for (const v of lShape) {
+        const p = await point(page, ...v);
+        expect(await page.locator('#planCanvas').evaluate((svg,p)=>svg.contains(document.elementFromPoint(p.x,p.y)),p)).toBe(true);
+        await tapCorner(page, ...v, true);
+      }
       await expect(page.locator('#planScene circle[data-trace-preview]')).toHaveCount(6);
       await page.locator('#finishEdit').tap(); await page.locator('#traceName').fill('Touch L');
       await page.locator('#modalOk').tap();
